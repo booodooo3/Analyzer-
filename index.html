@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Analyzer - Pro Dashboard</title>
+    <title>YouTube Analyzer - Ultimate</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -17,41 +17,45 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            background: linear-gradient(135deg, #050505 0%, #121212 100%);
             color: #ffffff;
         }
         .glass-panel {
-            background: rgba(35, 35, 35, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        .sidebar-card, .search-card {
-            background: rgba(45, 45, 45, 0.5);
+            background: rgba(30, 30, 30, 0.6);
+            backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        .search-card {
+            background: rgba(40, 40, 40, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.03);
             transition: all 0.2s ease;
         }
-        .sidebar-card:hover, .search-card:hover {
-            background: rgba(60, 60, 60, 0.8);
-            border-color: rgba(99, 102, 241, 0.4);
-            transform: translateY(-2px);
+        .search-card:hover {
+            background: rgba(50, 50, 50, 0.7);
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
         }
         .loader {
-            border: 3px solid #333;
-            border-radius: 50%;
-            border-top: 3px solid #6366f1;
             width: 24px;
             height: 24px;
-            animation: spin 1s linear infinite;
+            border: 3px solid #FFF;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
         }
-        @keyframes spin {
+        @keyframes rotation {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
         .fade-in {
-            animation: fadeIn 0.4s ease-out;
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .line-clamp-2 {
@@ -60,128 +64,150 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+        /* Gradient Text */
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(to right, #818cf8, #c084fc);
+        }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-8">
+<body class="min-h-screen p-4 md:p-8 text-gray-100">
 
     <div class="max-w-7xl mx-auto w-full">
         
         <!-- Header -->
-        <div class="flex items-center justify-between mb-8 pb-6 border-b border-gray-800">
-            <div class="flex items-center gap-4 cursor-pointer select-none" onclick="resetApp()">
-                <div class="bg-indigo-600 p-2 rounded-xl shadow-[0_0_15px_rgba(99,102,241,0.4)] flex flex-col items-center justify-center min-w-[56px] hover:scale-105 transition-transform">
-                    <i data-lucide="bar-chart-2" class="w-6 h-6 text-white mb-1"></i>
-                    <i data-lucide="search" class="w-3 h-3 text-white/70"></i>
+        <div class="flex items-center justify-between mb-8 pb-6 border-b border-gray-800/50">
+            <div class="flex items-center gap-4 cursor-pointer select-none group" onclick="resetApp()">
+                <div class="relative">
+                    <div class="absolute inset-0 bg-indigo-500 blur-lg opacity-20 group-hover:opacity-40 transition-opacity rounded-xl"></div>
+                    <div class="relative bg-gray-900 border border-gray-700 p-2.5 rounded-xl flex flex-col items-center justify-center min-w-[56px] group-hover:border-indigo-500/50 transition-colors">
+                        <i data-lucide="zap" class="w-6 h-6 text-indigo-400 mb-1"></i>
+                        <span class="text-[10px] font-bold text-gray-400">PRO</span>
+                    </div>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-black text-white tracking-tight">Smart YouTube <span class="text-indigo-500">Analyzer</span></h1>
-                    <p class="text-gray-400 text-xs">Search & Analyze Everything</p>
+                    <h1 class="text-2xl font-black tracking-tight text-white">Tube<span class="text-gradient">Analyzer</span></h1>
+                    <p class="text-gray-500 text-xs font-medium">Advanced Data Extraction</p>
                 </div>
             </div>
             
             <!-- Search Bar (Desktop) -->
-            <div class="flex-1 max-w-xl mx-4 hidden md:block relative group">
-                <input type="text" id="videoUrl" 
-                    class="w-full pl-5 pr-14 py-3 bg-[#1f1f1f] border border-gray-700 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-900/50 outline-none transition-all text-sm text-gray-100 placeholder-gray-500"
-                    placeholder="Search keywords or paste URL..."
-                >
-                <button onclick="handleMainAction()" id="searchBtn"
-                    class="absolute right-1.5 top-1.5 bottom-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-4 rounded-lg font-bold transition-all flex items-center justify-center shadow-lg">
-                    <i data-lucide="search" class="w-4 h-4"></i>
-                </button>
+            <div class="flex-1 max-w-xl mx-8 hidden md:block relative group z-20">
+                <div class="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl opacity-20 group-hover:opacity-40 transition duration-500 blur"></div>
+                <div class="relative flex bg-[#0a0a0a] rounded-xl items-center">
+                    <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-4"></i>
+                    <input type="text" id="videoUrl" 
+                        class="w-full pl-11 pr-4 py-3.5 bg-transparent border-none outline-none text-sm text-gray-100 placeholder-gray-500 font-medium"
+                        placeholder="Paste URL or search keywords..."
+                    >
+                    <div class="pr-2">
+                        <button onclick="handleMainAction()" id="searchBtn" class="bg-gray-800 hover:bg-gray-700 text-gray-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border border-gray-700">
+                            GO
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Mobile Search -->
-        <div class="md:hidden mb-6 relative">
-            <input type="text" id="videoUrlMobile" 
-                class="w-full pl-5 pr-14 py-3 bg-[#1f1f1f] border border-gray-700 rounded-xl focus:border-indigo-500 outline-none text-white placeholder-gray-500 shadow-sm"
-                placeholder="Search keywords or paste URL..."
-                oninput="syncInputs(this.value)"
-            >
-            <button onclick="handleMainAction()" class="absolute right-1.5 top-1.5 bottom-1.5 bg-indigo-600 text-white px-4 rounded-lg shadow-lg">
-                <i data-lucide="search" class="w-4 h-4"></i>
-            </button>
-        </div>
-
-        <!-- Global Messages -->
-        <div id="errorMessage" class="hidden bg-red-900/20 text-red-400 p-4 rounded-xl mb-6 border border-red-900/50 flex items-center gap-3 animate-pulse">
-            <i data-lucide="alert-circle" class="w-5 h-5"></i>
-            <span id="errorText">Error occurred.</span>
-        </div>
-        
-        <div id="loadingState" class="hidden py-16 text-center">
-            <div class="loader mx-auto mb-4"></div>
-            <p id="loadingText" class="text-gray-400 font-medium animate-pulse">Processing request...</p>
-        </div>
-
-        <!-- === SEARCH RESULTS GRID === -->
-        <div id="searchResultsArea" class="hidden fade-in mb-12">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                    <i data-lucide="list" class="w-5 h-5 text-indigo-500"></i>
-                    Search Results
-                </h2>
-                <span id="resultCount" class="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded"></span>
+        <div class="md:hidden mb-6 relative z-20">
+            <div class="relative flex bg-[#1a1a1a] border border-gray-700 rounded-xl items-center focus-within:border-indigo-500 transition-colors">
+                <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-4"></i>
+                <input type="text" id="videoUrlMobile" 
+                    class="w-full pl-11 pr-14 py-3.5 bg-transparent border-none outline-none text-white placeholder-gray-500"
+                    placeholder="Search or paste URL..."
+                    oninput="syncInputs(this.value)"
+                >
+                <button onclick="handleMainAction()" class="absolute right-2 top-2 bottom-2 bg-indigo-600 text-white px-3 rounded-lg shadow-lg">
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
             </div>
+        </div>
+
+        <!-- Status & Errors -->
+        <div id="statusMessage" class="hidden mb-6 flex justify-center">
+            <div class="bg-gray-900 border border-gray-800 px-4 py-2 rounded-full flex items-center gap-3 shadow-lg">
+                <span class="loader w-4 h-4 border-2 border-indigo-500 border-b-transparent"></span>
+                <span id="statusText" class="text-xs text-gray-300 font-mono">Connecting...</span>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="hidden max-w-lg mx-auto bg-red-900/10 border border-red-500/20 text-red-400 p-4 rounded-xl mb-6 flex items-start gap-3 text-sm">
+            <i data-lucide="alert-triangle" class="w-5 h-5 flex-shrink-0 mt-0.5"></i>
+            <div>
+                <p class="font-bold mb-1">Connection Error</p>
+                <p id="errorText">Unable to fetch data.</p>
+                <button onclick="handleMainAction()" class="mt-2 text-xs bg-red-900/30 hover:bg-red-900/50 px-3 py-1 rounded text-red-300 transition-colors">Try Again</button>
+            </div>
+        </div>
+
+        <!-- === SEARCH RESULTS === -->
+        <div id="searchResultsArea" class="hidden fade-in mb-12">
+            <div class="flex items-center justify-between mb-6 px-1">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <span class="bg-indigo-500/10 text-indigo-400 p-1.5 rounded-lg"><i data-lucide="filter" class="w-4 h-4"></i></span>
+                    Results
+                </h2>
+                <span id="resultCount" class="text-[10px] font-bold text-gray-500 bg-gray-900 border border-gray-800 px-2 py-1 rounded-md uppercase tracking-wider">0 Found</span>
+            </div>
+            
             <div id="searchGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <!-- Search results injected here -->
+                <!-- Injected via JS -->
             </div>
         </div>
 
         <!-- === ANALYZER DASHBOARD === -->
-        <div id="resultArea" class="hidden fade-in grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div id="resultArea" class="hidden fade-in grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <!-- Left Column: Main Analyzer -->
-            <div class="lg:col-span-2 space-y-6">
+            <!-- Left Column: Video & Stats (8 cols) -->
+            <div class="lg:col-span-8 space-y-6">
                 
-                <button onclick="showSearchResults()" id="backToSearchBtn" class="hidden text-sm text-gray-400 hover:text-white flex items-center gap-2 mb-2 transition-colors px-2 py-1 rounded hover:bg-gray-800 w-fit">
-                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Results
+                <button onclick="showSearchResults()" id="backToSearchBtn" class="hidden text-xs font-bold text-gray-400 hover:text-white flex items-center gap-2 mb-2 transition-colors px-3 py-1.5 rounded-lg border border-gray-800 bg-gray-900 hover:border-gray-600 w-fit">
+                    <i data-lucide="arrow-left" class="w-3 h-3"></i> Back to Search
                 </button>
 
-                <!-- Video Player/Thumbnail -->
-                <div class="glass-panel p-1 rounded-2xl shadow-2xl">
+                <!-- Thumbnail Container -->
+                <div class="glass-panel p-1.5 rounded-2xl shadow-2xl relative group">
                     <div onclick="window.open(document.getElementById('watchLink').href, '_blank')" 
-                        class="bg-black rounded-xl overflow-hidden aspect-video w-full relative group cursor-pointer">
-                        <img id="mainThumbnail" src="" class="w-full h-full object-cover opacity-90 group-hover:opacity-60 transition-all duration-500" alt="Video Thumbnail">
+                        class="bg-black rounded-xl overflow-hidden aspect-video w-full relative cursor-pointer">
+                        <img id="mainThumbnail" src="" class="w-full h-full object-cover opacity-100 group-hover:opacity-70 transition-all duration-500" alt="Thumbnail">
                         
-                        <!-- Play Button Overlay -->
-                        <div class="absolute inset-0 flex flex-col items-center justify-center z-10 transition-transform duration-300 group-hover:scale-105">
-                            <div class="bg-red-600 text-white p-5 rounded-full shadow-[0_0_40px_rgba(220,38,38,0.5)] mb-3 flex items-center justify-center">
-                                <i data-lucide="play" class="w-8 h-8 fill-current ml-1"></i>
+                        <!-- Overlay -->
+                        <div class="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                            <div class="bg-white/10 backdrop-blur-md p-4 rounded-full border border-white/20 mb-3 transform translate-y-4 group-hover:translate-y-0 transition-transform">
+                                <i data-lucide="external-link" class="w-8 h-8 text-white"></i>
                             </div>
-                            <p class="text-white font-black text-xl drop-shadow-lg tracking-wide bg-black/40 px-4 py-1 rounded-full backdrop-blur-sm">Watch on YouTube</p>
+                            <span class="text-white font-bold text-sm tracking-wide shadow-black drop-shadow-lg">Open in YouTube</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Video Info Card -->
-                <div class="glass-panel rounded-2xl p-6 md:p-8">
-                    <h2 id="videoTitle" class="text-xl md:text-3xl font-black text-white leading-tight mb-4"></h2>
+                <!-- Info Card -->
+                <div class="glass-panel rounded-2xl p-6 relative overflow-hidden">
+                    <!-- Background decoration -->
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-600/5 rounded-full blur-3xl -z-10"></div>
                     
-                    <div class="flex flex-wrap items-center gap-3 text-sm text-gray-400 mb-8 pb-6 border-b border-gray-700/50">
-                        <div class="flex items-center gap-2 bg-[#1f1f1f] border border-gray-700 px-3 py-1.5 rounded-full">
-                            <i data-lucide="user" class="w-4 h-4 text-indigo-400"></i>
-                            <span id="videoAuthor" class="font-bold text-gray-200"></span>
+                    <h2 id="videoTitle" class="text-xl md:text-2xl font-bold text-white leading-snug mb-4"></h2>
+                    
+                    <div class="flex flex-wrap items-center gap-2 text-xs font-medium text-gray-400 mb-6 pb-6 border-b border-gray-800">
+                        <div class="flex items-center gap-1.5 bg-gray-800/50 border border-gray-700/50 px-3 py-1.5 rounded-full text-gray-300">
+                            <i data-lucide="user" class="w-3.5 h-3.5 text-indigo-400"></i>
+                            <span id="videoAuthor">Channel</span>
                         </div>
-                        <div class="flex items-center gap-2 bg-[#1f1f1f] border border-gray-700 px-3 py-1.5 rounded-full">
-                            <i data-lucide="eye" class="w-4 h-4 text-emerald-400"></i>
-                            <span id="videoViews" class="text-gray-200"></span>
-                        </div>
-                        <div class="flex items-center gap-2 bg-[#1f1f1f] border border-gray-700 px-3 py-1.5 rounded-full">
-                            <i data-lucide="calendar" class="w-4 h-4 text-orange-400"></i>
-                            <span id="videoDate" class="text-gray-200"></span>
+                        <div class="flex items-center gap-1.5 bg-gray-800/50 border border-gray-700/50 px-3 py-1.5 rounded-full">
+                             <span id="videoDate">Date</span>
                         </div>
                     </div>
 
-                    <!-- Action Buttons -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <button onclick="downloadThumbnail()" class="flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 hover:text-white text-gray-300 py-4 rounded-xl border border-gray-700 transition-all font-medium">
-                            <i data-lucide="image" class="w-5 h-5 text-indigo-400"></i>
-                            <span>View HD Thumbnail</span>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="downloadThumbnail()" class="flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-750 hover:text-white text-gray-300 py-3.5 rounded-xl border border-gray-700 transition-all text-sm font-bold">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            <span>HD Image</span>
                         </button>
-                        <button onclick="copyLink()" id="copyBtn" class="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-xl transition-all shadow-lg shadow-indigo-900/20 font-bold">
-                            <i data-lucide="copy" class="w-5 h-5"></i>
+                        <button onclick="copyLink()" id="copyBtn" class="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white py-3.5 rounded-xl transition-all shadow-lg shadow-indigo-900/20 text-sm font-bold">
+                            <i data-lucide="link" class="w-4 h-4"></i>
                             <span>Copy Link</span>
                         </button>
                     </div>
@@ -191,245 +217,289 @@
                 </div>
             </div>
 
-            <!-- Right Column: Sidebar -->
-            <div class="lg:col-span-1 space-y-6">
+            <!-- Right Column: Sidebar (4 cols) -->
+            <div class="lg:col-span-4 space-y-5">
                 
-                <!-- Donation -->
-                <div class="glass-panel rounded-2xl p-6 text-center border-t-4 border-yellow-400 relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-yellow-400/20 to-transparent rounded-bl-full transition-transform group-hover:scale-110"></div>
-                    <h3 class="text-white font-bold mb-1 text-lg">Support the Tool</h3>
-                    <p class="text-sm text-gray-400 mb-5">Keep the servers running!</p>
-                    <a href="#" class="block w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-yellow-900/20 transform hover:-translate-y-1">
-                        <i data-lucide="coffee" class="w-5 h-5"></i>
-                        <span>Buy me a Coffee</span>
-                    </a>
+                <!-- Support Card -->
+                <div class="glass-panel rounded-2xl p-5 border border-yellow-500/20 bg-gradient-to-b from-yellow-500/5 to-transparent relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h3 class="text-gray-100 font-bold text-sm">Support Development</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Help keep servers online.</p>
+                        </div>
+                        <div class="bg-yellow-500/20 p-2 rounded-lg">
+                            <i data-lucide="coffee" class="w-5 h-5 text-yellow-500"></i>
+                        </div>
+                    </div>
+                    <button class="w-full mt-3 bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-bold py-2.5 rounded-lg transition-colors">
+                        Donate Now
+                    </button>
                 </div>
 
-                <!-- Related Videos Section -->
-                <div class="glass-panel rounded-2xl p-5">
-                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                        <i data-lucide="film" class="w-5 h-5 text-indigo-500"></i>
-                        Related Videos
+                <!-- Related Videos -->
+                <div class="glass-panel rounded-2xl p-5 min-h-[300px]">
+                    <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                        <i data-lucide="film" class="w-4 h-4 text-indigo-500"></i>
+                        Related Content
                     </h3>
                     <div id="relatedVideosList" class="space-y-3">
-                        <div class="text-gray-500 text-xs italic">Loading...</div>
+                         <!-- Injected -->
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Footer -->
         <div class="mt-12 text-center border-t border-gray-800 pt-8 pb-4">
-            <p class="text-xs text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                **Disclaimer:** This tool uses the <strong>Piped API</strong> to display video metadata. It is intended for educational and analytical purposes only. We do not host any content. All rights belong to their respective owners.
+            <p class="text-[10px] text-gray-600 max-w-xl mx-auto uppercase tracking-widest">
+                Educational Tool • Non-Commercial Use Only
             </p>
         </div>
     </div>
 
     <script>
         lucide.createIcons();
-        // Using Piped API - much more reliable than invidious instances
-        const API_BASE = 'https://pipedapi.kavin.rocks';
 
+        // --- ULTRA ROBUST API CONFIGURATION ---
+        // Mixed list of Piped instances. The code will cycle through them.
+        const API_SERVERS = [
+            'https://pipedapi.kavin.rocks', 
+            'https://api.piped.io',
+            'https://pipedapi.drgns.space',
+            'https://piped-api.privacy.com.de',
+            'https://api.piped.privacydev.net',
+            'https://pipedapi.smnz.de',
+            'https://pipedapi.adminforge.de',
+            'https://pipedapi.ducks.party',
+            'https://pipedapi.moomoo.me',
+            'https://pa.il.ax'
+        ];
+
+        let currentApiIndex = Math.floor(Math.random() * API_SERVERS.length); // Start random to distribute load
         let currentThumbUrl = '';
         let lastSearchResults = null; 
 
+        // --- HELPER FUNCTIONS ---
+        
         function syncInputs(val) {
             document.getElementById('videoUrl').value = val;
             document.getElementById('videoUrlMobile').value = val;
         }
 
         function extractVideoID(url) {
-            // Updated regex to catch more formats including youtube shorts
             var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?)|(shorts\/))\??v?=?([^#&?]*).*/;
             var match = url.match(regExp);
             return (match && match[8].length == 11) ? match[8] : false;
         }
 
-        // MAIN LOGIC ROUTER
-        function handleMainAction() {
+        function getSafeThumb(videoId) {
+            return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+        }
+
+        function formatCompactNumber(number) {
+            return Intl.NumberFormat('en-US', { notation: "compact", maximumFractionDigits: 1 }).format(number);
+        }
+
+        // --- CORE NETWORKING ---
+
+        async function fetchWithFailover(endpoint) {
+            const maxRetries = 5; // Try 5 different servers max
+            let attempts = 0;
+            const statusBox = document.getElementById('statusMessage');
+            const statusText = document.getElementById('statusText');
+
+            statusBox.classList.remove('hidden');
+
+            while (attempts < maxRetries) {
+                const server = API_SERVERS[currentApiIndex];
+                statusText.innerText = `Trying Server ${currentApiIndex + 1}...`;
+                
+                try {
+                    // Fast timeout (3s) to skip slow servers quickly
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 3500);
+                    
+                    const response = await fetch(`${server}${endpoint}`, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+
+                    if (response.ok) {
+                        statusBox.classList.add('hidden');
+                        return await response.json();
+                    }
+                    throw new Error('Status not ok');
+                } catch (error) {
+                    console.warn(`Server ${server} failed, switching...`);
+                    currentApiIndex = (currentApiIndex + 1) % API_SERVERS.length;
+                    attempts++;
+                }
+            }
+            statusBox.classList.add('hidden');
+            throw new Error('All servers busy');
+        }
+
+        // --- MAIN LOGIC ---
+
+        async function handleMainAction() {
             const input = document.getElementById('videoUrl').value.trim();
             if (!input) return;
+
+            // UI Reset
+            document.getElementById('errorMessage').classList.add('hidden');
+            document.getElementById('searchResultsArea').classList.add('hidden');
+            document.getElementById('resultArea').classList.add('hidden');
 
             const videoId = extractVideoID(input);
 
             if (videoId) {
-                analyzeVideo(videoId);
+                // HYBRID APPROACH: Use NoEmbed for direct link (100% reliable)
+                analyzeVideoDirect(videoId);
             } else {
+                // Use Piped for Search
                 performSearch(input);
             }
         }
 
-        async function performSearch(query) {
-            const loadingState = document.getElementById('loadingState');
-            const resultArea = document.getElementById('resultArea');
-            const searchResultsArea = document.getElementById('searchResultsArea');
-            const errorMessage = document.getElementById('errorMessage');
-            const loadingText = document.getElementById('loadingText');
-
-            // UI Reset
-            errorMessage.classList.add('hidden');
-            resultArea.classList.add('hidden');
-            searchResultsArea.classList.add('hidden');
-            loadingState.classList.remove('hidden');
-            loadingText.innerText = `Searching YouTube for "${query}"...`;
+        // 1. DIRECT ANALYSIS (Uses NoEmbed - Very Stable)
+        async function analyzeVideoDirect(videoId) {
+            const statusBox = document.getElementById('statusMessage');
+            const statusText = document.getElementById('statusText');
+            statusBox.classList.remove('hidden');
+            statusText.innerText = "Analyzing Video...";
 
             try {
-                // Fetch from Piped API
-                const response = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}&filter=all`);
-                if (!response.ok) throw new Error('Search failed');
-                
+                const response = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`);
                 const data = await response.json();
-                
-                // Piped returns { items: [...] }
-                const videos = data.items.filter(item => item.type === 'stream'); // Filter only videos
+
+                if (data.error) throw new Error('Video not found');
+
+                // Fill Data
+                fillVideoData({
+                    title: data.title,
+                    author: data.author_name,
+                    date: 'Unknown', // NoEmbed doesn't give date
+                    videoId: videoId
+                });
+
+                // Try to get sidebar data in background (don't block UI)
+                fetchSidebarData(videoId);
+
+                statusBox.classList.add('hidden');
+                document.getElementById('resultArea').classList.remove('hidden');
+                lucide.createIcons();
+
+            } catch (error) {
+                document.getElementById('errorMessage').classList.remove('hidden');
+                document.getElementById('errorText').innerText = "Invalid URL or Private Video.";
+                statusBox.classList.add('hidden');
+            }
+        }
+
+        // 2. SEARCH (Uses Piped Rotation)
+        async function performSearch(query) {
+            try {
+                const data = await fetchWithFailover(`/search?q=${encodeURIComponent(query)}&filter=all`);
+                const videos = data.items.filter(item => item.type === 'stream');
                 
                 lastSearchResults = videos;
                 renderSearchResults(videos);
-
+                document.getElementById('searchResultsArea').classList.remove('hidden');
             } catch (error) {
-                console.error(error);
-                loadingState.classList.add('hidden');
-                errorMessage.classList.remove('hidden');
-                document.getElementById('errorText').innerText = "Search unavailable. API might be busy.";
+                document.getElementById('errorMessage').classList.remove('hidden');
+                document.getElementById('errorText').innerText = "Search servers are busy. Please try pasting a direct URL instead.";
             }
+        }
+
+        // 3. BACKGROUND SIDEBAR FETCH
+        async function fetchSidebarData(videoId) {
+            const relatedList = document.getElementById('relatedVideosList');
+            relatedList.innerHTML = '<div class="text-xs text-gray-500 animate-pulse">Loading suggestions...</div>';
+
+            try {
+                const data = await fetchWithFailover(`/streams/${videoId}`);
+                renderRelatedVideos(data.relatedStreams);
+                
+                // Update Date if we got it from Piped
+                if(data.uploadDate) document.getElementById('videoDate').innerText = data.uploadDate;
+
+            } catch (err) {
+                relatedList.innerHTML = '<div class="text-xs text-gray-600">Suggestions unavailable</div>';
+            }
+        }
+
+        // --- RENDER FUNCTIONS ---
+
+        function fillVideoData(data) {
+            document.getElementById('videoTitle').innerText = data.title;
+            document.getElementById('videoAuthor').innerText = data.author;
+            document.getElementById('videoDate').innerText = data.date || '';
+            document.getElementById('watchLink').href = `https://www.youtube.com/watch?v=${data.videoId}`;
+            document.getElementById('shareUrl').innerText = `https://youtu.be/${data.videoId}`;
+            
+            currentThumbUrl = `https://img.youtube.com/vi/${data.videoId}/maxresdefault.jpg`;
+            document.getElementById('mainThumbnail').src = currentThumbUrl;
         }
 
         function renderSearchResults(videos) {
-            const loadingState = document.getElementById('loadingState');
-            const searchResultsArea = document.getElementById('searchResultsArea');
             const grid = document.getElementById('searchGrid');
-            const resultCount = document.getElementById('resultCount');
-            
+            const count = document.getElementById('resultCount');
             grid.innerHTML = '';
-            loadingState.classList.add('hidden');
 
-            if (!videos || videos.length === 0) {
+            if(!videos || videos.length === 0) {
                 grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">No results found.</div>';
-                resultCount.innerText = '0 results';
-            } else {
-                resultCount.innerText = `${videos.length} results`;
-                videos.forEach(video => {
-                    const card = document.createElement('div');
-                    card.className = 'search-card rounded-xl overflow-hidden cursor-pointer group flex flex-col bg-[#252525] border border-gray-800';
-                    card.onclick = () => analyzeVideo(video.url.split('v=')[1]);
-
-                    // Duration formatting
-                    let duration = "0:00";
-                    if (video.duration) {
-                        const mins = Math.floor(video.duration / 60);
-                        const secs = video.duration % 60;
-                        duration = `${mins}:${secs.toString().padStart(2, '0')}`;
-                    }
-
-                    card.innerHTML = `
-                        <div class="aspect-video relative overflow-hidden bg-black">
-                            <img src="${video.thumbnail}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
-                            <div class="absolute bottom-1.5 right-1.5 bg-black/80 text-white text-[10px] px-1.5 py-0.5 rounded font-mono font-bold">
-                                ${duration}
-                            </div>
-                        </div>
-                        <div class="p-3.5 flex-1 flex flex-col">
-                            <h4 class="text-sm font-bold text-gray-100 line-clamp-2 leading-snug mb-2 group-hover:text-indigo-400 transition-colors" title="${video.title}">${video.title}</h4>
-                            <div class="mt-auto flex items-center justify-between text-[11px] text-gray-500">
-                                <span class="flex items-center gap-1 truncate max-w-[60%]">
-                                    <i data-lucide="user" class="w-3 h-3"></i> ${video.uploaderName}
-                                </span>
-                                <span>${formatCompactNumber(video.views)} views</span>
-                            </div>
-                        </div>
-                    `;
-                    grid.appendChild(card);
-                });
+                count.innerText = '0 Found';
+                return;
             }
 
-            searchResultsArea.classList.remove('hidden');
+            count.innerText = `${videos.length} Found`;
+
+            videos.forEach(video => {
+                const vidId = video.url.split('v=')[1];
+                const card = document.createElement('div');
+                card.className = 'search-card rounded-xl overflow-hidden cursor-pointer group flex flex-col bg-[#1a1a1a]';
+                card.onclick = () => analyzeVideoDirect(vidId);
+
+                card.innerHTML = `
+                    <div class="aspect-video relative bg-black">
+                        <img src="${getSafeThumb(vidId)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
+                        <div class="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1.5 rounded font-mono">
+                            ${video.duration ? Math.floor(video.duration/60)+':'+(video.duration%60).toString().padStart(2,'0') : ''}
+                        </div>
+                    </div>
+                    <div class="p-3 flex-1">
+                        <h4 class="text-xs font-bold text-gray-200 line-clamp-2 leading-snug mb-2 group-hover:text-indigo-400">${video.title}</h4>
+                        <div class="flex justify-between text-[10px] text-gray-500">
+                            <span>${video.uploaderName}</span>
+                            <span>${formatCompactNumber(video.views)} views</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
             lucide.createIcons();
-        }
-
-        async function analyzeVideo(videoId) {
-            const loadingState = document.getElementById('loadingState');
-            const resultArea = document.getElementById('resultArea');
-            const searchResultsArea = document.getElementById('searchResultsArea');
-            const errorMessage = document.getElementById('errorMessage');
-            const loadingText = document.getElementById('loadingText');
-            const backBtn = document.getElementById('backToSearchBtn');
-
-            searchResultsArea.classList.add('hidden');
-            resultArea.classList.add('hidden');
-            errorMessage.classList.add('hidden');
-            loadingState.classList.remove('hidden');
-            loadingText.innerText = "Analyzing Video Data...";
-            
-            if (lastSearchResults) {
-                backBtn.classList.remove('hidden');
-            } else {
-                backBtn.classList.add('hidden');
-            }
-
-            try {
-                // Fetch ALL data from Piped Stream Endpoint
-                const response = await fetch(`${API_BASE}/streams/${videoId}`);
-                if (!response.ok) throw new Error('Video fetch failed');
-                
-                const data = await response.json();
-
-                // Update UI with Data
-                document.getElementById('videoTitle').innerText = data.title;
-                document.getElementById('videoAuthor').innerText = data.uploader;
-                document.getElementById('videoViews').innerText = `${formatCompactNumber(data.views)} views`;
-                document.getElementById('videoDate').innerText = data.uploadDate || 'Unknown date';
-                document.getElementById('watchLink').href = `https://www.youtube.com/watch?v=${videoId}`;
-                document.getElementById('shareUrl').innerText = `https://youtu.be/${videoId}`;
-                
-                // High Res Thumbnail
-                // Piped usually provides a high quality thumbnail in the list, but we can fallback to YouTube CDN
-                currentThumbUrl = data.thumbnailUrl || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-                document.getElementById('mainThumbnail').src = currentThumbUrl;
-
-                // Render Related Videos (Sidebar)
-                renderRelatedVideos(data.relatedStreams);
-
-                loadingState.classList.add('hidden');
-                resultArea.classList.remove('hidden');
-                lucide.createIcons();
-                
-            } catch (error) {
-                console.error(error);
-                loadingState.classList.add('hidden');
-                errorMessage.classList.remove('hidden');
-                document.getElementById('errorText').innerText = "Unable to access video details. Try another video.";
-            }
         }
 
         function renderRelatedVideos(videos) {
             const container = document.getElementById('relatedVideosList');
             container.innerHTML = '';
             
-            // Take first 5 related videos
             const list = videos.slice(0, 5);
-
-            if (list.length === 0) {
-                container.innerHTML = '<div class="text-xs text-gray-500">No related videos found.</div>';
+            if(list.length === 0) {
+                container.innerHTML = '<div class="text-xs text-gray-500">No related videos.</div>';
                 return;
             }
 
             list.forEach(video => {
-                const item = document.createElement('div');
-                item.className = 'sidebar-card rounded-lg p-2 flex gap-3 cursor-pointer group';
-                // Piped returns URL like "/watch?v=..."
                 const vidId = video.url.split('v=')[1];
-                item.onclick = () => analyzeVideo(vidId);
+                const item = document.createElement('div');
+                item.className = 'flex gap-3 cursor-pointer group hover:bg-gray-800/50 p-2 rounded-lg transition-colors';
+                item.onclick = () => analyzeVideoDirect(vidId);
                 
                 item.innerHTML = `
-                    <div class="w-24 h-16 flex-shrink-0 relative rounded-md overflow-hidden bg-black">
-                        <img src="${video.thumbnail}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                    <div class="w-20 h-12 flex-shrink-0 bg-black rounded overflow-hidden">
+                        <img src="${getSafeThumb(vidId)}" class="w-full h-full object-cover">
                     </div>
                     <div class="flex-1 min-w-0 flex flex-col justify-center">
-                        <h4 class="text-xs font-bold text-gray-200 line-clamp-2 leading-tight group-hover:text-indigo-400 transition-colors mb-1">${video.title}</h4>
-                        <div class="flex items-center gap-2">
-                            <span class="text-[10px] text-gray-500 bg-[#1f1f1f] px-1.5 rounded">${formatCompactNumber(video.views)} views</span>
-                        </div>
+                        <h4 class="text-xs font-bold text-gray-300 line-clamp-2 group-hover:text-indigo-400">${video.title}</h4>
+                        <span class="text-[10px] text-gray-600 mt-0.5">${formatCompactNumber(video.views)} views</span>
                     </div>
                 `;
                 container.appendChild(item);
@@ -441,6 +511,25 @@
             document.getElementById('searchResultsArea').classList.remove('hidden');
         }
 
+        function downloadThumbnail() {
+            if(currentThumbUrl) window.open(currentThumbUrl, '_blank');
+        }
+
+        function copyLink() {
+            const text = document.getElementById('shareUrl').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i><span>Copied</span>`;
+                btn.classList.add('bg-green-600');
+                lucide.createIcons();
+                setTimeout(() => {
+                    btn.innerHTML = `<i data-lucide="link" class="w-4 h-4"></i><span>Copy Link</span>`;
+                    btn.classList.remove('bg-green-600');
+                    lucide.createIcons();
+                }, 2000);
+            });
+        }
+
         function resetApp() {
             document.getElementById('videoUrl').value = '';
             document.getElementById('videoUrlMobile').value = '';
@@ -450,44 +539,11 @@
             lastSearchResults = null;
         }
 
-        function formatCompactNumber(number) {
-            return Intl.NumberFormat('en-US', { notation: "compact", maximumFractionDigits: 1 }).format(number);
-        }
-
-        function downloadThumbnail() {
-            if(!currentThumbUrl) return;
-            window.open(currentThumbUrl, '_blank');
-        }
-
-        function copyLink() {
-            const text = document.getElementById('shareUrl').innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                const btn = document.getElementById('copyBtn');
-                const originalContent = btn.innerHTML;
-                
-                btn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
-                btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
-                btn.innerHTML = `<i data-lucide="check" class="w-5 h-5"></i><span>Copied!</span>`;
-                lucide.createIcons();
-                
-                setTimeout(() => {
-                    btn.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
-                    btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
-                    btn.innerHTML = originalContent;
-                    lucide.createIcons();
-                }, 2000);
-            });
-        }
-        
         // Listeners
+        document.getElementById('videoUrl').addEventListener('keypress', (e) => e.key === 'Enter' && handleMainAction());
         document.getElementById('videoUrlMobile').addEventListener('input', (e) => syncInputs(e.target.value));
-        document.getElementById('videoUrl').addEventListener('input', (e) => syncInputs(e.target.value));
-        document.getElementById('videoUrl').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') handleMainAction();
-        });
-        document.getElementById('videoUrlMobile').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') handleMainAction();
-        });
+        document.getElementById('videoUrlMobile').addEventListener('keypress', (e) => e.key === 'Enter' && handleMainAction());
+
     </script>
 </body>
 </html>

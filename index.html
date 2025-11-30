@@ -3,438 +3,506 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Video Analyzer - Dark Mode</title>
+    <title>Analyzer A | Ultimate Video Search</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts (Inter for English) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                        roboto: ['Roboto', 'sans-serif'],
+                    },
+                    colors: {
+                        youtube: '#FF0000',
+                        dailymotion: '#0066DC',
+                        vimeo: '#1AB7EA',
+                        dark: {
+                            900: '#0f0f0f',
+                            800: '#1f1f1f',
+                            700: '#2d2d2d'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     
-    <!-- Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
-            color: #ffffff;
-        }
-        .glass-panel {
-            background: rgba(30, 30, 30, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .loader {
-            border: 3px solid #333;
-            border-radius: 50%;
-            border-top: 3px solid #6366f1; /* Indigo */
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #111; 
+            background: #0f0f0f;
         }
         ::-webkit-scrollbar-thumb {
-            background: #444; 
+            background: #333;
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #666; 
+            background: #555;
         }
-        .line-clamp-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+        
+        .video-card:hover .play-overlay {
+            opacity: 1;
+        }
+        .platform-btn.active {
+            background-color: white;
+            color: black;
+            font-weight: bold;
+        }
+
+        /* Directional Logic for Search Bar */
+        /* RTL Defaults (Arabic) */
+        [dir="rtl"] .search-icon-pos { right: 0; padding-right: 1rem; }
+        [dir="rtl"] .search-btn-pos { left: 0; padding-left: 0.5rem; }
+        [dir="rtl"] .search-input-pad { padding-right: 3rem; padding-left: 5rem; }
+        [dir="rtl"] .search-btn-shape { border-top-left-radius: 9999px; border-bottom-left-radius: 9999px; border-left-width: 1px; }
+        
+        /* LTR Overrides (English) */
+        [dir="ltr"] .search-icon-pos { left: 0; padding-left: 1rem; }
+        [dir="ltr"] .search-btn-pos { right: 0; padding-right: 0.5rem; }
+        [dir="ltr"] .search-input-pad { padding-left: 3rem; padding-right: 5rem; }
+        [dir="ltr"] .search-btn-shape { border-top-right-radius: 9999px; border-bottom-right-radius: 9999px; border-right-width: 1px; }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        [dir="rtl"] body {
+            font-family: 'Cairo', sans-serif;
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body class="bg-dark-900 text-white min-h-screen flex flex-col transition-all duration-300">
 
-    <div class="max-w-4xl w-full">
-        
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <div class="flex justify-center mb-4">
-                <div class="bg-indigo-600 p-4 rounded-2xl shadow-[0_0_20px_rgba(99,102,241,0.5)]">
-                    <i data-lucide="bar-chart-2" class="w-10 h-10 text-white"></i>
-                </div>
-            </div>
-            <h1 class="text-4xl font-black text-white mb-2">Smart YouTube <span class="text-indigo-500">Analyzer</span></h1>
-            <p class="text-gray-400 text-lg">Legal tool for thumbnail extraction and data analysis</p>
-        </div>
-
-        <!-- Main Card -->
-        <div class="glass-panel rounded-3xl shadow-2xl p-6 md:p-8 mb-8">
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-md border-b border-dark-700 shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
             
-            <!-- Input Area -->
-            <div class="relative mb-6">
-                <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                    <i data-lucide="link" class="w-5 h-5 text-gray-500"></i>
+            <!-- Logo -->
+            <div class="flex items-center gap-2 cursor-pointer" onclick="resetApp()">
+                <div class="w-10 h-10 bg-gradient-to-br from-red-600 to-purple-600 rounded-lg flex items-center justify-center text-xl shadow-lg">
+                    <i class="fa-solid fa-play text-white"></i>
                 </div>
-                <input type="text" id="videoUrl" 
-                    class="w-full pr-12 pl-4 py-4 bg-gray-900/80 border border-gray-700 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-900/30 outline-none transition-all text-gray-100 placeholder-gray-600 font-medium"
-                    placeholder="Paste YouTube URL here (e.g., https://youtu.be/...)"
-                >
-                <button onclick="fetchVideoData()" id="searchBtn"
-                    class="absolute right-2 top-2 bottom-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 rounded-lg font-bold transition-all shadow-lg hover:shadow-indigo-500/30 flex items-center gap-2">
-                    <span>Analyze</span>
-                    <i data-lucide="search" class="w-4 h-4"></i>
+                <h1 class="text-2xl font-bold tracking-wide font-sans">Analyzer <span class="text-red-500">A</span></h1>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="w-full max-w-2xl relative group">
+                <div class="absolute inset-y-0 search-icon-pos flex items-center pointer-events-none">
+                    <i class="fa-solid fa-magnifying-glass text-gray-400 group-focus-within:text-white transition-colors"></i>
+                </div>
+                <input type="text" 
+                       id="searchInput" 
+                       placeholder="Search for videos..." 
+                       class="w-full bg-dark-800 border border-dark-700 text-white text-lg rounded-full py-3 search-input-pad focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all shadow-inner"
+                       onkeypress="handleEnter(event)">
+                <button onclick="performSearch()" class="absolute inset-y-0 search-btn-pos py-1">
+                    <div id="btnSearchText" class="bg-dark-700 hover:bg-dark-600 text-white px-6 h-full flex items-center transition-colors border-dark-600 search-btn-shape">
+                        Search
+                    </div>
                 </button>
             </div>
 
-            <!-- Error Message -->
-            <div id="errorMessage" class="hidden bg-red-900/20 text-red-400 p-4 rounded-xl mb-6 flex items-center gap-3 border border-red-900/50">
-                <i data-lucide="alert-circle" class="w-5 h-5"></i>
-                <span id="errorText">Invalid URL or private video.</span>
-            </div>
-
-            <!-- Loading State -->
-            <div id="loadingState" class="hidden py-8 text-center">
-                <div class="loader mx-auto mb-3"></div>
-                <p class="text-gray-400 animate-pulse">Fetching API data...</p>
-            </div>
-
-            <!-- Result Area -->
-            <div id="resultArea" class="hidden fade-in space-y-6">
-                
-                <!-- 1. Video Display (Image Only + Link) -->
-                <div onclick="window.open(document.getElementById('watchLink').href, '_blank')" 
-                     class="bg-black rounded-2xl overflow-hidden shadow-2xl border border-gray-800 aspect-video w-full relative group cursor-pointer hover:border-indigo-500/50 transition-colors">
-                    
-                    <img id="mainThumbnail" src="" class="w-full h-full object-cover opacity-80 group-hover:opacity-60 transition-all duration-300 transform group-hover:scale-105" alt="Video Thumbnail">
-                    
-                    <div class="absolute inset-0 flex flex-col items-center justify-center z-10">
-                        <div class="bg-red-600 text-white p-5 rounded-full shadow-[0_0_30px_rgba(220,38,38,0.6)] transform group-hover:scale-110 transition-transform duration-300 mb-4 flex items-center justify-center">
-                            <i data-lucide="play" class="w-8 h-8 fill-current ml-1"></i>
-                        </div>
-                        <p class="text-white font-black text-xl drop-shadow-lg tracking-wide">Watch on YouTube</p>
-                        <p class="text-gray-300 text-sm mt-2 bg-black/50 px-3 py-1 rounded-full backdrop-blur-sm">Click to open in new tab</p>
-                    </div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none"></div>
-                </div>
-
-                <!-- 2. Video Info & Technical Specs -->
-                <div class="bg-gray-800/50 border border-gray-700 rounded-2xl p-6 shadow-sm">
-                    <h3 id="videoTitle" class="text-2xl font-bold text-white leading-tight mb-2"></h3>
-                    
-                    <!-- Author & Date Info -->
-                    <div class="flex flex-wrap items-center gap-4 text-gray-400 text-sm mb-6 pb-4 border-b border-gray-700">
-                        <div class="flex items-center gap-2 bg-gray-900 px-3 py-1 rounded-full border border-gray-700">
-                            <i data-lucide="user" class="w-4 h-4 text-indigo-400"></i>
-                            <span id="videoAuthor" class="font-medium text-gray-200"></span>
-                        </div>
-                        <div class="flex items-center gap-2 bg-gray-900 px-3 py-1 rounded-full border border-gray-700 hidden" id="dateContainer">
-                            <i data-lucide="calendar" class="w-4 h-4 text-orange-400"></i>
-                            <span id="videoDate" class="font-medium text-gray-200"></span>
-                        </div>
-                    </div>
-
-                    <!-- Technical Specs Bar -->
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                        <div class="bg-gray-900/60 p-3 rounded-xl border border-gray-700 text-center">
-                            <div class="text-[10px] text-gray-500 mb-1 uppercase tracking-wider">Player Type</div>
-                            <div class="font-bold text-indigo-400 text-sm flex items-center justify-center gap-1">
-                                <i data-lucide="image" class="w-3 h-3"></i> Thumbnail
-                            </div>
-                        </div>
-                        <div class="bg-gray-900/60 p-3 rounded-xl border border-gray-700 text-center">
-                            <div class="text-[10px] text-gray-500 mb-1 uppercase tracking-wider">Video Format</div>
-                            <div class="font-bold text-emerald-400 text-sm flex items-center justify-center gap-1">
-                                <i data-lucide="file-video" class="w-3 h-3"></i> MP4 / WebM
-                            </div>
-                        </div>
-                        <div class="bg-gray-900/60 p-3 rounded-xl border border-gray-700 text-center">
-                            <div class="text-[10px] text-gray-500 mb-1 uppercase tracking-wider">Quality</div>
-                            <div class="font-bold text-blue-400 text-sm flex items-center justify-center gap-1">
-                                <i data-lucide="monitor" class="w-3 h-3"></i> HD / 4K
-                            </div>
-                        </div>
-                        <div class="bg-gray-900/60 p-3 rounded-xl border border-gray-700 text-center">
-                            <div class="text-[10px] text-gray-500 mb-1 uppercase tracking-wider">Status</div>
-                            <div class="font-bold text-green-400 text-sm flex items-center justify-center gap-1">
-                                <i data-lucide="check-circle" class="w-3 h-3"></i> Available
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
-                         <p class="text-xs text-gray-500 flex items-center gap-1">
-                            <i data-lucide="shield-check" class="w-3 h-3"></i>
-                            Safe View (No IFrame)
-                         </p>
-                         <a id="watchLink" href="#" target="_blank" class="text-indigo-400 hover:text-indigo-300 text-sm font-bold flex items-center gap-1 transition-colors">
-                             Open Original Link
-                             <i data-lucide="external-link" class="w-3 h-3"></i>
-                         </a>
-                    </div>
-                </div>
-
-                <!-- 3. Tools Section -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    
-                    <!-- Thumbnail Tool -->
-                    <div class="bg-gray-800/50 p-5 rounded-2xl border border-gray-700 hover:border-gray-600 transition-colors">
-                        <div class="flex items-center gap-2 mb-4 text-gray-200 font-bold">
-                            <i data-lucide="image" class="w-5 h-5 text-indigo-500"></i>
-                            Thumbnail
-                        </div>
-                        <div class="relative rounded-lg overflow-hidden mb-4 border border-gray-700 group">
-                            <img id="previewThumb" src="" class="w-full opacity-80 group-hover:opacity-100 transition-opacity" alt="Preview">
-                            <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
-                        </div>
-                        <button onclick="downloadThumbnail()" class="w-full bg-gray-700 hover:bg-gray-600 hover:text-white text-gray-200 font-medium py-3 rounded-xl transition-all flex items-center justify-center gap-2 border border-gray-600 hover:border-gray-500">
-                            <i data-lucide="download" class="w-4 h-4"></i>
-                            View Image (HD)
-                        </button>
-                    </div>
-
-                    <!-- SEO / Share Tool -->
-                    <div class="bg-gray-800/50 p-5 rounded-2xl border border-gray-700 hover:border-gray-600 transition-colors flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center gap-2 mb-4 text-gray-200 font-bold">
-                                <i data-lucide="share-2" class="w-5 h-5 text-green-500"></i>
-                                Share & Embed
-                            </div>
-                            <p class="text-sm text-gray-400 mb-4">Short share link:</p>
-                            
-                            <div class="bg-black/50 p-4 rounded-xl border border-gray-700 text-xs font-mono text-indigo-300 break-all mb-4 select-all" id="shareUrl">
-                                https://youtu.be/...
-                            </div>
-                        </div>
-                        
-                        <button onclick="copyLink()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition-all shadow-lg shadow-indigo-900/20 flex items-center justify-center gap-2">
-                            <i data-lucide="copy" class="w-4 h-4"></i>
-                            Copy Link
-                        </button>
-                    </div>
-                </div>
-
+            <!-- User Icon & Lang Switch -->
+            <div class="flex items-center gap-4">
+                <button onclick="toggleLanguage()" class="px-3 py-1 rounded border border-dark-600 text-sm hover:bg-dark-700 text-gray-300 transition flex items-center gap-2">
+                    <i class="fa-solid fa-globe"></i>
+                    <span id="langBtnText">العربية</span>
+                </button>
+                <!-- تم حذف أيقونة المستخدم وزر التنبيهات -->
             </div>
         </div>
+    </header>
 
-        <!-- Latest Videos Section -->
-        <div id="latestVideosSection" class="hidden fade-in">
-            <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                <i data-lucide="clapperboard" class="w-5 h-5 text-indigo-500"></i>
-                Latest from Channel
-            </h2>
-            <div id="latestVideosGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <!-- Cards will be injected here -->
-            </div>
-            <div id="latestError" class="hidden text-gray-500 text-sm italic mt-2">Could not fetch latest videos (API restrictions).</div>
-        </div>
-        
-        <!-- Legal Footer -->
-        <div class="mt-8 border-t border-gray-800 pt-6 text-center">
-            <p class="text-xs text-gray-600 leading-relaxed max-w-xl mx-auto">
-                **Disclaimer:** This website is a tool for data analysis and video display. We do not host any pirated content.
-            </p>
+    <!-- Platform Selection Tabs -->
+    <div class="bg-dark-800 border-b border-dark-700 py-3 overflow-x-auto">
+        <div class="container mx-auto px-4 flex gap-3 whitespace-nowrap" id="platformContainer">
+            <button onclick="selectPlatform('all')" class="platform-btn active px-6 py-2 rounded-full border border-dark-600 hover:bg-dark-700 transition text-sm flex items-center gap-2" id="btn-all">
+                <i class="fa-solid fa-layer-group"></i> <span data-key="btnAll">All</span>
+            </button>
+            <button onclick="selectPlatform('youtube')" class="platform-btn px-6 py-2 rounded-full border border-dark-600 hover:bg-dark-700 transition text-sm flex items-center gap-2 text-gray-300" id="btn-youtube">
+                <i class="fa-brands fa-youtube text-youtube"></i> <span data-key="btnYoutube">YouTube</span>
+            </button>
+            <button onclick="selectPlatform('dailymotion')" class="platform-btn px-6 py-2 rounded-full border border-dark-600 hover:bg-dark-700 transition text-sm flex items-center gap-2 text-gray-300" id="btn-dailymotion">
+                <i class="fa-brands fa-dailymotion text-dailymotion"></i> <span data-key="btnDailymotion">Dailymotion</span>
+            </button>
+            <button onclick="selectPlatform('vimeo')" class="platform-btn px-6 py-2 rounded-full border border-dark-600 hover:bg-dark-700 transition text-sm flex items-center gap-2 text-gray-300" id="btn-vimeo">
+                <i class="fa-brands fa-vimeo text-vimeo"></i> <span data-key="btnVimeo">Vimeo</span>
+            </button>
         </div>
     </div>
 
+    <!-- Main Content Area -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        
+        <!-- Status Message Area -->
+        <div id="statusMessage" class="hidden mb-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg text-blue-200 flex items-center gap-3">
+            <i class="fa-solid fa-info-circle text-xl"></i>
+            <span id="statusText">Redirecting to search results...</span>
+        </div>
+
+        <!-- Featured / Results Label -->
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold flex items-center gap-2">
+                <i class="fa-solid fa-fire text-red-500"></i> <span id="sectionTitle">Trending Videos</span>
+            </h2>
+            <div class="flex gap-2">
+                <button class="w-8 h-8 rounded-full bg-dark-700 flex items-center justify-center hover:bg-dark-600 transform ltr:rotate-180 transition-transform"><i class="fa-solid fa-chevron-right"></i></button>
+                <button class="w-8 h-8 rounded-full bg-dark-700 flex items-center justify-center hover:bg-dark-600 transform ltr:rotate-180 transition-transform"><i class="fa-solid fa-chevron-left"></i></button>
+            </div>
+        </div>
+
+        <!-- Video Grid -->
+        <div id="videoGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Content will be injected via JS -->
+        </div>
+
+        <!-- Empty State (Hidden by default) -->
+        <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-center text-gray-500">
+            <i class="fa-solid fa-film text-6xl mb-4 text-dark-700"></i>
+            <p class="text-xl" id="emptyTitle">No results to display.</p>
+            <p class="text-sm mt-2" id="emptyDesc">Try searching for something else.</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark-800 border-t border-dark-700 py-8 mt-auto">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-gray-400 mb-4" id="footerDesc">Designed as a unified search interface for easy content access.</p>
+            <div class="flex justify-center gap-6 mb-4">
+                <a href="#" class="text-gray-500 hover:text-youtube text-2xl"><i class="fa-brands fa-youtube"></i></a>
+                <a href="#" class="text-gray-500 hover:text-dailymotion text-2xl"><i class="fa-brands fa-dailymotion"></i></a>
+                <a href="#" class="text-gray-500 hover:text-vimeo text-2xl"><i class="fa-brands fa-vimeo"></i></a>
+            </div>
+            <p class="text-gray-600 text-sm" id="footerCopyright">&copy; 2023 Analyzer A. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
     <script>
-        lucide.createIcons();
+        // --- Configuration & State ---
+        let currentLang = 'en'; // Changed default to English
+        let currentPlatform = 'all';
 
-        let currentVideoId = '';
-        let currentThumbUrl = '';
+        // --- DOM Elements ---
+        const searchInput = document.getElementById('searchInput');
+        const videoGrid = document.getElementById('videoGrid');
+        const sectionTitle = document.getElementById('sectionTitle');
+        const statusMessage = document.getElementById('statusMessage');
+        const statusText = document.getElementById('statusText');
+        const langBtnText = document.getElementById('langBtnText');
+        const btnSearchText = document.getElementById('btnSearchText');
+        const emptyTitle = document.getElementById('emptyTitle');
+        const emptyDesc = document.getElementById('emptyDesc');
+        const footerDesc = document.getElementById('footerDesc');
+        const footerCopyright = document.getElementById('footerCopyright');
 
-        function extractVideoID(url) {
-            var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
-            var match = url.match(regExp);
-            return (match && match[7].length == 11) ? match[7] : false;
+        // --- Translations ---
+        const i18n = {
+            ar: {
+                pageTitle: "Analyzer A | محرك بحث الفيديو الشامل",
+                searchPlaceholder: "ابحث عن فيديو (أغاني، تقنية، وثائقيات...)",
+                searchButton: "بحث",
+                btnAll: "الكل",
+                btnYoutube: "يوتيوب",
+                btnDailymotion: "ديلي موشن",
+                btnVimeo: "فيميو",
+                featuredTitle: "الفيديوهات الرائجة",
+                statusLoading: "جاري تحويلك لنتائج البحث... إذا لم تفتح النافذة، يرجى السماح بالنوافذ المنبثقة.",
+                emptyStateTitle: "لا توجد نتائج لعرضها حالياً.",
+                emptyStateDesc: "جرب البحث عن شيء آخر.",
+                footerDesc: "تم التصميم كواجهة بحث موحدة لتسهيل الوصول للمحتوى.",
+                copyright: "© 2023 Analyzer A. جميع الحقوق محفوظة.",
+                alertEnterQuery: "الرجاء إدخال كلمة للبحث",
+                confirmMultiOpen: "سيتم فتح البحث عن \"{query}\" في يوتيوب.\n\nهل تريد أيضاً فتح ديلي موشن وفيميو؟",
+                resultsFor: "نتائج البحث عن:",
+                langBtnLabel: "English"
+            },
+            en: {
+                pageTitle: "Analyzer A | Ultimate Video Search",
+                searchPlaceholder: "Search for videos (music, tech, docs...)",
+                searchButton: "Search",
+                btnAll: "All",
+                btnYoutube: "YouTube",
+                btnDailymotion: "Dailymotion",
+                btnVimeo: "Vimeo",
+                featuredTitle: "Trending Videos",
+                statusLoading: "Redirecting to search results... Allow popups if window doesn't open.",
+                emptyStateTitle: "No results to display.",
+                emptyStateDesc: "Try searching for something else.",
+                footerDesc: "Designed as a unified search interface for easy content access.",
+                copyright: "© 2023 Analyzer A. All rights reserved.",
+                alertEnterQuery: "Please enter a search term",
+                confirmMultiOpen: "Search for \"{query}\" will open in YouTube.\n\nDo you want to open Dailymotion and Vimeo as well?",
+                resultsFor: "Search results for:",
+                langBtnLabel: "العربية"
+            }
+        };
+
+        // --- Mock Data (Bilingual) ---
+        const mockVideos = [
+            { 
+                id: 1,
+                title: { ar: "أفضل وجهات السفر لعام 2024", en: "Top Travel Destinations for 2024" },
+                views: { ar: "1.2M", en: "1.2M" },
+                duration: "12:45", 
+                thumbnail: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=600&auto=format&fit=crop", 
+                platform: "youtube", 
+                channel: { ar: "سافر معي", en: "Travel With Me" }
+            },
+            { 
+                id: 2,
+                title: { ar: "مراجعة شاملة لآيفون 15 برو ماكس", en: "iPhone 15 Pro Max Full Review" },
+                views: { ar: "850K", en: "850K" },
+                duration: "18:20", 
+                thumbnail: "https://images.unsplash.com/photo-1696446701796-da61225697cc?q=80&w=600&auto=format&fit=crop", 
+                platform: "youtube", 
+                channel: { ar: "تيك زون", en: "Tech Zone" }
+            },
+            { 
+                id: 3,
+                title: { ar: "ملخص نهائي دوري الأبطال", en: "Champions League Final Highlights" },
+                views: { ar: "3.5M", en: "3.5M" },
+                duration: "08:15", 
+                thumbnail: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?q=80&w=600&auto=format&fit=crop", 
+                platform: "dailymotion", 
+                channel: { ar: "بي إن سبورت", en: "BeIN Sports" }
+            },
+            { 
+                id: 4,
+                title: { ar: "كيف تبدأ البرمجة من الصفر", en: "Start Programming from Scratch" },
+                views: { ar: "400K", en: "400K" },
+                duration: "45:00", 
+                thumbnail: "https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=600&auto=format&fit=crop", 
+                platform: "vimeo", 
+                channel: { ar: "أكاديمية الكود", en: "Code Academy" }
+            },
+            { 
+                id: 5,
+                title: { ar: "طريقة عمل البيتزا الإيطالية", en: "Authentic Italian Pizza Recipe" },
+                views: { ar: "2.1M", en: "2.1M" },
+                duration: "10:30", 
+                thumbnail: "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=600&auto=format&fit=crop", 
+                platform: "youtube", 
+                channel: { ar: "مطبخ منال", en: "Manal's Kitchen" }
+            },
+            { 
+                id: 6,
+                title: { ar: "وثائقي: أسرار الكون والفضاء", en: "Documentary: Secrets of the Cosmos" },
+                views: { ar: "900K", en: "900K" },
+                duration: "1:20:00", 
+                thumbnail: "https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?q=80&w=600&auto=format&fit=crop", 
+                platform: "dailymotion", 
+                channel: { ar: "ناشيونال جيو", en: "Nat Geo" }
+            },
+            { 
+                id: 7,
+                title: { ar: "تمرين كامل للجسم في المنزل", en: "Full Body Workout at Home" },
+                views: { ar: "560K", en: "560K" },
+                duration: "25:00", 
+                thumbnail: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=600&auto=format&fit=crop", 
+                platform: "youtube", 
+                channel: { ar: "فيتنس تايم", en: "Fitness Time" }
+            },
+            { 
+                id: 8,
+                title: { ar: "جولة في سيارة المستقبل الكهربائية", en: "Future Electric Car Tour" },
+                views: { ar: "1.5M", en: "1.5M" },
+                duration: "14:10", 
+                thumbnail: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?q=80&w=600&auto=format&fit=crop", 
+                platform: "vimeo", 
+                channel: { ar: "عالم السيارات", en: "Car World" }
+            }
+        ];
+
+        // --- Initialization ---
+        window.onload = function() {
+            renderVideos();
+        };
+
+        // --- Core Functions ---
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            applyLanguage();
         }
 
-        async function fetchVideoData() {
-            const urlInput = document.getElementById('videoUrl');
-            const resultArea = document.getElementById('resultArea');
-            const latestSection = document.getElementById('latestVideosSection');
-            const loadingState = document.getElementById('loadingState');
-            const errorMessage = document.getElementById('errorMessage');
-            const searchBtn = document.getElementById('searchBtn');
+        function applyLanguage() {
+            const t = i18n[currentLang];
+            const dir = currentLang === 'ar' ? 'rtl' : 'ltr';
 
-            const videoId = extractVideoID(urlInput.value);
+            // 1. Update HTML Attributes
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = dir;
+
+            // 2. Update Static Text
+            document.title = t.pageTitle;
+            searchInput.placeholder = t.searchPlaceholder;
+            btnSearchText.innerText = t.searchButton;
+            langBtnText.innerText = t.langBtnLabel;
+            sectionTitle.innerText = t.featuredTitle;
+            statusText.innerText = t.statusLoading;
+            emptyTitle.innerText = t.emptyStateTitle;
+            emptyDesc.innerText = t.emptyStateDesc;
+            footerDesc.innerText = t.footerDesc;
+            footerCopyright.innerText = t.copyright;
+
+            // 3. Update Tab Buttons
+            document.querySelector('[data-key="btnAll"]').innerText = t.btnAll;
+            document.querySelector('[data-key="btnYoutube"]').innerText = t.btnYoutube;
+            document.querySelector('[data-key="btnDailymotion"]').innerText = t.btnDailymotion;
+            document.querySelector('[data-key="btnVimeo"]').innerText = t.btnVimeo;
+
+            // 4. Update Grid Content
+            renderVideos();
+        }
+
+        function renderVideos() {
+            videoGrid.innerHTML = '';
             
-            // Reset UI
-            errorMessage.classList.add('hidden');
-            resultArea.classList.add('hidden');
-            latestSection.classList.add('hidden');
-            document.getElementById('dateContainer').classList.add('hidden');
-            
-            // Reset image src
-            document.getElementById('mainThumbnail').src = '';
-            document.getElementById('previewThumb').src = '';
-            document.getElementById('latestVideosGrid').innerHTML = '';
-            
-            if (!videoId) {
-                errorMessage.classList.remove('hidden');
-                document.getElementById('errorText').innerText = "Please enter a valid YouTube URL.";
-                return;
+            // Filter videos if needed
+            let displayVideos = mockVideos;
+            if (currentPlatform !== 'all') {
+                displayVideos = mockVideos.filter(v => v.platform === currentPlatform);
             }
 
-            currentVideoId = videoId;
+            if (displayVideos.length === 0) {
+                document.getElementById('emptyState').classList.remove('hidden');
+                document.getElementById('emptyState').classList.add('flex');
+            } else {
+                document.getElementById('emptyState').classList.add('hidden');
+                document.getElementById('emptyState').classList.remove('flex');
+            }
 
-            // UI Loading State
-            loadingState.classList.remove('hidden');
-            searchBtn.disabled = true;
-            searchBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            const viewsText = currentLang === 'ar' ? 'مشاهدة' : 'views';
 
-            try {
-                // 1. Fetch Basic Data (Stable)
-                const response = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`);
-                const data = await response.json();
+            displayVideos.forEach(video => {
+                const title = video.title[currentLang];
+                const channel = video.channel[currentLang];
+                const views = video.views[currentLang];
 
-                if (data.error) throw new Error('Video not found');
-
-                // Update Basic Details
-                document.getElementById('videoTitle').innerText = data.title;
-                document.getElementById('videoAuthor').innerText = data.author_name;
-                document.getElementById('watchLink').href = data.url;
-                document.getElementById('shareUrl').innerText = `https://youtu.be/${videoId}`;
-
-                // Update Thumbnails
-                currentThumbUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-                document.getElementById('mainThumbnail').src = currentThumbUrl;
-                document.getElementById('previewThumb').src = currentThumbUrl;
-
-                // Show Result immediately (Responsive Feel)
-                loadingState.classList.add('hidden');
-                resultArea.classList.remove('hidden');
-                lucide.createIcons();
-
-                // 2. Fetch Extended Data (Date & Channel Videos)
-                // We use a public Invidious instance API. Note: instances may have rate limits.
-                fetchExtendedData(videoId);
+                const card = document.createElement('div');
+                card.className = 'video-card group cursor-pointer';
+                card.onclick = () => performSpecificSearch(title, video.platform); 
                 
-            } catch (error) {
-                console.error(error);
-                loadingState.classList.add('hidden');
-                errorMessage.classList.remove('hidden');
-                document.getElementById('errorText').innerText = "Unable to access video. Ensure the video is Public.";
-            } finally {
-                searchBtn.disabled = false;
-                searchBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            }
-        }
-
-        async function fetchExtendedData(videoId) {
-            // Using a reliable public Invidious instance
-            const apiBase = 'https://inv.tux.pizza/api/v1'; 
-            
-            try {
-                // Fetch Video Details for Date & Channel ID
-                const vidRes = await fetch(`${apiBase}/videos/${videoId}`);
-                if(!vidRes.ok) throw new Error('API Error');
-                const vidData = await vidRes.json();
-
-                // Update Date
-                if(vidData.publishedText) {
-                    const dateEl = document.getElementById('videoDate');
-                    const dateContainer = document.getElementById('dateContainer');
-                    dateEl.innerText = vidData.publishedText;
-                    dateContainer.classList.remove('hidden');
-                }
-
-                // Fetch Channel Videos
-                if(vidData.authorId) {
-                    const channelRes = await fetch(`${apiBase}/channels/${vidData.authorId}/latest`);
-                    if(!channelRes.ok) throw new Error('Channel API Error');
-                    const channelData = await channelRes.json();
-                    
-                    // Render Last 3 Videos
-                    const grid = document.getElementById('latestVideosGrid');
-                    grid.innerHTML = '';
-                    
-                    // Take only first 3
-                    const latestVideos = channelData.slice(0, 3);
-                    
-                    if(latestVideos.length > 0) {
-                        latestVideos.forEach(video => {
-                            const card = document.createElement('div');
-                            card.className = 'bg-gray-800/50 border border-gray-700 rounded-xl overflow-hidden hover:border-indigo-500 transition-colors group cursor-pointer';
-                            card.onclick = () => window.open(`https://www.youtube.com/watch?v=${video.videoId}`, '_blank');
-                            
-                            // Safe Image Loading
-                            const thumbUrl = video.videoThumbnails ? video.videoThumbnails[0].url : `https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`;
-                            
-                            card.innerHTML = `
-                                <div class="aspect-video relative overflow-hidden">
-                                    <img src="${thumbUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                    <div class="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1 rounded">
-                                        ${new Date(video.lengthSeconds * 1000).toISOString().substr(14, 5)}
-                                    </div>
-                                </div>
-                                <div class="p-3">
-                                    <h4 class="text-sm font-bold text-white line-clamp-2 mb-1 group-hover:text-indigo-400 transition-colors">${video.title}</h4>
-                                    <div class="flex justify-between text-[10px] text-gray-500">
-                                        <span>${video.viewCount ? formatCompactNumber(video.viewCount) : '0'} views</span>
-                                        <span>${video.publishedText || ''}</span>
-                                    </div>
-                                </div>
-                            `;
-                            grid.appendChild(card);
-                        });
-                        
-                        document.getElementById('latestVideosSection').classList.remove('hidden');
-                    }
-                }
-            } catch (err) {
-                console.log("Extended data fetch failed:", err);
-                // Fail silently or show small error in the specific section, don't break main flow
-                document.getElementById('latestError').classList.remove('hidden');
-            }
-        }
-
-        function formatCompactNumber(number) {
-            return Intl.NumberFormat('en-US', {
-                notation: "compact",
-                maximumFractionDigits: 1
-            }).format(number);
-        }
-
-        function downloadThumbnail() {
-            if(!currentThumbUrl) return;
-            window.open(currentThumbUrl, '_blank');
-        }
-
-        function copyLink() {
-            const text = document.getElementById('shareUrl').innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                const btn = document.querySelector('button[onclick="copyLink()"]');
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Copied';
-                btn.classList.add('bg-green-600');
-                lucide.createIcons();
-                
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.classList.remove('bg-green-600');
-                    lucide.createIcons();
-                }, 2000);
+                card.innerHTML = `
+                    <div class="relative rounded-xl overflow-hidden aspect-video bg-dark-800 mb-3 shadow-lg group-hover:shadow-red-900/20 transition-all duration-300 group-hover:-translate-y-1">
+                        <img src="${video.thumbnail}" alt="${title}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
+                        <div class="absolute bottom-2 ${currentLang === 'ar' ? 'right-2' : 'left-2'} bg-black/80 text-white text-xs px-2 py-1 rounded font-mono">
+                            ${video.duration}
+                        </div>
+                        <div class="play-overlay absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 transition-opacity duration-300">
+                            <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center ${currentLang === 'ar' ? 'pl-1' : 'pr-1'} text-white shadow-lg scale-90 group-hover:scale-100 transition-transform">
+                                <i class="fa-solid fa-play"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 items-start">
+                        <div class="w-9 h-9 rounded-full bg-dark-700 flex items-center justify-center text-sm border border-dark-600">
+                           ${getPlatformIcon(video.platform)}
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white text-sm leading-tight mb-1 group-hover:text-red-500 transition-colors line-clamp-2 text-start">${title}</h3>
+                            <p class="text-gray-400 text-xs hover:text-gray-300 transition-colors text-start">${channel}</p>
+                            <p class="text-gray-500 text-xs mt-0.5 text-start">${views} ${viewsText} • ${video.platform}</p>
+                        </div>
+                    </div>
+                `;
+                videoGrid.appendChild(card);
             });
         }
 
-        // Enter key support
-        document.getElementById('videoUrl').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') fetchVideoData();
-        });
+        function performSearch() {
+            const query = searchInput.value.trim();
+            const t = i18n[currentLang];
+
+            if (!query) {
+                alert(t.alertEnterQuery);
+                return;
+            }
+
+            statusMessage.classList.remove('hidden');
+            sectionTitle.innerText = `${t.resultsFor} ${query}`;
+            
+            const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+            const dmUrl = `https://www.dailymotion.com/search/${encodeURIComponent(query)}`;
+            const vmUrl = `https://vimeo.com/search?q=${encodeURIComponent(query)}`;
+
+            setTimeout(() => {
+                if (currentPlatform === 'youtube') {
+                    window.open(ytUrl, '_blank');
+                } else if (currentPlatform === 'dailymotion') {
+                    window.open(dmUrl, '_blank');
+                } else if (currentPlatform === 'vimeo') {
+                    window.open(vmUrl, '_blank');
+                } else {
+                    const msg = t.confirmMultiOpen.replace('{query}', query);
+                    const userConfirm = confirm(msg);
+                    window.open(ytUrl, '_blank');
+                    if (userConfirm) {
+                        window.open(dmUrl, '_blank');
+                        window.open(vmUrl, '_blank');
+                    }
+                }
+                statusMessage.classList.add('hidden');
+            }, 500); 
+        }
+
+        function handleEnter(event) {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        }
+
+        function selectPlatform(platform) {
+            currentPlatform = platform;
+            const buttons = document.querySelectorAll('.platform-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('active', 'bg-white', 'text-black', 'font-bold');
+                btn.classList.add('text-gray-300');
+            });
+
+            const activeBtn = document.getElementById(`btn-${platform}`);
+            activeBtn.classList.add('active'); 
+            activeBtn.classList.remove('text-gray-300');
+            
+            renderVideos();
+        }
+
+        function getPlatformIcon(platform) {
+            switch(platform) {
+                case 'youtube': return '<i class="fa-brands fa-youtube text-youtube"></i>';
+                case 'dailymotion': return '<i class="fa-brands fa-dailymotion text-dailymotion"></i>';
+                case 'vimeo': return '<i class="fa-brands fa-vimeo text-vimeo"></i>';
+                default: return '<i class="fa-solid fa-play"></i>';
+            }
+        }
+        
+        function performSpecificSearch(title, platform) {
+            if (platform === 'youtube') window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(title)}`, '_blank');
+            if (platform === 'dailymotion') window.open(`https://www.dailymotion.com/search/${encodeURIComponent(title)}`, '_blank');
+            if (platform === 'vimeo') window.open(`https://vimeo.com/search?q=${encodeURIComponent(title)}`, '_blank');
+        }
+
+        function resetApp() {
+            const t = i18n[currentLang];
+            searchInput.value = '';
+            sectionTitle.innerText = t.featuredTitle;
+            selectPlatform('all');
+        }
+
     </script>
 </body>
 </html>

@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analyzer A | Ultimate Video Search</title>
+    <title>Analyzer A | Python Hub</title>
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -21,16 +21,31 @@
                 extend: {
                     fontFamily: {
                         cairo: ['Cairo', 'sans-serif'],
-                        roboto: ['Roboto', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif'],
                     },
                     colors: {
-                        youtube: '#FF0000',
-                        dailymotion: '#0066DC',
-                        vimeo: '#1AB7EA',
+                        primary: '#6366f1', // Indigo
+                        secondary: '#ec4899', // Pink
                         dark: {
-                            900: '#0f0f0f',
-                            800: '#1f1f1f',
-                            700: '#2d2d2d'
+                            900: '#0b0c15',
+                            800: '#151725',
+                            700: '#23263a'
+                        }
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
                         }
                     }
                 }
@@ -41,303 +56,341 @@
     <style>
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #0f0f0f;
+            background: #0b0c15;
         }
         ::-webkit-scrollbar-thumb {
             background: #333;
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #555;
+            background: #4f46e5;
         }
         
-        .video-card:hover .play-overlay {
-            opacity: 1;
+        /* Glassmorphism Utilities */
+        .glass {
+            background: rgba(30, 32, 45, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
-        .platform-btn.active {
-            background-color: white;
-            color: black;
-            font-weight: bold;
-        }
-
-        /* Directional Logic for Search Bar */
-        /* RTL Defaults (Arabic) */
-        [dir="rtl"] .search-icon-pos { right: 0; padding-right: 1rem; }
-        [dir="rtl"] .search-btn-pos { left: 0; padding-left: 0.5rem; }
-        [dir="rtl"] .search-input-pad { padding-right: 3rem; padding-left: 5rem; }
-        [dir="rtl"] .search-btn-shape { border-top-left-radius: 9999px; border-bottom-left-radius: 9999px; border-left-width: 1px; }
         
-        /* LTR Overrides (English) */
-        [dir="ltr"] .search-icon-pos { left: 0; padding-left: 1rem; }
-        [dir="ltr"] .search-btn-pos { right: 0; padding-right: 0.5rem; }
-        [dir="ltr"] .search-input-pad { padding-left: 3rem; padding-right: 5rem; }
-        [dir="ltr"] .search-btn-shape { border-top-right-radius: 9999px; border-bottom-right-radius: 9999px; border-right-width: 1px; }
-
-        body {
-            font-family: 'Roboto', sans-serif;
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        [dir="rtl"] body {
-            font-family: 'Cairo', sans-serif;
+        
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 212, 59, 0.3); /* Python Yellow Tint */
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(55, 118, 171, 0.3); /* Python Blue Tint */
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, #3776AB 0%, #FFD43B 100%); /* Python Colors */
+            border-color: transparent;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(55, 118, 171, 0.4);
+        }
+
+        /* RTL/LTR Logic */
+        [dir="rtl"] .search-icon-pos { right: 0; padding-right: 1.25rem; }
+        [dir="rtl"] .search-input-pad { padding-right: 3.5rem; padding-left: 1rem; }
+        [dir="ltr"] .search-icon-pos { left: 0; padding-left: 1.25rem; }
+        [dir="ltr"] .search-input-pad { padding-left: 3.5rem; padding-right: 1rem; }
+
+        body { font-family: 'Outfit', sans-serif; }
+        [dir="rtl"] body { font-family: 'Cairo', sans-serif; }
+        
+        /* Background Shapes */
+        .bg-shape-1 {
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, rgba(55, 118, 171, 0.15) 0%, transparent 70%); /* Python Blue */
+            border-radius: 50%;
+            filter: blur(60px);
+            z-index: -1;
+            animation: blob 20s infinite alternate;
+        }
+        .bg-shape-2 {
+            position: fixed;
+            bottom: -10%;
+            right: -10%;
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, rgba(255, 212, 59, 0.1) 0%, transparent 70%); /* Python Yellow */
+            border-radius: 50%;
+            filter: blur(60px);
+            z-index: -1;
+            animation: blob 25s infinite alternate-reverse;
         }
     </style>
 </head>
-<body class="bg-dark-900 text-white min-h-screen flex flex-col transition-all duration-300">
+<body class="bg-dark-900 text-white min-h-screen flex flex-col transition-all duration-300 overflow-x-hidden">
 
-    <!-- Header / Navbar -->
-    <header class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-md border-b border-dark-700 shadow-lg">
-        <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+    <!-- Ambient Background -->
+    <div class="bg-shape-1"></div>
+    <div class="bg-shape-2"></div>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 glass border-b border-white/5 shadow-2xl">
+        <div class="container mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-5">
             
             <!-- Logo -->
-            <div class="flex items-center gap-2 cursor-pointer" onclick="resetApp()">
-                <div class="w-10 h-10 bg-gradient-to-br from-red-600 to-purple-600 rounded-lg flex items-center justify-center text-xl shadow-lg">
-                    <i class="fa-solid fa-play text-white"></i>
+            <div class="flex items-center gap-3 cursor-pointer group" onclick="resetApp()">
+                <div class="w-12 h-12 bg-gradient-to-tr from-blue-600 to-yellow-400 rounded-xl flex items-center justify-center text-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <i class="fa-brands fa-python text-white"></i>
                 </div>
-                <h1 class="text-2xl font-bold tracking-wide font-sans">Analyzer <span class="text-red-500">A</span></h1>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight">Analyzer <span class="text-blue-400">Py</span></h1>
+                    <p class="text-xs text-gray-400 tracking-wider uppercase font-semibold">Python Tools</p>
+                </div>
             </div>
 
             <!-- Search Bar -->
-            <div class="w-full max-w-2xl relative group">
+            <div class="w-full max-w-xl relative group">
                 <div class="absolute inset-y-0 search-icon-pos flex items-center pointer-events-none">
-                    <i class="fa-solid fa-magnifying-glass text-gray-400 group-focus-within:text-white transition-colors"></i>
+                    <i class="fa-solid fa-search text-gray-500 group-focus-within:text-blue-400 transition-colors"></i>
                 </div>
                 <input type="text" 
                        id="searchInput" 
-                       placeholder="Search for videos..." 
-                       class="w-full bg-dark-800 border border-dark-700 text-white text-lg rounded-full py-3 search-input-pad focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all shadow-inner"
-                       onkeypress="handleEnter(event)">
-                <button onclick="performSearch()" class="absolute inset-y-0 search-btn-pos py-1">
-                    <div id="btnSearchText" class="bg-dark-700 hover:bg-dark-600 text-white px-6 h-full flex items-center transition-colors border-dark-600 search-btn-shape">
-                        Search
-                    </div>
-                </button>
+                       placeholder="Find Python libraries, frameworks..." 
+                       class="w-full bg-dark-800/50 border border-white/10 text-white text-lg rounded-2xl py-3 search-input-pad focus:outline-none focus:border-blue-500 focus:bg-dark-800/80 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner backdrop-blur-sm"
+                       oninput="filterPrograms(this.value)">
             </div>
 
-            <!-- User Icon & Lang Switch -->
-            <div class="flex items-center gap-4">
-                <button onclick="toggleLanguage()" class="px-3 py-1 rounded border border-dark-600 text-sm hover:bg-dark-700 text-gray-300 transition flex items-center gap-2">
-                    <i class="fa-solid fa-globe"></i>
-                    <span id="langBtnText">العربية</span>
-                </button>
-                <!-- تم حذف أيقونة المستخدم وزر التنبيهات -->
-            </div>
+            <!-- Lang Switch -->
+            <button onclick="toggleLanguage()" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm hover:bg-white/10 hover:border-blue-500/50 text-gray-300 transition-all flex items-center gap-2 group">
+                <i class="fa-solid fa-globe group-hover:text-blue-400 transition-colors"></i>
+                <span id="langBtnText" class="font-medium">العربية</span>
+            </button>
         </div>
     </header>
 
-    <!-- Platform Selection Tabs -->
-    <div class="bg-dark-800 border-b border-dark-700 py-3 overflow-x-auto">
-        <div class="container mx-auto px-4 flex gap-3 whitespace-nowrap" id="platformContainer">
-            <button onclick="selectPlatform('all')" class="platform-btn active px-6 py-2 rounded-full border border-dark-600 hover:bg-dark-700 transition text-sm flex items-center gap-2" id="btn-all">
-                <i class="fa-solid fa-layer-group"></i> <span data-key="btnAll">All</span>
+    <!-- Categories / Tabs -->
+    <div class="py-6 overflow-x-auto no-scrollbar">
+        <div class="container mx-auto px-6 flex gap-4 min-w-max" id="categoryContainer">
+            <button onclick="selectCategory('all')" class="category-btn active px-6 py-2.5 rounded-full border border-white/10 hover:bg-white/5 transition-all text-sm flex items-center gap-2.5 backdrop-blur-sm" id="btn-all">
+                <i class="fa-brands fa-python"></i> <span data-key="btnAll">All Libraries</span>
             </button>
-            <button onclick="selectPlatform('youtube')" class="platform-btn px-6 py-2 rounded-full border border-dark-600 hover:bg-dark-700 transition text-sm flex items-center gap-2 text-gray-300" id="btn-youtube">
-                <i class="fa-brands fa-youtube text-youtube"></i> <span data-key="btnYoutube">YouTube</span>
+            <button onclick="selectCategory('development')" class="category-btn px-6 py-2.5 rounded-full border border-white/10 hover:bg-white/5 transition-all text-sm flex items-center gap-2.5 text-gray-300 backdrop-blur-sm" id="btn-development">
+                <i class="fa-solid fa-code text-blue-400"></i> <span data-key="btnDev">Web Dev</span>
             </button>
-            <button onclick="selectPlatform('dailymotion')" class="platform-btn px-6 py-2 rounded-full border border-dark-600 hover:bg-dark-700 transition text-sm flex items-center gap-2 text-gray-300" id="btn-dailymotion">
-                <i class="fa-brands fa-dailymotion text-dailymotion"></i> <span data-key="btnDailymotion">Dailymotion</span>
+            <button onclick="selectCategory('utilities')" class="category-btn px-6 py-2.5 rounded-full border border-white/10 hover:bg-white/5 transition-all text-sm flex items-center gap-2.5 text-gray-300 backdrop-blur-sm" id="btn-utilities">
+                <i class="fa-solid fa-brain text-yellow-400"></i> <span data-key="btnUtils">AI & Data</span>
             </button>
-            <button onclick="selectPlatform('vimeo')" class="platform-btn px-6 py-2 rounded-full border border-dark-600 hover:bg-dark-700 transition text-sm flex items-center gap-2 text-gray-300" id="btn-vimeo">
-                <i class="fa-brands fa-vimeo text-vimeo"></i> <span data-key="btnVimeo">Vimeo</span>
+            <button onclick="selectCategory('design')" class="category-btn px-6 py-2.5 rounded-full border border-white/10 hover:bg-white/5 transition-all text-sm flex items-center gap-2.5 text-gray-300 backdrop-blur-sm" id="btn-design">
+                <i class="fa-solid fa-gamepad text-pink-400"></i> <span data-key="btnDesign">Media & Games</span>
+            </button>
+            <button onclick="selectCategory('security')" class="category-btn px-6 py-2.5 rounded-full border border-white/10 hover:bg-white/5 transition-all text-sm flex items-center gap-2.5 text-gray-300 backdrop-blur-sm" id="btn-security">
+                <i class="fa-solid fa-shield-halved text-green-400"></i> <span data-key="btnSecurity">Security</span>
             </button>
         </div>
     </div>
 
-    <!-- Main Content Area -->
-    <main class="flex-grow container mx-auto px-4 py-8">
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-6 pb-12">
         
-        <!-- Status Message Area -->
-        <div id="statusMessage" class="hidden mb-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg text-blue-200 flex items-center gap-3">
-            <i class="fa-solid fa-info-circle text-xl"></i>
-            <span id="statusText">Redirecting to search results...</span>
-        </div>
-
-        <!-- Featured / Results Label -->
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold flex items-center gap-2">
-                <i class="fa-solid fa-fire text-red-500"></i> <span id="sectionTitle">Trending Videos</span>
+        <!-- Header Section -->
+        <div class="flex items-center justify-between mb-8 animate-fade-in">
+            <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-yellow-200 flex items-center gap-3">
+                <i class="fa-brands fa-python text-blue-500 text-2xl"></i> 
+                <span id="sectionTitle">Python Ecosystem</span>
             </h2>
-            <div class="flex gap-2">
-                <button class="w-8 h-8 rounded-full bg-dark-700 flex items-center justify-center hover:bg-dark-600 transform ltr:rotate-180 transition-transform"><i class="fa-solid fa-chevron-right"></i></button>
-                <button class="w-8 h-8 rounded-full bg-dark-700 flex items-center justify-center hover:bg-dark-600 transform ltr:rotate-180 transition-transform"><i class="fa-solid fa-chevron-left"></i></button>
+            <button onclick="openMarket()" class="hidden md:flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors font-medium">
+                <span data-key="viewMarket">View Resources</span> <i class="fa-solid fa-arrow-right-long"></i>
+            </button>
+        </div>
+
+        <!-- Grid -->
+        <div id="softwareGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Items injected by JS -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-center">
+            <div class="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mb-6">
+                <i class="fa-brands fa-python text-4xl text-gray-600"></i>
             </div>
+            <p class="text-2xl font-bold text-gray-300 mb-2" id="emptyTitle">No libraries found.</p>
+            <p class="text-gray-500" id="emptyDesc">Try a different search term or category.</p>
+            <button onclick="openMarket()" class="mt-6 px-8 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white font-medium transition-all shadow-lg shadow-blue-900/20">
+                <span data-key="searchMarket">Browse All</span>
+            </button>
         </div>
 
-        <!-- Video Grid -->
-        <div id="videoGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            <!-- Content will be injected via JS -->
-        </div>
-
-        <!-- Empty State (Hidden by default) -->
-        <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-center text-gray-500">
-            <i class="fa-solid fa-film text-6xl mb-4 text-dark-700"></i>
-            <p class="text-xl" id="emptyTitle">No results to display.</p>
-            <p class="text-sm mt-2" id="emptyDesc">Try searching for something else.</p>
-        </div>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark-800 border-t border-dark-700 py-8 mt-auto">
-        <div class="container mx-auto px-4 text-center">
-            <p class="text-gray-400 mb-4" id="footerDesc">Designed as a unified search interface for easy content access.</p>
-            <div class="flex justify-center gap-6 mb-4">
-                <a href="#" class="text-gray-500 hover:text-youtube text-2xl"><i class="fa-brands fa-youtube"></i></a>
-                <a href="#" class="text-gray-500 hover:text-dailymotion text-2xl"><i class="fa-brands fa-dailymotion"></i></a>
-                <a href="#" class="text-gray-500 hover:text-vimeo text-2xl"><i class="fa-brands fa-vimeo"></i></a>
+    <footer class="bg-dark-900 border-t border-white/5 py-10">
+        <div class="container mx-auto px-6 text-center">
+            <div class="flex justify-center items-center gap-2 mb-6 opacity-70">
+                 <div class="w-8 h-8 bg-gradient-to-tr from-blue-600 to-yellow-500 rounded-lg flex items-center justify-center text-sm shadow">
+                    <i class="fa-brands fa-python text-white"></i>
+                </div>
+                <h3 class="text-xl font-bold">Analyzer Py</h3>
             </div>
-            <p class="text-gray-600 text-sm" id="footerCopyright">&copy; 2025 Analyzer A. All rights reserved.</p>
-            
-            <!-- Instagram Handle -->
-            <a href="https://www.instagram.com/boood0003" target="_blank" class="block mt-2 text-gray-500 hover:text-pink-500 transition-colors text-sm" dir="ltr">
-                <i class="fa-brands fa-instagram"></i> @boood0003
-            </a>
+            <p class="text-gray-400 mb-8 max-w-lg mx-auto leading-relaxed" id="footerDesc">
+                Your ultimate resource for Python libraries, frameworks, and tools.
+            </p>
+            <div class="flex justify-center gap-8 mb-8">
+                <a href="#" onclick="openMarket()" class="text-gray-500 hover:text-blue-400 text-2xl transition-all hover:-translate-y-1"><i class="fa-brands fa-github"></i></a>
+                <a href="#" onclick="openMarket()" class="text-gray-500 hover:text-yellow-400 text-2xl transition-all hover:-translate-y-1"><i class="fa-brands fa-stack-overflow"></i></a>
+                <a href="#" onclick="openMarket()" class="text-gray-500 hover:text-green-400 text-2xl transition-all hover:-translate-y-1"><i class="fa-brands fa-python"></i></a>
+            </div>
+            <div class="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
+                <p id="footerCopyright">&copy; 2025 Analyzer Py. All rights reserved.</p>
+                <a href="https://www.instagram.com/boood0003" target="_blank" class="flex items-center gap-2 hover:text-pink-500 transition-colors" dir="ltr">
+                    <i class="fa-brands fa-instagram"></i> @boood0003
+                </a>
+            </div>
         </div>
     </footer>
 
-    <!-- JavaScript Logic -->
+    <!-- Scripts -->
     <script>
-        // --- Configuration & State ---
-        let currentLang = 'en'; // Changed default to English
-        let currentPlatform = 'all';
+        // --- Config ---
+        const MARKET_URL = "https://opulent-of-e93.zipwp.xyz";
+        let currentLang = 'en'; 
+        let currentCategory = 'all';
 
-        // --- DOM Elements ---
-        const searchInput = document.getElementById('searchInput');
-        const videoGrid = document.getElementById('videoGrid');
-        const sectionTitle = document.getElementById('sectionTitle');
-        const statusMessage = document.getElementById('statusMessage');
-        const statusText = document.getElementById('statusText');
-        const langBtnText = document.getElementById('langBtnText');
-        const btnSearchText = document.getElementById('btnSearchText');
-        const emptyTitle = document.getElementById('emptyTitle');
-        const emptyDesc = document.getElementById('emptyDesc');
-        const footerDesc = document.getElementById('footerDesc');
-        const footerCopyright = document.getElementById('footerCopyright');
+        // --- Mock Data: Python Ecosystem ---
+        const softwareData = [
+            {
+                id: 1,
+                title: { ar: "لغة بايثون 3.12", en: "Python 3.12 Core" },
+                desc: { ar: "اللغة الأساسية القوية والمرنة لجميع الاستخدامات البرمجية.", en: "The powerful and flexible core language for all purposes." },
+                category: "development",
+                image: "https://images.unsplash.com/photo-1649180556628-9ba704115795?q=80&w=600&auto=format&fit=crop", 
+                icon: "fa-python"
+            },
+            {
+                id: 2,
+                title: { ar: "إطار عمل جانغو", en: "Django Framework" },
+                desc: { ar: "إطار عمل قوي لتطوير تطبيقات الويب الآمنة والسريعة.", en: "High-level Python web framework for rapid development." },
+                category: "development",
+                image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=600&auto=format&fit=crop", 
+                icon: "fa-globe"
+            },
+            {
+                id: 3,
+                title: { ar: "مكتبة بانداس", en: "Pandas Library" },
+                desc: { ar: "أداة تحليل البيانات ومعالجتها الأكثر شهرة وكفاءة.", en: "Powerful data analysis and manipulation tool." },
+                category: "utilities",
+                image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=600&auto=format&fit=crop", 
+                icon: "fa-chart-simple"
+            },
+            {
+                id: 4,
+                title: { ar: "تشفير كريبتوجرافي", en: "Cryptography" },
+                desc: { ar: "حزمة أدوات لتأمين البيانات والتشفير المتقدم.", en: "Package designed to expose cryptographic primitives." },
+                category: "security",
+                image: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?q=80&w=600&auto=format&fit=crop", 
+                icon: "fa-key"
+            },
+            {
+                id: 5,
+                title: { ar: "تينسور فلو", en: "TensorFlow AI" },
+                desc: { ar: "منصة مفتوحة المصدر لتعلم الآلة والذكاء الاصطناعي.", en: "Open-source platform for machine learning and AI." },
+                category: "utilities",
+                image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=600&auto=format&fit=crop", 
+                icon: "fa-brain"
+            },
+            {
+                id: 6,
+                title: { ar: "مكتبة باي جيم", en: "PyGame Library" },
+                desc: { ar: "مجموعة من وحدات بايثون مصممة لكتابة ألعاب الفيديو.", en: "Set of Python modules designed for writing video games." },
+                category: "design",
+                image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=600&auto=format&fit=crop", 
+                icon: "fa-gamepad"
+            },
+            {
+                id: 7,
+                title: { ar: "بيلو (معالجة الصور)", en: "Pillow (PIL)" },
+                desc: { ar: "مكتبة معالجة الصور القوية وسهلة الاستخدام.", en: "The friendly Python Imaging Library for image processing." },
+                category: "design",
+                image: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600&auto=format&fit=crop", 
+                icon: "fa-image"
+            },
+            {
+                id: 8,
+                title: { ar: "أتمتة سيلينيوم", en: "Selenium Automation" },
+                desc: { ar: "أداة لأتمتة المتصفحات واختبار تطبيقات الويب.", en: "Tool for automating web browsers and testing web apps." },
+                category: "utilities",
+                image: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=600&auto=format&fit=crop", 
+                icon: "fa-robot"
+            }
+        ];
 
         // --- Translations ---
         const i18n = {
             ar: {
-                pageTitle: "Analyzer A | محرك بحث الفيديو الشامل",
-                searchPlaceholder: "ابحث عن فيديو (أغاني، تقنية، وثائقيات...)",
-                searchButton: "بحث",
-                btnAll: "الكل",
-                btnYoutube: "يوتيوب",
-                btnDailymotion: "ديلي موشن",
-                btnVimeo: "فيميو",
-                featuredTitle: "الفيديوهات الرائجة",
-                statusLoading: "جاري تحويلك لنتائج البحث... إذا لم تفتح النافذة، يرجى السماح بالنوافذ المنبثقة.",
-                emptyStateTitle: "لا توجد نتائج لعرضها حالياً.",
-                emptyStateDesc: "جرب البحث عن شيء آخر.",
-                footerDesc: "تم التصميم كواجهة بحث موحدة لتسهيل الوصول للمحتوى.",
-                copyright: "© 2025 Analyzer A. جميع الحقوق محفوظة.",
-                alertEnterQuery: "الرجاء إدخال كلمة للبحث",
-                confirmMultiOpen: "سيتم فتح البحث عن \"{query}\" في يوتيوب.\n\nهل تريد أيضاً فتح ديلي موشن وفيميو؟",
-                resultsFor: "نتائج البحث عن:",
-                langBtnLabel: "English"
+                pageTitle: "Analyzer Py | عالم بايثون",
+                searchPlaceholder: "ابحث عن مكتبة، إطار عمل، أداة...",
+                btnAll: "كل المكتبات",
+                btnDesign: "ألعاب وميديا",
+                btnDev: "تطوير الويب",
+                btnUtils: "ذكاء اصطناعي",
+                btnSecurity: "الأمان",
+                sectionTitle: "نظام بايثون البيئي",
+                viewMarket: "المصادر كاملة",
+                searchMarket: "تصفح الكل",
+                emptyTitle: "لم يتم العثور على مكتبات",
+                emptyDesc: "جرب البحث بكلمة أخرى أو تصفح قسم آخر.",
+                footerDesc: "وجهتك الأولى لاكتشاف أفضل مكتبات وأدوات لغة بايثون.",
+                copyright: "© 2025 Analyzer Py. جميع الحقوق محفوظة.",
+                langBtnLabel: "English",
+                downloadBtn: "تحميل / توثيق",
+                categoryLabels: {
+                    design: "ميديا",
+                    development: "ويب",
+                    utilities: "بيانات",
+                    security: "أمان"
+                }
             },
             en: {
-                pageTitle: "Analyzer A | Ultimate Video Search",
-                searchPlaceholder: "Search for videos (music, tech, docs...)",
-                searchButton: "Search",
-                btnAll: "All",
-                btnYoutube: "YouTube",
-                btnDailymotion: "Dailymotion",
-                btnVimeo: "Vimeo",
-                featuredTitle: "Trending Videos",
-                statusLoading: "Redirecting to search results... Allow popups if window doesn't open.",
-                emptyStateTitle: "No results to display.",
-                emptyStateDesc: "Try searching for something else.",
-                footerDesc: "Designed as a unified search interface for easy content access.",
-                copyright: "© 2025 Analyzer A. All rights reserved.",
-                alertEnterQuery: "Please enter a search term",
-                confirmMultiOpen: "Search for \"{query}\" will open in YouTube.\n\nDo you want to open Dailymotion and Vimeo as well?",
-                resultsFor: "Search results for:",
-                langBtnLabel: "العربية"
+                pageTitle: "Analyzer Py | Python World",
+                searchPlaceholder: "Search libs, frameworks, tools...",
+                btnAll: "All Libraries",
+                btnDesign: "Media & Games",
+                btnDev: "Web Dev",
+                btnUtils: "AI & Data",
+                btnSecurity: "Security",
+                sectionTitle: "Python Ecosystem",
+                viewMarket: "Full Resources",
+                searchMarket: "Browse All",
+                emptyTitle: "No libraries found.",
+                emptyDesc: "Try a different keyword or category.",
+                footerDesc: "Your ultimate resource for Python libraries, frameworks, and tools.",
+                copyright: "© 2025 Analyzer Py. All rights reserved.",
+                langBtnLabel: "العربية",
+                downloadBtn: "Download / Docs",
+                categoryLabels: {
+                    design: "Media",
+                    development: "Web",
+                    utilities: "Data",
+                    security: "Sec"
+                }
             }
         };
 
-        // --- Mock Data (Bilingual) ---
-        const mockVideos = [
-            { 
-                id: 1,
-                title: { ar: "أفضل وجهات السفر لعام 2024", en: "Top Travel Destinations for 2024" },
-                views: { ar: "1.2M", en: "1.2M" },
-                duration: "12:45", 
-                thumbnail: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=600&auto=format&fit=crop", 
-                platform: "youtube", 
-                channel: { ar: "سافر معي", en: "Travel With Me" }
-            },
-            { 
-                id: 2,
-                title: { ar: "مراجعة شاملة لآيفون 15 برو ماكس", en: "iPhone 15 Pro Max Full Review" },
-                views: { ar: "850K", en: "850K" },
-                duration: "18:20", 
-                thumbnail: "https://images.unsplash.com/photo-1696446701796-da61225697cc?q=80&w=600&auto=format&fit=crop", 
-                platform: "youtube", 
-                channel: { ar: "تيك زون", en: "Tech Zone" }
-            },
-            { 
-                id: 3,
-                title: { ar: "ملخص نهائي دوري الأبطال", en: "Champions League Final Highlights" },
-                views: { ar: "3.5M", en: "3.5M" },
-                duration: "08:15", 
-                thumbnail: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?q=80&w=600&auto=format&fit=crop", 
-                platform: "dailymotion", 
-                channel: { ar: "بي إن سبورت", en: "BeIN Sports" }
-            },
-            { 
-                id: 4,
-                title: { ar: "كيف تبدأ البرمجة من الصفر", en: "Start Programming from Scratch" },
-                views: { ar: "400K", en: "400K" },
-                duration: "45:00", 
-                thumbnail: "https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=600&auto=format&fit=crop", 
-                platform: "vimeo", 
-                channel: { ar: "أكاديمية الكود", en: "Code Academy" }
-            },
-            { 
-                id: 5,
-                title: { ar: "طريقة عمل البيتزا الإيطالية", en: "Authentic Italian Pizza Recipe" },
-                views: { ar: "2.1M", en: "2.1M" },
-                duration: "10:30", 
-                thumbnail: "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=600&auto=format&fit=crop", 
-                platform: "youtube", 
-                channel: { ar: "مطبخ منال", en: "Manal's Kitchen" }
-            },
-            { 
-                id: 6,
-                title: { ar: "وثائقي: أسرار الكون والفضاء", en: "Documentary: Secrets of the Cosmos" },
-                views: { ar: "900K", en: "900K" },
-                duration: "1:20:00", 
-                thumbnail: "https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?q=80&w=600&auto=format&fit=crop", 
-                platform: "dailymotion", 
-                channel: { ar: "ناشيونال جيو", en: "Nat Geo" }
-            },
-            { 
-                id: 7,
-                title: { ar: "تمرين كامل للجسم في المنزل", en: "Full Body Workout at Home" },
-                views: { ar: "560K", en: "560K" },
-                duration: "25:00", 
-                thumbnail: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=600&auto=format&fit=crop", 
-                platform: "youtube", 
-                channel: { ar: "فيتنس تايم", en: "Fitness Time" }
-            },
-            { 
-                id: 8,
-                title: { ar: "جولة في سيارة المستقبل الكهربائية", en: "Future Electric Car Tour" },
-                views: { ar: "1.5M", en: "1.5M" },
-                duration: "14:10", 
-                thumbnail: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?q=80&w=600&auto=format&fit=crop", 
-                platform: "vimeo", 
-                channel: { ar: "عالم السيارات", en: "Car World" }
-            }
-        ];
-
-        // --- Initialization ---
+        // --- Init ---
         window.onload = function() {
-            renderVideos();
+            renderGrid(softwareData);
         };
 
-        // --- Core Functions ---
+        // --- Functions ---
+        function openMarket() {
+            window.open(MARKET_URL, '_blank');
+        }
 
         function toggleLanguage() {
             currentLang = currentLang === 'ar' ? 'en' : 'ar';
@@ -348,166 +401,124 @@
             const t = i18n[currentLang];
             const dir = currentLang === 'ar' ? 'rtl' : 'ltr';
 
-            // 1. Update HTML Attributes
             document.documentElement.lang = currentLang;
             document.documentElement.dir = dir;
 
-            // 2. Update Static Text
+            // Update text elements
             document.title = t.pageTitle;
-            searchInput.placeholder = t.searchPlaceholder;
-            btnSearchText.innerText = t.searchButton;
-            langBtnText.innerText = t.langBtnLabel;
-            sectionTitle.innerText = t.featuredTitle;
-            statusText.innerText = t.statusLoading;
-            emptyTitle.innerText = t.emptyStateTitle;
-            emptyDesc.innerText = t.emptyStateDesc;
-            footerDesc.innerText = t.footerDesc;
-            footerCopyright.innerText = t.copyright;
+            document.getElementById('searchInput').placeholder = t.searchPlaceholder;
+            document.getElementById('langBtnText').innerText = t.langBtnLabel;
+            document.getElementById('sectionTitle').innerText = t.sectionTitle;
+            document.getElementById('emptyTitle').innerText = t.emptyTitle;
+            document.getElementById('emptyDesc').innerText = t.emptyDesc;
+            document.getElementById('footerDesc').innerText = t.footerDesc;
+            document.getElementById('footerCopyright').innerText = t.copyright;
+            
+            // Update buttons text
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const key = el.getAttribute('data-key');
+                if(t[key]) el.innerText = t[key];
+            });
 
-            // 3. Update Tab Buttons
-            document.querySelector('[data-key="btnAll"]').innerText = t.btnAll;
-            document.querySelector('[data-key="btnYoutube"]').innerText = t.btnYoutube;
-            document.querySelector('[data-key="btnDailymotion"]').innerText = t.btnDailymotion;
-            document.querySelector('[data-key="btnVimeo"]').innerText = t.btnVimeo;
-
-            // 4. Update Grid Content
-            renderVideos();
+            // Re-render grid to update text inside cards
+            const currentSearch = document.getElementById('searchInput').value;
+            filterPrograms(currentSearch);
         }
 
-        function renderVideos() {
-            videoGrid.innerHTML = '';
+        function selectCategory(cat) {
+            currentCategory = cat;
             
-            // Filter videos if needed
-            let displayVideos = mockVideos;
-            if (currentPlatform !== 'all') {
-                displayVideos = mockVideos.filter(v => v.platform === currentPlatform);
+            // Update UI styles
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('text-gray-300');
+            });
+            const active = document.getElementById(cat === 'development' ? 'btn-development' : `btn-${cat}`);
+            if(active) {
+                active.classList.add('active');
+                active.classList.remove('text-gray-300');
             }
 
-            if (displayVideos.length === 0) {
-                document.getElementById('emptyState').classList.remove('hidden');
-                document.getElementById('emptyState').classList.add('flex');
+            // Trigger filter
+            filterPrograms(document.getElementById('searchInput').value);
+        }
+
+        function filterPrograms(query) {
+            query = query.toLowerCase().trim();
+            
+            const filtered = softwareData.filter(item => {
+                const matchesCategory = currentCategory === 'all' || item.category === currentCategory;
+                const matchesSearch = item.title.ar.toLowerCase().includes(query) || 
+                                      item.title.en.toLowerCase().includes(query) ||
+                                      item.desc.ar.toLowerCase().includes(query) ||
+                                      item.desc.en.toLowerCase().includes(query);
+                return matchesCategory && matchesSearch;
+            });
+
+            renderGrid(filtered);
+        }
+
+        function renderGrid(items) {
+            const grid = document.getElementById('softwareGrid');
+            const emptyState = document.getElementById('emptyState');
+            grid.innerHTML = '';
+
+            if (items.length === 0) {
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
             } else {
-                document.getElementById('emptyState').classList.add('hidden');
-                document.getElementById('emptyState').classList.remove('flex');
+                emptyState.classList.add('hidden');
+                emptyState.classList.remove('flex');
             }
 
-            const viewsText = currentLang === 'ar' ? 'مشاهدة' : 'views';
-
-            displayVideos.forEach(video => {
-                const title = video.title[currentLang];
-                const channel = video.channel[currentLang];
-                const views = video.views[currentLang];
+            items.forEach((item, index) => {
+                const t = i18n[currentLang];
+                const title = item.title[currentLang];
+                const desc = item.desc[currentLang];
+                const catLabel = t.categoryLabels[item.category];
+                
+                // Stagger animation delay
+                const delay = index * 100; 
 
                 const card = document.createElement('div');
-                card.className = 'video-card group cursor-pointer';
-                card.onclick = () => performSpecificSearch(title, video.platform); 
-                
+                card.className = `glass-card rounded-2xl overflow-hidden group flex flex-col h-full animate-fade-in`;
+                card.style.animationDelay = `${delay}ms`;
+                card.onclick = openMarket;
+
                 card.innerHTML = `
-                    <div class="relative rounded-xl overflow-hidden aspect-video bg-dark-800 mb-3 shadow-lg group-hover:shadow-red-900/20 transition-all duration-300 group-hover:-translate-y-1">
-                        <img src="${video.thumbnail}" alt="${title}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
-                        <div class="absolute bottom-2 ${currentLang === 'ar' ? 'right-2' : 'left-2'} bg-black/80 text-white text-xs px-2 py-1 rounded font-mono">
-                            ${video.duration}
-                        </div>
-                        <div class="play-overlay absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 transition-opacity duration-300">
-                            <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center ${currentLang === 'ar' ? 'pl-1' : 'pr-1'} text-white shadow-lg scale-90 group-hover:scale-100 transition-transform">
-                                <i class="fa-solid fa-play"></i>
-                            </div>
+                    <div class="relative h-48 overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-transparent to-transparent opacity-60 z-10"></div>
+                        <img src="${item.image}" alt="${title}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                        <div class="absolute top-3 ${currentLang === 'ar' ? 'right-3' : 'left-3'} z-20">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-black/50 backdrop-blur-md border border-white/10 text-white flex items-center gap-1">
+                                <i class="fa-solid ${item.icon} text-blue-400"></i> ${catLabel}
+                            </span>
                         </div>
                     </div>
-                    <div class="flex gap-3 items-start">
-                        <div class="w-9 h-9 rounded-full bg-dark-700 flex items-center justify-center text-sm border border-dark-600">
-                           ${getPlatformIcon(video.platform)}
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-white text-sm leading-tight mb-1 group-hover:text-red-500 transition-colors line-clamp-2 text-start">${title}</h3>
-                            <p class="text-gray-400 text-xs hover:text-gray-300 transition-colors text-start">${channel}</p>
-                            <p class="text-gray-500 text-xs mt-0.5 text-start">${views} ${viewsText} • ${video.platform}</p>
+                    
+                    <div class="p-5 flex-grow flex flex-col relative">
+                        <!-- Glow effect -->
+                        <div class="absolute -top-10 left-0 right-0 h-10 bg-gradient-to-t from-dark-900 to-transparent"></div>
+                        
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors leading-tight">${title}</h3>
+                        <p class="text-gray-400 text-sm mb-6 flex-grow leading-relaxed">${desc}</p>
+                        
+                        <div class="mt-auto">
+                            <button class="w-full py-3 rounded-xl bg-white/5 hover:bg-blue-600 border border-white/10 hover:border-blue-500 text-white font-semibold transition-all flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-blue-900/40">
+                                <span>${t.downloadBtn}</span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-xs opacity-70"></i>
+                            </button>
                         </div>
                     </div>
                 `;
-                videoGrid.appendChild(card);
+                grid.appendChild(card);
             });
-        }
-
-        function performSearch() {
-            const query = searchInput.value.trim();
-            const t = i18n[currentLang];
-
-            if (!query) {
-                alert(t.alertEnterQuery);
-                return;
-            }
-
-            statusMessage.classList.remove('hidden');
-            sectionTitle.innerText = `${t.resultsFor} ${query}`;
-            
-            const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
-            const dmUrl = `https://www.dailymotion.com/search/${encodeURIComponent(query)}`;
-            const vmUrl = `https://vimeo.com/search?q=${encodeURIComponent(query)}`;
-
-            setTimeout(() => {
-                if (currentPlatform === 'youtube') {
-                    window.open(ytUrl, '_blank');
-                } else if (currentPlatform === 'dailymotion') {
-                    window.open(dmUrl, '_blank');
-                } else if (currentPlatform === 'vimeo') {
-                    window.open(vmUrl, '_blank');
-                } else {
-                    const msg = t.confirmMultiOpen.replace('{query}', query);
-                    const userConfirm = confirm(msg);
-                    window.open(ytUrl, '_blank');
-                    if (userConfirm) {
-                        window.open(dmUrl, '_blank');
-                        window.open(vmUrl, '_blank');
-                    }
-                }
-                statusMessage.classList.add('hidden');
-            }, 500); 
-        }
-
-        function handleEnter(event) {
-            if (event.key === 'Enter') {
-                performSearch();
-            }
-        }
-
-        function selectPlatform(platform) {
-            currentPlatform = platform;
-            const buttons = document.querySelectorAll('.platform-btn');
-            buttons.forEach(btn => {
-                btn.classList.remove('active', 'bg-white', 'text-black', 'font-bold');
-                btn.classList.add('text-gray-300');
-            });
-
-            const activeBtn = document.getElementById(`btn-${platform}`);
-            activeBtn.classList.add('active'); 
-            activeBtn.classList.remove('text-gray-300');
-            
-            renderVideos();
-        }
-
-        function getPlatformIcon(platform) {
-            switch(platform) {
-                case 'youtube': return '<i class="fa-brands fa-youtube text-youtube"></i>';
-                case 'dailymotion': return '<i class="fa-brands fa-dailymotion text-dailymotion"></i>';
-                case 'vimeo': return '<i class="fa-brands fa-vimeo text-vimeo"></i>';
-                default: return '<i class="fa-solid fa-play"></i>';
-            }
         }
         
-        function performSpecificSearch(title, platform) {
-            if (platform === 'youtube') window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(title)}`, '_blank');
-            if (platform === 'dailymotion') window.open(`https://www.dailymotion.com/search/${encodeURIComponent(title)}`, '_blank');
-            if (platform === 'vimeo') window.open(`https://vimeo.com/search?q=${encodeURIComponent(title)}`, '_blank');
-        }
-
         function resetApp() {
-            const t = i18n[currentLang];
-            searchInput.value = '';
-            sectionTitle.innerText = t.featuredTitle;
-            selectPlatform('all');
+            document.getElementById('searchInput').value = '';
+            selectCategory('all');
         }
-
     </script>
 </body>
 </html>

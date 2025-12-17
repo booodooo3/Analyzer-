@@ -132,6 +132,47 @@
             z-index: -1;
             animation: blob 25s infinite alternate-reverse;
         }
+        /* تنسيق حاوية البرنامج (البطاقة) */ 
+        .project-card { 
+            border: 1px solid #ddd; 
+            border-radius: 15px; /* حواف دائرية */ 
+            padding: 20px; 
+            text-align: center; 
+            max-width: 300px; 
+            transition: transform 0.3s ease, shadow 0.3s ease; /* تأثير الحركة */ 
+            background-color: #fff; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+        } 
+        
+        /* تأثير عند مرور الماوس على البطاقة */ 
+        .project-card:hover { 
+            transform: translateY(-10px); /* ترتفع للأعلى قليلاً */ 
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2); 
+        } 
+        
+        /* تنسيق الصورة */ 
+        .project-card img { 
+            width: 100%; 
+            height: auto; 
+            border-radius: 10px; 
+            margin-bottom: 15px; 
+        } 
+        
+        /* تنسيق زر التحميل */ 
+        .download-btn { 
+            display: inline-block; 
+            background-color: #28a745; /* لون أخضر */ 
+            color: white; 
+            padding: 10px 20px; 
+            text-decoration: none; 
+            border-radius: 5px; 
+            font-weight: bold; 
+            transition: background-color 0.3s; 
+        } 
+        
+        .download-btn:hover { 
+            background-color: #218838; /* لون أخضر غامق عند اللمس */ 
+        }
     </style>
 </head>
 <body class="bg-dark-900 text-white min-h-screen flex flex-col transition-all duration-300 overflow-x-hidden">
@@ -150,8 +191,8 @@
                     <i class="fa-brands fa-python text-white"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold tracking-tight">Analyzer <span class="text-blue-400">Py</span></h1>
-                    <p class="text-xs text-gray-400 tracking-wider uppercase font-semibold">Python Tools</p>
+                    <h1 class="text-2xl font-bold tracking-tight">Analyzer <span class="text-blue-400">-A</span></h1>
+                    <p class="text-xs text-gray-400 tracking-wider uppercase font-semibold">Analyzer-A</p>
                 </div>
             </div>
 
@@ -181,17 +222,17 @@
             <button onclick="selectCategory('all')" class="category-btn active px-6 py-2.5 rounded-full border border-white/10 hover:bg-white/5 transition-all text-sm flex items-center gap-2.5 backdrop-blur-sm" id="btn-all">
                 <i class="fa-brands fa-python"></i> <span data-key="btnAll">All Libraries</span>
             </button>
-            <button onclick="selectCategory('development')" class="category-btn px-6 py-2.5 rounded-full border border-white/10 hover:bg-white/5 transition-all text-sm flex items-center gap-2.5 text-gray-300 backdrop-blur-sm" id="btn-development">
-                <i class="fa-solid fa-code text-blue-400"></i> <span data-key="btnDev">Web Dev</span>
+            <button class="category-btn px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-gray-500 cursor-not-allowed transition-all text-sm flex items-center gap-2.5 backdrop-blur-sm" id="btn-development">
+                <i class="fa-solid fa-lock text-gray-500"></i> <span data-key="btnDev">Web Dev</span>
             </button>
-            <button onclick="selectCategory('utilities')" class="category-btn px-6 py-2.5 rounded-full border border-white/10 hover:bg-white/5 transition-all text-sm flex items-center gap-2.5 text-gray-300 backdrop-blur-sm" id="btn-utilities">
-                <i class="fa-solid fa-brain text-yellow-400"></i> <span data-key="btnUtils">AI & Data</span>
+            <button class="category-btn px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-gray-500 cursor-not-allowed transition-all text-sm flex items-center gap-2.5 backdrop-blur-sm" id="btn-utilities">
+                <i class="fa-solid fa-lock text-gray-500"></i> <span data-key="btnUtils">AI & Data</span>
             </button>
-            <button onclick="selectCategory('design')" class="category-btn px-6 py-2.5 rounded-full border border-white/10 hover:bg-white/5 transition-all text-sm flex items-center gap-2.5 text-gray-300 backdrop-blur-sm" id="btn-design">
-                <i class="fa-solid fa-gamepad text-pink-400"></i> <span data-key="btnDesign">Media & Games</span>
+            <button class="category-btn px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-gray-500 cursor-not-allowed transition-all text-sm flex items-center gap-2.5 backdrop-blur-sm" id="btn-design">
+                <i class="fa-solid fa-lock text-gray-500"></i> <span data-key="btnDesign">Media & Games</span>
             </button>
-            <button onclick="selectCategory('security')" class="category-btn px-6 py-2.5 rounded-full border border-white/10 hover:bg-white/5 transition-all text-sm flex items-center gap-2.5 text-gray-300 backdrop-blur-sm" id="btn-security">
-                <i class="fa-solid fa-shield-halved text-green-400"></i> <span data-key="btnSecurity">Security</span>
+            <button class="category-btn px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-gray-500 cursor-not-allowed transition-all text-sm flex items-center gap-2.5 backdrop-blur-sm" id="btn-security">
+                <i class="fa-solid fa-lock text-gray-500"></i> <span data-key="btnSecurity">Security</span>
             </button>
         </div>
     </div>
@@ -203,7 +244,7 @@
         <div class="flex items-center justify-between mb-8 animate-fade-in">
             <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-yellow-200 flex items-center gap-3">
                 <i class="fa-brands fa-python text-blue-500 text-2xl"></i> 
-                <span id="sectionTitle">Python Ecosystem</span>
+                <span id="sectionTitle">180Degrees</span>
             </h2>
             <button onclick="openMarket()" class="hidden md:flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors font-medium">
                 <span data-key="viewMarket">View Resources</span> <i class="fa-solid fa-arrow-right-long"></i>
@@ -236,7 +277,7 @@
                  <div class="w-8 h-8 bg-gradient-to-tr from-blue-600 to-yellow-500 rounded-lg flex items-center justify-center text-sm shadow">
                     <i class="fa-brands fa-python text-white"></i>
                 </div>
-                <h3 class="text-xl font-bold">Analyzer Py</h3>
+                <h3 class="text-xl font-bold">Analyzer-A</h3>
             </div>
             <p class="text-gray-400 mb-8 max-w-lg mx-auto leading-relaxed" id="footerDesc">
                 Your ultimate resource for Python libraries, frameworks, and tools.
@@ -247,7 +288,7 @@
                 <a href="#" onclick="openMarket()" class="text-gray-500 hover:text-green-400 text-2xl transition-all hover:-translate-y-1"><i class="fa-brands fa-python"></i></a>
             </div>
             <div class="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
-                <p id="footerCopyright">&copy; 2025 Analyzer Py. All rights reserved.</p>
+                <p id="footerCopyright">&copy; 2025 Analyzer-A. All rights reserved.</p>
                 <a href="https://www.instagram.com/boood0003" target="_blank" class="flex items-center gap-2 hover:text-pink-500 transition-colors" dir="ltr">
                     <i class="fa-brands fa-instagram"></i> @boood0003
                 </a>
@@ -264,6 +305,46 @@
 
         // --- Mock Data: Python Ecosystem ---
         const softwareData = [
+            {
+                id: 9,
+                title: { ar: "تحميل انستقرام برو", en: "Instagram Downloader Pro" },
+                desc: { ar: "أداة لتحميل المحتوى من انستقرام.", en: "Tool to download content from Instagram." },
+                category: "utilities",
+                image: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?q=80&w=600&auto=format&fit=crop",
+                video: "video/v5.mp4",
+                icon: "fa-download",
+                file: "https://opulent-of-e93.zipwp.xyz/product/instagram-downloader-pro/"
+            },
+            {
+                id: 10,
+                title: { ar: "منظم الوسائط", en: "Media Organizer" },
+                desc: { ar: "نظم ملفات الوسائط الخاصة بك بسهولة.", en: "Organize your media files easily." },
+                category: "utilities",
+                image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=600&auto=format&fit=crop",
+                video: "video/666.mp4",
+                icon: "fa-folder-open",
+                file: "https://opulent-of-e93.zipwp.xyz/product/media-organizer/"
+            },
+            {
+                id: 11,
+                title: { ar: "تحميل الفيديو الشامل", en: "Universal V Downloader" },
+                desc: { ar: "تحميل الفيديو من جميع المنصات.", en: "Download videos from all platforms." },
+                category: "utilities",
+                image: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=600&auto=format&fit=crop",
+                video: "video/70.mp4",
+                icon: "fa-download",
+                file: "https://opulent-of-e93.zipwp.xyz/product/universal-video-downloader/"
+            },
+            {
+                id: 12,
+                title: { ar: "حذف آمن", en: "Secure Delete" },
+                desc: { ar: "حذف الملفات بشكل نهائي وآمن.", en: "Permanently and securely delete files." },
+                category: "security",
+                image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=600&auto=format&fit=crop",
+                video: "video/555.mp4",
+                icon: "fa-trash",
+                file: "https://opulent-of-e93.zipwp.xyz/product/secure-file-deleter-permanently-erase-photos-videos-sensitive-data/"
+            },
             {
                 id: 1,
                 title: { ar: "لغة بايثون 3.12", en: "Python 3.12 Core" },
@@ -333,20 +414,20 @@
         // --- Translations ---
         const i18n = {
             ar: {
-                pageTitle: "Analyzer Py | عالم بايثون",
+                pageTitle: "Analyzer-A | عالم بايثون",
                 searchPlaceholder: "ابحث عن مكتبة، إطار عمل، أداة...",
                 btnAll: "كل المكتبات",
                 btnDesign: "ألعاب وميديا",
                 btnDev: "تطوير الويب",
                 btnUtils: "ذكاء اصطناعي",
                 btnSecurity: "الأمان",
-                sectionTitle: "نظام بايثون البيئي",
+                sectionTitle: "180Degrees",
                 viewMarket: "المصادر كاملة",
                 searchMarket: "تصفح الكل",
                 emptyTitle: "لم يتم العثور على مكتبات",
                 emptyDesc: "جرب البحث بكلمة أخرى أو تصفح قسم آخر.",
                 footerDesc: "وجهتك الأولى لاكتشاف أفضل مكتبات وأدوات لغة بايثون.",
-                copyright: "© 2025 Analyzer Py. جميع الحقوق محفوظة.",
+                copyright: "© 2025 Analyzer-A. جميع الحقوق محفوظة.",
                 langBtnLabel: "English",
                 downloadBtn: "تحميل / توثيق",
                 categoryLabels: {
@@ -357,20 +438,20 @@
                 }
             },
             en: {
-                pageTitle: "Analyzer Py | Python World",
+                pageTitle: "Analyzer-A | Python World",
                 searchPlaceholder: "Search libs, frameworks, tools...",
                 btnAll: "All Libraries",
                 btnDesign: "Media & Games",
                 btnDev: "Web Dev",
                 btnUtils: "AI & Data",
                 btnSecurity: "Security",
-                sectionTitle: "Python Ecosystem",
+                sectionTitle: "180Degrees",
                 viewMarket: "Full Resources",
                 searchMarket: "Browse All",
                 emptyTitle: "No libraries found.",
                 emptyDesc: "Try a different keyword or category.",
                 footerDesc: "Your ultimate resource for Python libraries, frameworks, and tools.",
-                copyright: "© 2025 Analyzer Py. All rights reserved.",
+                copyright: "© 2025 Analyzer-A. All rights reserved.",
                 langBtnLabel: "العربية",
                 downloadBtn: "Download / Docs",
                 categoryLabels: {
@@ -481,36 +562,68 @@
                 const delay = index * 100; 
 
                 const card = document.createElement('div');
-                card.className = `glass-card rounded-2xl overflow-hidden group flex flex-col h-full animate-fade-in`;
                 card.style.animationDelay = `${delay}ms`;
-                card.onclick = openMarket;
 
-                card.innerHTML = `
-                    <div class="relative h-48 overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-transparent to-transparent opacity-60 z-10"></div>
-                        <img src="${item.image}" alt="${title}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
-                        <div class="absolute top-3 ${currentLang === 'ar' ? 'right-3' : 'left-3'} z-20">
-                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-black/50 backdrop-blur-md border border-white/10 text-white flex items-center gap-1">
-                                <i class="fa-solid ${item.icon} text-blue-400"></i> ${catLabel}
-                            </span>
-                        </div>
-                    </div>
+                if (item.file) {
+                    // Use project-card style for downloadable files or links
+                    card.className = `project-card animate-fade-in mx-auto`; 
                     
-                    <div class="p-5 flex-grow flex flex-col relative">
-                        <!-- Glow effect -->
-                        <div class="absolute -top-10 left-0 right-0 h-10 bg-gradient-to-t from-dark-900 to-transparent"></div>
-                        
-                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors leading-tight">${title}</h3>
-                        <p class="text-gray-400 text-sm mb-6 flex-grow leading-relaxed">${desc}</p>
-                        
-                        <div class="mt-auto">
-                            <button class="w-full py-3 rounded-xl bg-white/5 hover:bg-blue-600 border border-white/10 hover:border-blue-500 text-white font-semibold transition-all flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-blue-900/40">
-                                <span>${t.downloadBtn}</span>
-                                <i class="fa-solid fa-arrow-up-right-from-square text-xs opacity-70"></i>
-                            </button>
+                    let mediaContent = '';
+                    if (item.video) {
+                        mediaContent = `
+                            <video width="100%" height="auto" controls style="border-radius: 10px; margin-bottom: 15px;">
+                                <source src="${item.video}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        `;
+                    } else {
+                        mediaContent = `<img src="${item.image}" alt="${title}">`;
+                    }
+
+                    const isExternalLink = item.file.startsWith('http');
+                    const downloadAttr = isExternalLink ? '' : 'download';
+                    const targetAttr = isExternalLink ? 'target="_blank"' : '';
+
+                    card.innerHTML = `
+                        ${mediaContent}
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">${title}</h3>
+                        <p class="text-gray-600 text-sm mb-4">${desc}</p>
+                        <a href="${item.file}" class="download-btn" ${downloadAttr} ${targetAttr}>
+                            ${t.downloadBtn} <i class="fa-solid fa-download ml-2"></i>
+                        </a>
+                    `;
+                } else {
+                    // Use glass-card style for existing items
+                    card.className = `glass-card rounded-2xl overflow-hidden group flex flex-col h-full animate-fade-in`;
+                    card.onclick = openMarket;
+
+                    card.innerHTML = `
+                        <div class="relative h-48 overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-transparent to-transparent opacity-60 z-10"></div>
+                            <img src="${item.image}" alt="${title}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                            <div class="absolute top-3 ${currentLang === 'ar' ? 'right-3' : 'left-3'} z-20">
+                                <span class="px-3 py-1 rounded-full text-xs font-bold bg-black/50 backdrop-blur-md border border-white/10 text-white flex items-center gap-1">
+                                    <i class="fa-solid ${item.icon} text-blue-400"></i> ${catLabel}
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                `;
+                        
+                        <div class="p-5 flex-grow flex flex-col relative">
+                            <!-- Glow effect -->
+                            <div class="absolute -top-10 left-0 right-0 h-10 bg-gradient-to-t from-dark-900 to-transparent"></div>
+                            
+                            <h3 class="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors leading-tight">${title}</h3>
+                            <p class="text-gray-400 text-sm mb-6 flex-grow leading-relaxed">${desc}</p>
+                            
+                            <div class="mt-auto">
+                                <button class="w-full py-3 rounded-xl bg-white/5 hover:bg-blue-600 border border-white/10 hover:border-blue-500 text-white font-semibold transition-all flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-blue-900/40">
+                                    <span>${t.downloadBtn}</span>
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-xs opacity-70"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
                 grid.appendChild(card);
             });
         }

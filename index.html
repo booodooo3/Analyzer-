@@ -132,22 +132,52 @@
             z-index: -1;
             animation: blob 25s infinite alternate-reverse;
         }
-        /* تنسيق حاوية البرنامج (البطاقة) */ 
-        .project-card { 
-            border: 1px solid #ddd; 
-            border-radius: 15px; /* حواف دائرية */ 
-            padding: 20px; 
-            text-align: center; 
-            max-width: 300px; 
-            transition: transform 0.3s ease, shadow 0.3s ease; /* تأثير الحركة */ 
-            background-color: #fff; 
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
-        } 
+        /* Project Card Style */
+        .project-card {
+            background: white;
+            border-radius: 20px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            max-width: 280px; /* Limit width */
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        .play-overlay:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            background: white;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
         
-        /* تأثير عند مرور الماوس على البطاقة */ 
-        .project-card:hover { 
-            transform: translateY(-10px); /* ترتفع للأعلى قليلاً */ 
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2); 
+        .play-icon {
+            color: #333;
+            font-size: 24px;
+            margin-left: 4px; /* Optical adjustment */
         } 
         
         /* تنسيق الصورة */ 
@@ -308,12 +338,18 @@
             {
                 id: 9,
                 title: { ar: "تحميل انستقرام برو", en: "Instagram Downloader Pro" },
-                desc: { ar: "أداة لتحميل المحتوى من انستقرام.", en: "Tool to download content from Instagram." },
+                desc: { ar: "أداة لتحميل المحتوى من انستقرام.", en: "Insta Downloader" },
                 category: "utilities",
                 image: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?q=80&w=600&auto=format&fit=crop",
                 video: "video/v5.mp4",
                 icon: "fa-download",
-                file: "https://opulent-of-e93.zipwp.xyz/product/instagram-downloader-pro/"
+                file: "https://opulent-of-e93.zipwp.xyz/product/instagram-downloader-pro/",
+                requirements: [
+                    "Operating System: Windows 7, 8, 10, 11",
+                    "Processor: 1 GHz or faster",
+                    "RAM: 512 MB or more",
+                    "Disk Space: 10 MB for the program"
+                ]
             },
             {
                 id: 10,
@@ -323,17 +359,28 @@
                 image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=600&auto=format&fit=crop",
                 video: "video/666.mp4",
                 icon: "fa-folder-open",
-                file: "https://opulent-of-e93.zipwp.xyz/product/media-organizer/"
+                file: "https://opulent-of-e93.zipwp.xyz/product/media-organizer/",
+                requirements: [
+                    "Operating System: Windows 10 or 11.",
+                    "No additional software is required to run the executable (.exe) version.",
+                    "(Optional) If running from source code: Python 3.8+ and Tkinter are required."
+                ]
             },
             {
                 id: 11,
                 title: { ar: "تحميل الفيديو الشامل", en: "Universal V Downloader" },
                 desc: { ar: "تحميل الفيديو من جميع المنصات.", en: "Download videos from all platforms." },
                 category: "utilities",
-                image: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=600&auto=format&fit=crop",
+                image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=600&auto=format&fit=crop",
                 video: "video/70.mp4",
                 icon: "fa-download",
-                file: "https://opulent-of-e93.zipwp.xyz/product/universal-video-downloader/"
+                file: "https://opulent-of-e93.zipwp.xyz/product/universal-video-downloader/",
+                requirements: [
+                    "Operating System: Windows 7, 8, 10, 11",
+                    "Processor: 1 GHz or faster",
+                    "RAM: 512 MB or more",
+                    "Disk Space: 10 MB for the program"
+                ]
             },
             {
                 id: 12,
@@ -343,7 +390,13 @@
                 image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=600&auto=format&fit=crop",
                 video: "video/555.mp4",
                 icon: "fa-trash",
-                file: "https://opulent-of-e93.zipwp.xyz/product/secure-file-deleter-permanently-erase-photos-videos-sensitive-data/"
+                file: "https://opulent-of-e93.zipwp.xyz/product/secure-file-deleter-permanently-erase-photos-videos-sensitive-data/",
+                requirements: [
+                    "Operating System: Windows 7, 8, 10, 11",
+                    "Processor: 1 GHz or faster",
+                    "RAM: 512 MB or more",
+                    "Disk Space: 10 MB for the program"
+                ]
             },
             {
                 id: 1,
@@ -566,30 +619,51 @@
 
                 if (item.file) {
                     // Use project-card style for downloadable files or links
-                    card.className = `project-card animate-fade-in mx-auto`; 
+                    card.className = `project-card animate-fade-in mx-auto w-full flex flex-col h-full`; 
                     
                     let mediaContent = '';
                     if (item.video) {
-                        mediaContent = `
-                            <video width="100%" height="auto" controls style="border-radius: 10px; margin-bottom: 15px;">
-                                <source src="${item.video}" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
+                         const videoId = `video-${item.id}`;
+                         mediaContent = `
+                            <div class="relative w-full aspect-video rounded-xl overflow-hidden mb-6 group cursor-pointer" onclick="playVideo('${videoId}', '${item.video}')">
+                                <img src="${item.image}" alt="${title}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" id="img-${videoId}">
+                                <div class="play-overlay" id="btn-${videoId}">
+                                    <i class="fa-solid fa-play play-icon"></i>
+                                </div>
+                                <div id="${videoId}" class="hidden w-full h-full"></div>
+                            </div>
                         `;
                     } else {
-                        mediaContent = `<img src="${item.image}" alt="${title}">`;
+                        mediaContent = `
+                            <div class="relative w-full aspect-video rounded-xl overflow-hidden mb-6">
+                                <img src="${item.image}" alt="${title}" class="w-full h-full object-cover">
+                            </div>
+                        `;
                     }
 
                     const isExternalLink = item.file.startsWith('http');
                     const downloadAttr = isExternalLink ? '' : 'download';
                     const targetAttr = isExternalLink ? 'target="_blank"' : '';
 
+                    let reqContent = '';
+                    if (item.requirements) {
+                        reqContent = `
+                            <div class="text-left text-xs text-gray-500 mb-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                <h4 class="font-bold text-gray-700 mb-2 text-[10px] uppercase tracking-wider">System Requirements:</h4>
+                                <ul class="space-y-1">
+                                    ${item.requirements.map(req => `<li class="flex items-start gap-1.5"><i class="fa-solid fa-check text-green-500 mt-0.5 text-[10px]"></i> <span>${req}</span></li>`).join('')}
+                                </ul>
+                            </div>
+                        `;
+                    }
+
                     card.innerHTML = `
                         ${mediaContent}
-                        <h3 class="text-xl font-bold text-gray-800 mb-2">${title}</h3>
-                        <p class="text-gray-600 text-sm mb-4">${desc}</p>
-                        <a href="${item.file}" class="download-btn" ${downloadAttr} ${targetAttr}>
-                            ${t.downloadBtn} <i class="fa-solid fa-download ml-2"></i>
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">${title}</h3>
+                        <p class="text-gray-500 text-sm mb-4 leading-relaxed">${desc}</p>
+                        ${reqContent}
+                        <a href="${item.file}" class="mt-auto w-full py-3.5 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 hover:shadow-green-500/40 transform hover:-translate-y-0.5" ${downloadAttr} ${targetAttr}>
+                            ${t.downloadBtn} <i class="fa-solid fa-download text-sm"></i>
                         </a>
                     `;
                 } else {
@@ -628,6 +702,41 @@
             });
         }
         
+        function playVideo(containerId, videoSrc) {
+            const container = document.getElementById(containerId);
+            const img = document.getElementById('img-' + containerId);
+            const btn = document.getElementById('btn-' + containerId);
+            
+            if(container && img && btn) {
+                img.style.display = 'none';
+                btn.style.display = 'none';
+                container.classList.remove('hidden');
+                
+                const video = document.createElement('video');
+                video.style.width = "100%";
+                video.style.height = "100%";
+                video.controls = true;
+                video.autoplay = true;
+                video.style.borderRadius = "10px";
+                
+                const source = document.createElement('source');
+                source.src = videoSrc;
+                source.type = "video/mp4";
+                video.appendChild(source);
+                
+                // Reset to image when video ends
+                video.onended = function() {
+                    container.classList.add('hidden');
+                    container.innerHTML = '';
+                    img.style.display = '';
+                    btn.style.display = '';
+                };
+                
+                container.innerHTML = '';
+                container.appendChild(video);
+            }
+        }
+
         function resetApp() {
             document.getElementById('searchInput').value = '';
             selectCategory('all');

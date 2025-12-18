@@ -400,11 +400,20 @@
             },
             {
                 id: 1,
-                title: { ar: "لغة بايثون 3.12", en: "Python 3.12 Core" },
-                desc: { ar: "اللغة الأساسية القوية والمرنة لجميع الاستخدامات البرمجية.", en: "The powerful and flexible core language for all purposes." },
-                category: "development",
-                image: "https://images.unsplash.com/photo-1649180556628-9ba704115795?q=80&w=600&auto=format&fit=crop", 
-                icon: "fa-python"
+                title: { ar: "باحث صور القرص", en: "Disk Image Searcher" },
+                desc: { ar: "أداة للبحث عن صور القرص وإدارتها بكفاءة.", en: "Efficient tool for searching disk images." },
+                category: "utilities",
+                image: "https://opulent-of-e93.zipwp.xyz/wp-content/uploads/2025/12/66666666666666666666.png", 
+                video: "video/7087688.mp4",
+                icon: "fa-search",
+                objectFit: "contain",
+                file: "https://opulent-of-e93.zipwp.xyz/product/disk-image-searcher/",
+                requirements: [
+                    "Operating System: Windows 10, 11",
+                    "Processor: 1 GHz or faster",
+                    "RAM: 512 MB or more",
+                    "Disk Space: 20 MB"
+                ]
             },
             {
                 id: 2,
@@ -634,9 +643,10 @@
                             </div>
                         `;
                     } else {
+                        const objectFitClass = item.objectFit ? `object-${item.objectFit}` : 'object-cover';
                         mediaContent = `
                             <div class="relative w-full aspect-video rounded-xl overflow-hidden mb-6">
-                                <img src="${item.image}" alt="${title}" class="w-full h-full object-cover">
+                                <img src="${item.image}" alt="${title}" class="w-full h-full ${objectFitClass}">
                             </div>
                         `;
                     }

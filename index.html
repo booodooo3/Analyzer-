@@ -272,9 +272,11 @@
         
         <!-- Header Section -->
         <div class="flex items-center justify-between mb-8 animate-fade-in">
-            <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-yellow-200 flex items-center gap-3">
-                <i class="fa-brands fa-python text-blue-500 text-2xl"></i> 
-                <span id="sectionTitle">180Degrees</span>
+            <h2 class="flex items-center">
+                <img src="09.webp" 
+                    srcset="09-300.webp 300w, 09-768.webp 768w, 09.webp 240w" 
+                    sizes="(max-width: 768px) 100vw, 240px" 
+                    alt="Logo" width="240" height="240" style="max-width: 100%; height: auto;">
             </h2>
             <button onclick="openMarket()" class="hidden md:flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors font-medium">
                 <span data-key="viewMarket">View Resources</span> <i class="fa-solid fa-arrow-right-long"></i>
@@ -304,8 +306,11 @@
     <footer class="bg-dark-900 border-t border-white/5 py-10">
         <div class="container mx-auto px-6 text-center">
             <div class="flex justify-center items-center gap-2 mb-6 opacity-70">
-                 <div class="w-8 h-8 bg-gradient-to-tr from-blue-600 to-yellow-500 rounded-lg flex items-center justify-center text-sm shadow">
-                    <i class="fa-brands fa-python text-white"></i>
+                 <div class="w-14 h-14 flex-shrink-0">
+                    <img src="09.webp" 
+                        srcset="09-300.webp 300w, 09-768.webp 768w, 09.webp 240w" 
+                        sizes="(max-width: 768px) 100vw, 240px" 
+                        alt="Logo" width="240" height="240" style="max-width: 100%; height: auto;">
                 </div>
                 <h3 class="text-xl font-bold">Analyzer-A</h3>
             </div>
@@ -337,13 +342,13 @@
         const softwareData = [
             {
                 id: 9,
-                title: { ar: "تحميل انستقرام برو", en: "Instagram Downloader Pro" },
+                title: { ar: "Ins-DownloaderPro", en: "Ins-DownloaderPro" },
                 desc: { ar: "أداة لتحميل المحتوى من انستقرام.", en: "Insta Downloader" },
                 category: "utilities",
                 image: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?q=80&w=600&auto=format&fit=crop",
                 video: "video/v5.mp4",
                 icon: "fa-download",
-                file: "https://opulent-of-e93.zipwp.xyz/product/instagram-downloader-pro/",
+                file: "https://opulent-of-e93.zipwp.xyz/product/ins-downloaderpro/",
                 requirements: [
                     "Operating System: Windows 7, 8, 10, 11",
                     "Processor: 1 GHz or faster",
@@ -417,19 +422,32 @@
             },
             {
                 id: 2,
-                title: { ar: "إطار عمل جانغو", en: "Django Framework" },
-                desc: { ar: "إطار عمل قوي لتطوير تطبيقات الويب الآمنة والسريعة.", en: "High-level Python web framework for rapid development." },
-                category: "development",
+                title: { ar: "Web Logo Generator", en: "Web Logo Generator" },
+                desc: { ar: "إنشاء أكواد صور HTML متجاوبة.", en: "Create responsive image code." },
+                category: "utilities",
                 image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=600&auto=format&fit=crop", 
-                icon: "fa-globe"
+                video: "video/00.mp4",
+                icon: "fa-code",
+                file: "https://opulent-of-e93.zipwp.xyz/product/responsive-images/",
+                requirements: [
+                    "Operating System: Windows 10 or Windows 11.",
+                    "No additional software or Python installation is required"
+                ]
             },
             {
                 id: 3,
-                title: { ar: "مكتبة بانداس", en: "Pandas Library" },
-                desc: { ar: "أداة تحليل البيانات ومعالجتها الأكثر شهرة وكفاءة.", en: "Powerful data analysis and manipulation tool." },
+                title: { ar: "SN-Downloader", en: "SN-Downloader" },
+                desc: { ar: "تحميل الفيديو والصور من سناب شات.", en: "Download videos and images from Snapchat." },
                 category: "utilities",
-                image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=600&auto=format&fit=crop", 
-                icon: "fa-chart-simple"
+                image: "https://pngimg.com/uploads/snapchat/snapchat_PNG66.png", 
+                video: "video/ooo.mp4",
+                icon: "fa-download",
+                file: "https://opulent-of-e93.zipwp.xyz/product/sn-downloader-video-story/",
+                requirements: [
+                    "Windows 10 or 11 (64-bit recommended).",
+                    "Internet connection.",
+                    "FFMPEG"
+                ]
             },
             {
                 id: 4,
@@ -551,11 +569,11 @@
             document.title = t.pageTitle;
             document.getElementById('searchInput').placeholder = t.searchPlaceholder;
             document.getElementById('langBtnText').innerText = t.langBtnLabel;
-            document.getElementById('sectionTitle').innerText = t.sectionTitle;
+            // document.getElementById('sectionTitle').innerText = t.sectionTitle;
             document.getElementById('emptyTitle').innerText = t.emptyTitle;
             document.getElementById('emptyDesc').innerText = t.emptyDesc;
             document.getElementById('footerDesc').innerText = t.footerDesc;
-            document.getElementById('footerCopyright').innerText = t.copyright;
+            document.getElementById('footerCopyright').innerHTML = `&copy; ${new Date().getFullYear()} ${t.footerCopyright}`;
             
             // Update buttons text
             document.querySelectorAll('[data-key]').forEach(el => {

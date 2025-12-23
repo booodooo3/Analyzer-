@@ -390,6 +390,7 @@
             {
                 id: 12,
                 title: { ar: "حذف آمن", en: "Secure Delete" },
+                disabled: true,
                 desc: { ar: "حذف الملفات بشكل نهائي وآمن.", en: "Permanently and securely delete files." },
                 category: "security",
                 image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=600&auto=format&fit=crop",
@@ -685,14 +686,27 @@
                         `;
                     }
 
+                    let buttonHtml;
+                    if (item.disabled) {
+                        buttonHtml = `
+                            <button class="mt-auto w-full py-3.5 rounded-xl bg-gray-400 text-white font-bold cursor-not-allowed flex items-center justify-center gap-2 shadow-none" disabled>
+                                ${t.downloadBtn} <i class="fa-solid fa-lock text-sm"></i>
+                            </button>
+                        `;
+                    } else {
+                        buttonHtml = `
+                            <a href="${item.file}" class="mt-auto w-full py-3.5 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 hover:shadow-green-500/40 transform hover:-translate-y-0.5" ${downloadAttr} ${targetAttr}>
+                                ${t.downloadBtn} <i class="fa-solid fa-download text-sm"></i>
+                            </a>
+                        `;
+                    }
+
                     card.innerHTML = `
                         ${mediaContent}
                         <h3 class="text-xl font-bold text-gray-800 mb-3">${title}</h3>
                         <p class="text-gray-500 text-sm mb-4 leading-relaxed">${desc}</p>
                         ${reqContent}
-                        <a href="${item.file}" class="mt-auto w-full py-3.5 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 hover:shadow-green-500/40 transform hover:-translate-y-0.5" ${downloadAttr} ${targetAttr}>
-                            ${t.downloadBtn} <i class="fa-solid fa-download text-sm"></i>
-                        </a>
+                        ${buttonHtml}
                     `;
                 } else {
                     // Use glass-card style for existing items

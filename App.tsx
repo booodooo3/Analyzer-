@@ -1,6 +1,5 @@
 import { useState } from 'react';
 
-
 function App() {
   const [prompt, setPrompt] = useState('');
   const [image, setImage] = useState<string | null>(null);
@@ -13,7 +12,6 @@ function App() {
     setImage(null);
 
     try {
-      // نرسل الطلب للملف السري اللي سويناه قبل شوي
       const response = await fetch('/.netlify/functions/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -23,7 +21,7 @@ function App() {
       const data = await response.json();
 
       if (data.image) {
-        setImage(data.image); // نعرض الصورة إذا وصلت
+        setImage(data.image);
       } else {
         alert("حدث خطأ: " + (data.error || "غير معروف"));
       }
@@ -37,7 +35,7 @@ function App() {
   };
 
   return (
-    <div style={{ padding: '50px', textAlign: 'center' }}>
+    <div style={{ padding: '50px', textAlign: 'center', fontFamily: 'sans-serif' }}>
       <h1>مولد الصور الذكي 🎨</h1>
       
       <div style={{ marginBottom: '20px' }}>
@@ -58,7 +56,7 @@ function App() {
       </div> 
 
       {image && ( 
-        <div> 
+        <div style={{ marginTop: '20px' }}> 
           <img src={image} alt="Generated AI" style={{ maxWidth: '100%', borderRadius: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} /> 
         </div> 
       )} 

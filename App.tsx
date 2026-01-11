@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import './index.css'; // الحين هذا السطر ما راح يسبب مشاكل لأننا سوينا الملف
 
 function App() {
-  const [prompt, setPrompt] = useState('');
+  const [prompt, setPrompt] = useState<string>('');
   const [image, setImage] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const generateImage = async () => {
     if (!prompt) return;
@@ -36,28 +37,28 @@ function App() {
 
   return (
     <div style={{ padding: '50px', textAlign: 'center', fontFamily: 'sans-serif' }}>
-      <h1>مولد الصور الذكي 🎨</h1>
+      <h1>🎨 مولد الصور (Replicate)</h1>
       
       <div style={{ marginBottom: '20px' }}>
         <input 
           type="text" 
-          placeholder="وصف الصورة (مثلاً: قطة ترتدي نظارة شمسية)" 
+          placeholder="اكتب وصف الصورة..." 
           value={prompt} 
           onChange={(e) => setPrompt(e.target.value)} 
-          style={{ padding: '10px', width: '300px', fontSize: '16px' }} 
+          style={{ padding: '12px', width: '300px', fontSize: '16px', borderRadius: '5px', border: '1px solid #ccc' }} 
         /> 
         <button 
           onClick={generateImage} 
           disabled={loading} 
-          style={{ padding: '10px 20px', marginLeft: '10px', fontSize: '16px', cursor: 'pointer' }} 
+          style={{ padding: '12px 25px', fontSize: '16px', marginLeft: '10px', cursor: loading ? 'not-allowed' : 'pointer', backgroundColor: '#0070f3', color: 'white', border: 'none', borderRadius: '5px' }} 
         > 
-          {loading ? "جاري الرسم..." : "توليد الصورة"} 
+          {loading ? "جاري الرسم..." : "توليد"} 
         </button> 
       </div> 
 
       {image && ( 
-        <div style={{ marginTop: '20px' }}> 
-          <img src={image} alt="Generated AI" style={{ maxWidth: '100%', borderRadius: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} /> 
+        <div style={{ marginTop: '30px' }}> 
+          <img src={image} alt="Generated AI" style={{ maxWidth: '100%', borderRadius: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }} /> 
         </div> 
       )} 
     </div> 

@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyzer A | Python Hub</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#6366f1', // Indigo
+                        secondary: '#ec4899', // Pink
+                        dark: {
+                            900: '#0b0c15',
+                            800: '#151725',
+                            700: '#23263a'
+                        }
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0c15;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4f46e5;
+        }
+        
+        /* Glassmorphism Utilities */
+        .glass {
+            background: rgba(30, 32, 45, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 212, 59, 0.3); /* Python Yellow Tint */
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(55, 118, 171, 0.3); /* Python Blue Tint */
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, #3776AB 0%, #FFD43B 100%); /* Python Colors */
+            border-color: transparent;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(55, 118, 171, 0.4);
+        }
+
+        /* RTL/LTR Logic */
+        [dir="rtl"] .search-icon-pos { right: 0; padding-right: 1.25rem; }
+        [dir="rtl"] .search-input-pad { padding-right: 3.5rem; padding-left: 1rem; }
+        [dir="ltr"] .search-icon-pos { left: 0; padding-left: 1.25rem; }
+        [dir="ltr"] .search-input-pad { padding-left: 3.5rem; padding-right: 1rem; }
+
+        body { font-family: 'Outfit', sans-serif; }
+        [dir="rtl"] body { font-family: 'Cairo', sans-serif; }
+        
+        /* Background Shapes */
+        .bg-shape-1 {
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, rgba(55, 118, 171, 0.15) 0%, transparent 70%); /* Python Blue */
+            border-radius: 50%;
+            filter: blur(60px);
+            z-index: -1;
+            animation: blob 20s infinite alternate;
+        }
+        .bg-shape-2 {
+            position: fixed;
+            bottom: -10%;
+            right: -10%;
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, rgba(255, 212, 59, 0.1) 0%, transparent 70%); /* Python Yellow */
+            border-radius: 50%;
+            filter: blur(60px);
+            z-index: -1;
+            animation: blob 25s infinite alternate-reverse;
+        }
+        /* Project Card Style */
+        .project-card {
+            background: white;
+            border-radius: 20px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            max-width: 280px; /* Limit width */
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        .play-overlay:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            background: white;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        
+        .play-icon {
+            color: #333;
+            font-size: 24px;
+            margin-left: 4px; /* Optical adjustment */
+        } 
+        
+        /* تنسيق الصورة */ 
+        .project-card img { 
+            width: 100%; 
+            height: auto; 
+            border-radius: 10px; 
+            margin-bottom: 15px; 
+        } 
+        
+        /* تنسيق زر التحميل */ 
+        .download-btn { 
+            display: inline-block; 
+            background-color: #28a745; /* لون أخضر */ 
+            color: white; 
+            padding: 10px 20px; 
+            text-decoration: none; 
+            border-radius: 5px; 
+            font-weight: bold; 
+            transition: background-color 0.3s; 
+        } 
+        
+        .download-btn:hover { 
+            background-color: #218838; /* لون أخضر غامق عند اللمس */ 
+        }
+    </style>
+</head>
+<body class="bg-dark-900 text-white min-h-screen flex flex-col transition-all duration-300 overflow-x-hidden">
+
+    <!-- Ambient Background -->
+    <div class="bg-shape-1"></div>
+    <div class="bg-shape-2"></div>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 glass border-b border-white/5 shadow-2xl">
+        <div class="container mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-5">
+            
+            <!-- Logo -->
+            <div class="flex items-center gap-3 cursor-pointer group" onclick="resetApp()">
+                <div class="w-12 h-12 bg-gradient-to-tr from-blue-600 to-yellow-400 rounded-xl flex items-center justify-center text-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <i class="fa-brands fa-python text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight">Analyzer <span class="text-blue-400">-A</span></h1>
+                    <p class="text-xs text-gray-400 tracking-wider uppercase font-semibold">Analyzer-A</p>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="w-full max-w-xl relative group">
+                <div class="absolute inset-y-0 search-icon-pos flex items-center pointer-events-none">
+                    <i class="fa-solid fa-search text-gray-500 group-focus-within:text-blue-400 transition-colors"></i>
+                </div>
+                <input type="text" 
+                       id="searchInput" 
+                       placeholder="Find Python libraries, frameworks..." 
+                       class="w-full bg-dark-800/50 border border-white/10 text-white text-lg rounded-2xl py-3 search-input-pad focus:outline-none focus:border-blue-500 focus:bg-dark-800/80 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner backdrop-blur-sm"
+                       oninput="filterPrograms(this.value)">
+            </div>
+
+            <!-- Lang Switch -->
+            <button onclick="toggleLanguage()" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm hover:bg-white/10 hover:border-blue-500/50 text-gray-300 transition-all flex items-center gap-2 group">
+                <i class="fa-solid fa-globe group-hover:text-blue-400 transition-colors"></i>
+                <span id="langBtnText" class="font-medium">العربية</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Categories / Tabs -->
+    <div class="py-6 overflow-x-auto no-scrollbar">
+        <div class="container mx-auto px-6 flex gap-4 min-w-max" id="categoryContainer">
+            <button onclick="selectCategory('all')" class="category-btn active px-6 py-2.5 rounded-full border border-white/10 hover:bg-white/5 transition-all text-sm flex items-center gap-2.5 backdrop-blur-sm" id="btn-all">
+                <i class="fa-brands fa-python"></i> <span data-key="btnAll">All Libraries</span>
+            </button>
+            <button class="category-btn px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-gray-500 cursor-not-allowed transition-all text-sm flex items-center gap-2.5 backdrop-blur-sm" id="btn-development">
+                <i class="fa-solid fa-lock text-gray-500"></i> <span data-key="btnDev">Web Dev</span>
+            </button>
+            <button class="category-btn px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-gray-500 cursor-not-allowed transition-all text-sm flex items-center gap-2.5 backdrop-blur-sm" id="btn-utilities">
+                <i class="fa-solid fa-lock text-gray-500"></i> <span data-key="btnUtils">AI & Data</span>
+            </button>
+            <button class="category-btn px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-gray-500 cursor-not-allowed transition-all text-sm flex items-center gap-2.5 backdrop-blur-sm" id="btn-design">
+                <i class="fa-solid fa-lock text-gray-500"></i> <span data-key="btnDesign">Media & Games</span>
+            </button>
+            <button class="category-btn px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-gray-500 cursor-not-allowed transition-all text-sm flex items-center gap-2.5 backdrop-blur-sm" id="btn-security">
+                <i class="fa-solid fa-lock text-gray-500"></i> <span data-key="btnSecurity">Security</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-6 pb-12">
+        
+        <!-- Header Section -->
+        <div class="flex items-center justify-between mb-8 animate-fade-in">
+            <h2 class="flex items-center">
+                <img src="09.webp" 
+                    srcset="09-300.webp 300w, 09-768.webp 768w, 09.webp 240w" 
+                    sizes="(max-width: 768px) 100vw, 240px" 
+                    alt="Logo" width="240" height="240" style="max-width: 100%; height: auto;">
+            </h2>
+            <button onclick="openMarket()" class="hidden md:flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors font-medium">
+                <span data-key="viewMarket">View Resources</span> <i class="fa-solid fa-arrow-right-long"></i>
+            </button>
+        </div>
+
+        <!-- Grid -->
+        <div id="softwareGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Items injected by JS -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-center">
+            <div class="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mb-6">
+                <i class="fa-brands fa-python text-4xl text-gray-600"></i>
+            </div>
+            <p class="text-2xl font-bold text-gray-300 mb-2" id="emptyTitle">No libraries found.</p>
+            <p class="text-gray-500" id="emptyDesc">Try a different search term or category.</p>
+            <button onclick="openMarket()" class="mt-6 px-8 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white font-medium transition-all shadow-lg shadow-blue-900/20">
+                <span data-key="searchMarket">Browse All</span>
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark-900 border-t border-white/5 py-10">
+        <div class="container mx-auto px-6 text-center">
+            <div class="flex justify-center items-center gap-2 mb-6 opacity-70">
+                 <div class="w-14 h-14 flex-shrink-0">
+                    <img src="09.webp" 
+                        srcset="09-300.webp 300w, 09-768.webp 768w, 09.webp 240w" 
+                        sizes="(max-width: 768px) 100vw, 240px" 
+                        alt="Logo" width="240" height="240" style="max-width: 100%; height: auto;">
+                </div>
+                <h3 class="text-xl font-bold">Analyzer-A</h3>
+            </div>
+            <p class="text-gray-400 mb-8 max-w-lg mx-auto leading-relaxed" id="footerDesc">
+                Your ultimate resource for Python libraries, frameworks, and tools.
+            </p>
+            <div class="flex justify-center gap-8 mb-8">
+                <a href="#" onclick="openMarket()" class="text-gray-500 hover:text-blue-400 text-2xl transition-all hover:-translate-y-1"><i class="fa-brands fa-github"></i></a>
+                <a href="#" onclick="openMarket()" class="text-gray-500 hover:text-yellow-400 text-2xl transition-all hover:-translate-y-1"><i class="fa-brands fa-stack-overflow"></i></a>
+                <a href="#" onclick="openMarket()" class="text-gray-500 hover:text-green-400 text-2xl transition-all hover:-translate-y-1"><i class="fa-brands fa-python"></i></a>
+            </div>
+            <div class="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
+                <p id="footerCopyright">&copy; 2025 Analyzer-A. All rights reserved.</p>
+                <a href="https://www.instagram.com/boood0003" target="_blank" class="flex items-center gap-2 hover:text-pink-500 transition-colors" dir="ltr">
+                    <i class="fa-brands fa-instagram"></i> @boood0003
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // --- Config ---
+        const MARKET_URL = "https://opulent-of-e93.zipwp.xyz";
+        let currentLang = 'en'; 
+        let currentCategory = 'all';
+
+        // --- Mock Data: Python Ecosystem ---
+        const softwareData = [
+            {
+                id: 9,
+                title: { ar: "Ins-DownloaderPro", en: "Ins-DownloaderPro" },
+                desc: { ar: "أداة لتحميل المحتوى من انستقرام.", en: "Insta Downloader" },
+                category: "utilities",
+                image: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?q=80&w=600&auto=format&fit=crop",
+                video: "video/v5.mp4",
+                icon: "fa-download",
+                file: "https://analyzer-a.org/product/ins-downloaderpro/",
+                requirements: [
+                    "Operating System: Windows 7, 8, 10, 11",
+                    "Processor: 1 GHz or faster",
+                    "RAM: 512 MB or more",
+                    "Disk Space: 10 MB for the program"
+                ]
+            },
+            {
+                id: 10,
+                title: { ar: "منظم الوسائط", en: "Media Organizer" },
+                desc: { ar: "نظم ملفات الوسائط الخاصة بك بسهولة.", en: "Organize your media files easily." },
+                category: "utilities",
+                image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=600&auto=format&fit=crop",
+                video: "video/666.mp4",
+                icon: "fa-folder-open",
+                file: "https://analyzer-a.org/product/media-organizer/",
+                requirements: [
+                    "Operating System: Windows 10 or 11.",
+                    "No additional software is required to run the executable (.exe) version.",
+                    "(Optional) If running from source code: Python 3.8+ and Tkinter are required."
+                ]
+            },
+            {
+                id: 11,
+                title: { ar: "تحميل الفيديو الشامل", en: "Universal V Downloader" },
+                desc: { ar: "تحميل الفيديو من جميع المنصات.", en: "Download videos from all platforms." },
+                category: "utilities",
+                image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=600&auto=format&fit=crop",
+                video: "video/70.mp4",
+                icon: "fa-download",
+                file: "https://analyzer-a.org/product/universal-video-downloader/",
+                requirements: [
+                    "Operating System: Windows 7, 8, 10, 11",
+                    "Processor: 1 GHz or faster",
+                    "RAM: 512 MB or more",
+                    "Disk Space: 10 MB for the program"
+                ]
+            },
+            {
+                id: 12,
+                title: { ar: "حذف آمن", en: "Secure Delete" },
+                desc: { ar: "حذف الملفات بشكل نهائي وآمن.", en: "Permanently and securely delete files." },
+                category: "security",
+                image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=600&auto=format&fit=crop",
+                video: "video/555.mp4",
+                icon: "fa-trash",
+                file: "https://analyzer-a.org/product/securedelete/",
+                requirements: [
+                    "Operating System: Windows 7, 8, 10, 11",
+                    "Processor: 1 GHz or faster",
+                    "RAM: 512 MB or more",
+                    "Disk Space: 10 MB for the program"
+                ]
+            },
+            {
+                id: 1,
+                title: { ar: "باحث صور القرص", en: "Disk Image Searcher" },
+                desc: { ar: "أداة للبحث عن صور القرص وإدارتها بكفاءة.", en: "Efficient tool for searching disk images." },
+                category: "utilities",
+                image: "https://analyzer-a.org/wp-content/uploads/2025/12/Disk-Image-Searcher.jpg",
+                video: "video/7087688.mp4",
+                icon: "fa-search",
+                objectFit: "contain",
+                file: "https://analyzer-a.org/product/disk-image-searcher/",
+                requirements: [
+                    "Operating System: Windows 10, 11",
+                    "Processor: 1 GHz or faster",
+                    "RAM: 512 MB or more",
+                    "Disk Space: 20 MB"
+                ]
+            },
+            {
+                id: 2,
+                title: { ar: "Web Logo Generator", en: "Web Logo Generator" },
+                desc: { ar: "إنشاء أكواد صور HTML متجاوبة.", en: "Create responsive image code." },
+                category: "utilities",
+                image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=600&auto=format&fit=crop", 
+                video: "video/00.mp4",
+                icon: "fa-code",
+                file: "https://analyzer-a.org/product/responsive-images/",
+                requirements: [
+                    "Operating System: Windows 10 or Windows 11.",
+                    "No additional software or Python installation is required"
+                ]
+            },
+            {
+                id: 3,
+                title: { ar: "SN-Downloader", en: "SN-Downloader" },
+                desc: { ar: "تحميل الفيديو والصور من سناب شات.", en: "Download videos from Snapchat." },
+                category: "utilities",
+                image: "https://pngimg.com/uploads/snapchat/snapchat_PNG66.png", 
+                video: "video/ooo.mp4",
+                icon: "fa-download",
+                file: "https://analyzer-a.org/product/sn-downloader-video-story/",
+                requirements: [
+                    "Windows 10 or 11 (64-bit recommended).",
+                    "Internet connection.",
+                    "FFMPEG"
+                ]
+            },
+            {
+                id: 4,
+                title: { ar: "محول النصوص (OCR)", en: "OCR Converter" },
+                desc: { ar: "تحويل الصور إلى نصوص قابلة للتعديل.", en: "Convert images into editable text documents." },
+                category: "utilities",
+                image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=600&auto=format&fit=crop", 
+                icon: "fa-file-lines",
+                file: "https://analyzer-a.org/product/ocr-converter/",
+                requirements: [
+                    "Operating System: Windows 10 or Windows 11 64-bit",
+                    "Processor: Intel Core i3 or equivalent (minimum).",
+                    "Tesseract-OCR must be installed on your system."
+                ]
+            },
+            {
+                id: 5,
+                title: { ar: "ImageFinderMap", en: "ImageFinderMap" },
+                desc: { ar: "تطبيق مكتبي قوي وفعال مصمم لتحديد الصور المتطابقة.", en: "Powerful and efficient desktop application designed to locate identical images." },
+                category: "utilities",
+                image: "https://analyzer-a.org/wp-content/uploads/2025/12/Image-Finder-Map-600x468.jpeg", 
+                icon: "fa-map",
+                file: "https://analyzer-a.org/product/image-finder-map/",
+                requirements: [
+                    "Operating System: Windows 10 or Windows 11 (64-bit).",
+                    "Processor: Intel Core i3 / AMD Ryzen 3 or newer.",
+                    "Memory (RAM): 4 GB minimum.",
+                    "Disk Space: 100 MB free space."
+                ]
+            },
+            {
+                id: 6,
+                title: { ar: "PNG2ICO_Converter", en: "PNG2ICO_Converter" },
+                desc: { ar: "", en: "" },
+                category: "design",
+                image: "https://analyzer-a.org/wp-content/uploads/2025/12/PNG2ICO_Converter-600x629.jpg", 
+                icon: "fa-gamepad",
+                file: "https://analyzer-a.org/product/png2ico_converter/",
+                requirements: [
+                    "Operating System: Windows 10 or Windows 11 (64-bit).",
+                    "Processor: 1 GHz or faster.",
+                    "Memory (RAM): 512 MB or more.",
+                    "Disk Space: 50 MB free space."
+                ]
+            },
+            {
+                id: 7,
+                title: { ar: "بيلو (معالجة الصور)", en: "Pillow (PIL)" },
+                disabled: true,
+                desc: { ar: "مكتبة معالجة الصور القوية وسهلة الاستخدام.", en: "The friendly Python Imaging Library for image processing." },
+                category: "design",
+                image: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600&auto=format&fit=crop", 
+                icon: "fa-image"
+            },
+            {
+                id: 8,
+                title: { ar: "أتمتة سيلينيوم", en: "Selenium Automation" },
+                disabled: true,
+                desc: { ar: "أداة لأتمتة المتصفحات واختبار تطبيقات الويب.", en: "Tool for automating web browsers and testing web apps." },
+                category: "utilities",
+                image: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=600&auto=format&fit=crop", 
+                icon: "fa-robot"
+            }
+        ];
+
+        // --- Translations ---
+        const i18n = {
+            ar: {
+                pageTitle: "Analyzer-A | عالم بايثون",
+                searchPlaceholder: "ابحث عن مكتبة، إطار عمل، أداة...",
+                btnAll: "كل المكتبات",
+                btnDesign: "ألعاب وميديا",
+                btnDev: "تطوير الويب",
+                btnUtils: "ذكاء اصطناعي",
+                btnSecurity: "الأمان",
+                sectionTitle: "180Degrees",
+                viewMarket: "المصادر كاملة",
+                searchMarket: "تصفح الكل",
+                emptyTitle: "لم يتم العثور على مكتبات",
+                emptyDesc: "جرب البحث بكلمة أخرى أو تصفح قسم آخر.",
+                footerDesc: "وجهتك الأولى لاكتشاف أفضل مكتبات وأدوات لغة بايثون.",
+                copyright: "© 2025 Analyzer-A. جميع الحقوق محفوظة.",
+                langBtnLabel: "English",
+                downloadBtn: "تحميل / توثيق",
+                categoryLabels: {
+                    design: "ميديا",
+                    development: "ويب",
+                    utilities: "بيانات",
+                    security: "أمان"
+                }
+            },
+            en: {
+                pageTitle: "Analyzer-A | Python World",
+                searchPlaceholder: "Search libs, frameworks, tools...",
+                btnAll: "All Libraries",
+                btnDesign: "Media & Games",
+                btnDev: "Web Dev",
+                btnUtils: "AI & Data",
+                btnSecurity: "Security",
+                sectionTitle: "180Degrees",
+                viewMarket: "Full Resources",
+                searchMarket: "Browse All",
+                emptyTitle: "No libraries found.",
+                emptyDesc: "Try a different keyword or category.",
+                footerDesc: "Your ultimate resource for Python libraries, frameworks, and tools.",
+                copyright: "© 2025 Analyzer-A. All rights reserved.",
+                langBtnLabel: "العربية",
+                downloadBtn: "Download / Docs",
+                categoryLabels: {
+                    design: "Media",
+                    development: "Web",
+                    utilities: "Data",
+                    security: "Sec"
+                }
+            }
+        };
+
+        // --- Init ---
+        window.onload = function() {
+            renderGrid(softwareData);
+        };
+
+        // --- Functions ---
+        function openMarket() {
+            window.open(MARKET_URL, '_blank');
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            applyLanguage();
+        }
+
+        function applyLanguage() {
+            const t = i18n[currentLang];
+            const dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = dir;
+
+            // Update text elements
+            document.title = t.pageTitle;
+            document.getElementById('searchInput').placeholder = t.searchPlaceholder;
+            document.getElementById('langBtnText').innerText = t.langBtnLabel;
+            // document.getElementById('sectionTitle').innerText = t.sectionTitle;
+            document.getElementById('emptyTitle').innerText = t.emptyTitle;
+            document.getElementById('emptyDesc').innerText = t.emptyDesc;
+            document.getElementById('footerDesc').innerText = t.footerDesc;
+            document.getElementById('footerCopyright').innerHTML = `&copy; ${new Date().getFullYear()} ${t.footerCopyright}`;
+            
+            // Update buttons text
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const key = el.getAttribute('data-key');
+                if(t[key]) el.innerText = t[key];
+            });
+
+            // Re-render grid to update text inside cards
+            const currentSearch = document.getElementById('searchInput').value;
+            filterPrograms(currentSearch);
+        }
+
+        function selectCategory(cat) {
+            currentCategory = cat;
+            
+            // Update UI styles
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('text-gray-300');
+            });
+            const active = document.getElementById(cat === 'development' ? 'btn-development' : `btn-${cat}`);
+            if(active) {
+                active.classList.add('active');
+                active.classList.remove('text-gray-300');
+            }
+
+            // Trigger filter
+            filterPrograms(document.getElementById('searchInput').value);
+        }
+
+        function filterPrograms(query) {
+            query = query.toLowerCase().trim();
+            
+            const filtered = softwareData.filter(item => {
+                const matchesCategory = currentCategory === 'all' || item.category === currentCategory;
+                const matchesSearch = item.title.ar.toLowerCase().includes(query) || 
+                                      item.title.en.toLowerCase().includes(query) ||
+                                      item.desc.ar.toLowerCase().includes(query) ||
+                                      item.desc.en.toLowerCase().includes(query);
+                return matchesCategory && matchesSearch;
+            });
+
+            renderGrid(filtered);
+        }
+
+        function renderGrid(items) {
+            const grid = document.getElementById('softwareGrid');
+            const emptyState = document.getElementById('emptyState');
+            grid.innerHTML = '';
+
+            if (items.length === 0) {
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+            } else {
+                emptyState.classList.add('hidden');
+                emptyState.classList.remove('flex');
+            }
+
+            items.forEach((item, index) => {
+                const t = i18n[currentLang];
+                const title = item.title[currentLang];
+                const desc = item.desc[currentLang];
+                const catLabel = t.categoryLabels[item.category];
+                
+                // Stagger animation delay
+                const delay = index * 100; 
+
+                const card = document.createElement('div');
+                card.style.animationDelay = `${delay}ms`;
+
+                if (item.file) {
+                    // Use project-card style for downloadable files or links
+                    card.className = `project-card animate-fade-in mx-auto w-full flex flex-col h-full`; 
+                    
+                    let mediaContent = '';
+                    if (item.video) {
+                         const videoId = `video-${item.id}`;
+                         mediaContent = `
+                            <div class="relative w-full aspect-video rounded-xl overflow-hidden mb-6 group cursor-pointer" onclick="playVideo('${videoId}', '${item.video}')">
+                                <img src="${item.image}" alt="${title}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" id="img-${videoId}">
+                                <div class="play-overlay" id="btn-${videoId}">
+                                    <i class="fa-solid fa-play play-icon"></i>
+                                </div>
+                                <div id="${videoId}" class="hidden w-full h-full"></div>
+                            </div>
+                        `;
+                    } else {
+                        const objectFitClass = item.objectFit ? `object-${item.objectFit}` : 'object-cover';
+                        mediaContent = `
+                            <div class="relative w-full aspect-video rounded-xl overflow-hidden mb-6">
+                                <img src="${item.image}" alt="${title}" class="w-full h-full ${objectFitClass}">
+                            </div>
+                        `;
+                    }
+
+                    const isExternalLink = item.file.startsWith('http');
+                    const downloadAttr = isExternalLink ? '' : 'download';
+                    const targetAttr = isExternalLink ? 'target="_blank"' : '';
+
+                    let reqContent = '';
+                    if (item.requirements) {
+                        reqContent = `
+                            <div class="text-left text-xs text-gray-500 mb-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                <h4 class="font-bold text-gray-700 mb-2 text-[10px] uppercase tracking-wider">System Requirements:</h4>
+                                <ul class="space-y-1">
+                                    ${item.requirements.map(req => `<li class="flex items-start gap-1.5"><i class="fa-solid fa-check text-green-500 mt-0.5 text-[10px]"></i> <span>${req}</span></li>`).join('')}
+                                </ul>
+                            </div>
+                        `;
+                    }
+
+                    let buttonHtml;
+                    if (item.disabled) {
+                        buttonHtml = `
+                            <button class="mt-auto w-full py-3.5 rounded-xl bg-gray-400 text-white font-bold cursor-not-allowed flex items-center justify-center gap-2 shadow-none" disabled>
+                                ${t.downloadBtn} <i class="fa-solid fa-lock text-sm"></i>
+                            </button>
+                        `;
+                    } else {
+                        buttonHtml = `
+                            <a href="${item.file}" class="mt-auto w-full py-3.5 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 hover:shadow-green-500/40 transform hover:-translate-y-0.5" ${downloadAttr} ${targetAttr}>
+                                ${t.downloadBtn} <i class="fa-solid fa-download text-sm"></i>
+                            </a>
+                        `;
+                    }
+
+                    card.innerHTML = `
+                        ${mediaContent}
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">${title}</h3>
+                        <p class="text-gray-500 text-sm mb-4 leading-relaxed min-h-[40px]">${desc}</p>
+                        ${reqContent}
+                        ${buttonHtml}
+                    `;
+                } else {
+                    // Use glass-card style for existing items
+                    card.className = `glass-card rounded-2xl overflow-hidden group flex flex-col h-full animate-fade-in`;
+                    
+                    if (!item.disabled) {
+                        card.classList.add('cursor-pointer');
+                        card.onclick = openMarket;
+                    }
+
+                    let glassButtonHtml;
+                    if (item.disabled) {
+                         glassButtonHtml = `
+                            <button class="w-full py-3 rounded-xl bg-white/5 cursor-not-allowed border border-white/10 text-gray-400 font-semibold flex items-center justify-center gap-2" disabled>
+                                <span>${t.downloadBtn}</span>
+                                <i class="fa-solid fa-lock text-xs opacity-70"></i>
+                            </button>
+                         `;
+                    } else {
+                         glassButtonHtml = `
+                            <button class="w-full py-3 rounded-xl bg-white/5 hover:bg-blue-600 border border-white/10 hover:border-blue-500 text-white font-semibold transition-all flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-blue-900/40">
+                                <span>${t.downloadBtn}</span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-xs opacity-70"></i>
+                            </button>
+                         `;
+                    }
+
+                    card.innerHTML = `
+                        <div class="relative h-48 overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-transparent to-transparent opacity-60 z-10"></div>
+                            <img src="${item.image}" alt="${title}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                            <div class="absolute top-3 ${currentLang === 'ar' ? 'right-3' : 'left-3'} z-20">
+                                <span class="px-3 py-1 rounded-full text-xs font-bold bg-black/50 backdrop-blur-md border border-white/10 text-white flex items-center gap-1">
+                                    <i class="fa-solid ${item.icon} text-blue-400"></i> ${catLabel}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="p-5 flex-grow flex flex-col relative">
+                            <!-- Glow effect -->
+                            <div class="absolute -top-10 left-0 right-0 h-10 bg-gradient-to-t from-dark-900 to-transparent"></div>
+                            
+                            <h3 class="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors leading-tight">${title}</h3>
+                            <p class="text-gray-400 text-sm mb-6 flex-grow leading-relaxed">${desc}</p>
+                            
+                            <div class="mt-auto">
+                                ${glassButtonHtml}
+                            </div>
+                        </div>
+                    `;
+                }
+                grid.appendChild(card);
+            });
+        }
+        
+        function playVideo(containerId, videoSrc) {
+            const container = document.getElementById(containerId);
+            const img = document.getElementById('img-' + containerId);
+            const btn = document.getElementById('btn-' + containerId);
+            
+            if(container && img && btn) {
+                img.style.display = 'none';
+                btn.style.display = 'none';
+                container.classList.remove('hidden');
+                
+                const video = document.createElement('video');
+                video.style.width = "100%";
+                video.style.height = "100%";
+                video.controls = true;
+                video.autoplay = true;
+                video.style.borderRadius = "10px";
+                
+                const source = document.createElement('source');
+                source.src = videoSrc;
+                source.type = "video/mp4";
+                video.appendChild(source);
+                
+                // Reset to image when video ends
+                video.onended = function() {
+                    container.classList.add('hidden');
+                    container.innerHTML = '';
+                    img.style.display = '';
+                    btn.style.display = '';
+                };
+                
+                container.innerHTML = '';
+                container.appendChild(video);
+            }
+        }
+
+        function resetApp() {
+            document.getElementById('searchInput').value = '';
+            selectCategory('all');
+        }
+    </script>
+</body>
+</html>

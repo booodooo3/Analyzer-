@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import './index.css';
+
 
 function App() {
   const [prompt, setPrompt] = useState('');

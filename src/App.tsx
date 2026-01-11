@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
+import CreditDisplay from './components/CreditDisplay';
 import { ImageUploader } from './components/ImageUploader';
 import { Button } from './components/Button';
 import { performVirtualTryOn, analyzeStyle } from './services/geminiService';
@@ -322,7 +324,17 @@ const App: React.FC = () => {
           >
             {lang === 'ar' ? 'English' : 'عربي'}
           </button>
-          <Button variant="outline" className="text-sm px-4 py-2">{t.nav.login}</Button>
+          <SignedOut>
+            <SignInButton mode="modal">
+              <Button variant="outline" className="text-sm px-4 py-2">{t.nav.login}</Button>
+            </SignInButton>
+          </SignedOut>
+          <SignedIn>
+              <div className="flex items-center gap-3">
+                <CreditDisplay />
+                <UserButton />
+              </div>
+            </SignedIn>
         </div>
       </nav>
 

@@ -45,8 +45,10 @@ export default async (req, context) => {
     if (type === "full" || type === "dresses") category = "dresses";
 
     // 4. Run Model (cuuupid/idm-vton)
+    // Using specific version hash to avoid "Invalid version" errors
+    // Updated to latest known working version
     const output = await replicate.run(
-      "cuuupid/idm-vton:c871bb9b0466074280c2a97189d0c63f3ce05eb30c6ed0547527964b46714d2b",
+      "cuuupid/idm-vton:139cb1163486954531b765d4ac3bb6d3e02fe121151665adfc3b47e9ba3ebf67",
       {
         input: {
           human_img: personDataURI,

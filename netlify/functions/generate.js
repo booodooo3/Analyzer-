@@ -38,25 +38,17 @@ export default async (req, context) => {
 
     console.log("🚀 Starting Replicate generation (IDM-VTON)...");
 
-    // Map category to IDM-VTON format
-    // Inputs: upper_body, lower_body, dresses
-    let category = "upper_body";
-    if (type === "bottom") category = "lower_body";
-    if (type === "full" || type === "dresses") category = "dresses";
-
-    // 4. Run Model (cuuupid/idm-vton)
-    // Using specific version hash to avoid "Invalid version" errors
-    // Updated to latest known working version
+    // 4. Run Model (google/nano-banana-pro)
+    // Reverting to user requested model
     const output = await replicate.run(
-      "cuuupid/idm-vton:139cb1163486954531b765d4ac3bb6d3e02fe121151665adfc3b47e9ba3ebf67",
+      "google/nano-banana-pro",
       {
         input: {
-          human_img: personDataURI,
-          garm_img: clothDataURI,
-          garment_des: desc,
-          category: category,
-          steps: 30,
-          seed: 42
+          prompt: `A photo of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic.`,
+          image_input: [personDataURI, clothDataURI],
+          aspect_ratio: "match_input_image",
+          output_format: "png",
+          safety_filter_level: "block_only_high"
         }
       }
     );

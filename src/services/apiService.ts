@@ -1,19 +1,17 @@
 import { ImageData, GarmentType } from '../types';
 
 // Helper to resize image to reduce payload size
-const resizeImage = (file: File | string, maxWidth = 1024): Promise<string> => {
+const resizeImage = (input: File | string, maxWidth = 1024): Promise<string> => {
   return new Promise((resolve, reject) => {
-    if (typeof file === 'string') {
-        if (file.startsWith('data:')) resolve(file);
-        else resolve(file); // URL
-        return;
+    // 1. If it's a URL (http/https), return as is (Replicate handles URLs)
+    if (typeof input === 'string' && !input.startsWith('data:')) {
+      resolve(input);
+      return;
     }
-    
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
+
+    const processImage = (src: string) => {
       const img = new Image();
-      img.src = event.target?.result as string;
+      img.src = src;
       img.onload = () => {
         const canvas = document.createElement('canvas');
         let width = img.width;
@@ -27,20 +25,47 @@ const resizeImage = (file: File | string, maxWidth = 1024): Promise<string> => {
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0, width, height);
+        if (!ctx) {
+             resolve(src); // Fallback
+             return;
+        }
+        
+        // Fill white background to handle transparency converting to black in JPEG
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, width, height);
+        
+        ctx.drawImage(img, 0, 0, width, height);
         resolve(canvas.toDataURL('image/jpeg', 0.8)); // Compress to JPEG 80%
       };
-      img.onerror = (error) => reject(error);
+      img.onerror = (err) => reject(err);
     };
-    reader.onerror = (error) => reject(error);
+
+    if (typeof input === 'string') {
+        // Data URI
+        processImage(input);
+    } else {
+        // File object
+        const reader = new FileReader();
+        reader.readAsDataURL(input);
+        reader.onload = (event) => processImage(event.target?.result as string);
+        reader.onerror = (err) => reject(err);
+    }
   });
 };
 
 export const performVirtualTryOn = async (person: ImageData, cloth: ImageData, type: GarmentType, token: string, garmentDescription?: string) => {
   try {
-    // 0. Resize images before sending to avoid Netlify timeout (10s limit)
-    const personImage = person.file ? await resizeImage(person.file) : (person.base64 || person.url);
-    const clothImage = cloth.file ? await resizeImage(cloth.file) : (cloth.base64 || cloth.url);
+    // 0. Resize images before sending to avoid Netlify timeout (10s limit) and Payload Too Large errors
+    // Ensure we handle File, Base64, or URL
+    const personInput = person.file || person.base64 || person.url;
+    const clothInput = cloth.file || cloth.base64 || cloth.url;
+
+    if (!personInput || !clothInput) {
+        throw new Error("يجب توفير صورتين (الشخص والملابس)");
+    }
+
+    const personImage = await resizeImage(personInput);
+    const clothImage = await resizeImage(clothInput);
 
     // 1. Start Prediction
     const startResponse = await fetch('/api/generate', {

@@ -2,42 +2,74 @@ import { ImageData, GarmentType } from '../types';
 
 export const performVirtualTryOn = async (person: ImageData, cloth: ImageData, type: GarmentType, token: string, garmentDescription?: string) => {
   try {
-    const response = await fetch('/api/generate', {
+    // 1. Start Prediction
+    const startResponse = await fetch('/api/generate', {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({ 
-        personImage: person.url || person.base64, // Ensure we send the base64 string
+        personImage: person.url || person.base64, 
         clothImage: cloth.url || cloth.base64,
         type: type,
         garmentDescription: garmentDescription
       }),
     });
 
-    // Check content type before parsing JSON
-    const contentType = response.headers.get("content-type");
-    if (!response.ok) {
-        if (contentType && contentType.indexOf("application/json") !== -1) {
-             const errorData = await response.json();
-             throw new Error(errorData.error || `Server Error: ${response.status}`);
-        } else {
-             const text = await response.text();
-             console.error("Non-JSON Error Response:", text);
-             throw new Error(`Server Error (${response.status}): The server returned an unexpected response (HTML). Check Netlify logs.`);
-        }
+    if (!startResponse.ok) {
+         const contentType = startResponse.headers.get("content-type");
+         if (contentType && contentType.indexOf("application/json") !== -1) {
+              const errorData = await startResponse.json();
+              throw new Error(errorData.error || `Server Error: ${startResponse.status}`);
+         } else {
+              const text = await startResponse.text();
+              console.error("Non-JSON Error Response:", text);
+              throw new Error(`Server Error (${startResponse.status}): Unexpected response (HTML). Check Netlify logs.`);
+         }
     }
 
-    const data = await response.json();
+    const startData = await startResponse.json();
+    const predictionId = startData.id;
 
-    // Server returns { front, side, full, analysis, remaining }
-    // We map it to our ResultImages interface
-    return {
-      front: data.front,
-      side: data.side || data.front,
-      full: data.full || data.front
-    };
+    if (!predictionId) {
+        throw new Error("No prediction ID returned from server.");
+    }
+
+    // 2. Poll for status
+    const pollInterval = 3000; // 3 seconds
+    const maxAttempts = 40; // 2 minutes timeout
+    let attempts = 0;
+
+    while (attempts < maxAttempts) {
+        attempts++;
+        await new Promise(r => setTimeout(r, pollInterval));
+
+        const statusResponse = await fetch(`/api/generate?id=${predictionId}`, {
+             headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!statusResponse.ok) continue;
+
+        const statusData = await statusResponse.json();
+        
+        if (statusData.status === 'succeeded') {
+             return {
+                front: statusData.output.front,
+                side: statusData.output.side || statusData.output.front,
+                full: statusData.output.full || statusData.output.front
+             };
+        }
+
+        if (statusData.status === 'failed' || statusData.status === 'canceled') {
+            throw new Error(`Generation failed: ${statusData.error || 'Unknown error'}`);
+        }
+        
+        // If 'starting' or 'processing', continue loop
+    }
+    
+    throw new Error("Timeout waiting for generation.");
+
   } catch (error: any) {
     console.error("Virtual Try-On Error:", error);
     throw new Error(error.message || 'حدث خطأ أثناء الاتصال بالخادم');

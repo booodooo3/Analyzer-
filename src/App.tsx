@@ -141,7 +141,7 @@ const App: React.FC = () => {
       results: { title: 'النتائج النهائية', subtitle: 'تم توليد صورة لتجربة الملابس.', front: 'المظهر النهائي', side: 'من الجنب', full: 'الجسم كامل' },
       analysis: { title: 'تحليل المظهر', fit: 'دقة المقاس', color: 'تناسق اللون', style: 'تقييم الستايل', tips: 'إرشادات للكمال' },
       usedImages: 'الصور المستخدمة',
-      footer: '© 2026 Developed by boood0003 | support@analyzer-a.org'
+      footer: '© 2026 Developed by boood0003'
     },
     en: {
       appName: 'Stylestoo',
@@ -190,7 +190,7 @@ const App: React.FC = () => {
       results: { title: 'Final Results', subtitle: 'Image generated for your preview.', front: 'Final Look', side: 'Side View', full: 'Full Body' },
       analysis: { title: 'Style Analysis', fit: 'Fit Accuracy', color: 'Color Match', style: 'Style Score', tips: 'Tips for Perfection' },
       usedImages: 'Input Images',
-      footer: '© 2026 Developed by boood0003 | support@analyzer-a.org'
+      footer: '© 2026 Developed by boood0003'
     }
   };
 
@@ -685,8 +685,9 @@ const App: React.FC = () => {
       )}
 
       <footer className="p-12 border-t border-zinc-900 mt-auto bg-zinc-950">
-        <div className="max-w-6xl mx-auto text-center space-y-4">
+        <div className="max-w-6xl mx-auto text-center space-y-2">
            <p className="text-zinc-600 text-sm">{t.footer}</p>
+           <p className="text-zinc-600 text-sm">support@analyzer-a.org</p>
         </div>
       </footer>
 

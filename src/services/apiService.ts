@@ -16,11 +16,20 @@ export const performVirtualTryOn = async (person: ImageData, cloth: ImageData, t
       }),
     });
 
-    const data = await response.json();
-
+    // Check content type before parsing JSON
+    const contentType = response.headers.get("content-type");
     if (!response.ok) {
-      throw new Error(data.error || 'فشل التوليد');
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+             const errorData = await response.json();
+             throw new Error(errorData.error || `Server Error: ${response.status}`);
+        } else {
+             const text = await response.text();
+             console.error("Non-JSON Error Response:", text);
+             throw new Error(`Server Error (${response.status}): The server returned an unexpected response (HTML). Check Netlify logs.`);
+        }
     }
+
+    const data = await response.json();
 
     // Server returns { front, side, full, analysis, remaining }
     // We map it to our ResultImages interface

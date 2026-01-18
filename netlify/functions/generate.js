@@ -82,9 +82,8 @@ export default async (req, context) => {
 
     console.log("🚀 Starting Replicate prediction (google/nano-banana-pro)...");
 
-    // Fetch model version ID
-    const model = await replicate.models.get("google", "nano-banana-pro");
-    const versionId = model.latest_version.id;
+    // Use hardcoded version ID to save time (avoid fetching model info)
+    const versionId = "f5318740f60d79bf0c480216aaf9ca7614977553170eacd19ff8cbcda2409ac8";
 
     // Create prediction (async)
     const prediction = await replicate.predictions.create({

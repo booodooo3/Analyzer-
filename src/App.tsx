@@ -141,7 +141,7 @@ const App: React.FC = () => {
       results: { title: 'النتائج النهائية', subtitle: 'تم توليد صورة لتجربة الملابس.', front: 'المظهر النهائي', side: 'من الجنب', full: 'الجسم كامل' },
       analysis: { title: 'تحليل المظهر', fit: 'دقة المقاس', color: 'تناسق اللون', style: 'تقييم الستايل', tips: 'إرشادات للكمال' },
       usedImages: 'الصور المستخدمة',
-      footer: '© 2026 Developed by boood0003'
+      footer: '© 2026 Developed by boood0003 | support@analyzer-a.org'
     },
     en: {
       appName: 'Stylestoo',
@@ -190,7 +190,7 @@ const App: React.FC = () => {
       results: { title: 'Final Results', subtitle: 'Image generated for your preview.', front: 'Final Look', side: 'Side View', full: 'Full Body' },
       analysis: { title: 'Style Analysis', fit: 'Fit Accuracy', color: 'Color Match', style: 'Style Score', tips: 'Tips for Perfection' },
       usedImages: 'Input Images',
-      footer: '© 2026 Developed by boood0003'
+      footer: '© 2026 Developed by boood0003 | support@analyzer-a.org'
     }
   };
 

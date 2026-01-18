@@ -116,7 +116,7 @@ const App: React.FC = () => {
         samplesLabel: 'خزانة الملابس',
         openCloset: 'فتح الدولاب',
         closeCloset: 'إغلاق',
-        garmentDescLabel: 'وصف الملابس (اختياري)',
+        garmentDescLabel: 'وصف الملابس (اختياري: واكتب اذا كنت تريد نفس المشهد بدون تغير اكتب بالوصف مثلا اللبس تي شيرت بدون تغير المكان)',
         garmentDescPlaceholder: 'أدخل وصف للملابس مثل: فستان أحمر، قميص أزرق...',
         types: {
           shirt: 'قميص / تيشيرت',

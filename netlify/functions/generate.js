@@ -1,4 +1,7 @@
 import Replicate from "replicate";
+import { createClerkClient } from "@clerk/clerk-sdk-node";
+
+const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
 export default async (req, context) => {
   const replicate = new Replicate({
@@ -61,6 +64,33 @@ export default async (req, context) => {
     return new Response("Method Not Allowed", { status: 405, headers });
   }
 
+  // 1. Verify Auth & Credits
+  let userId;
+  let currentCredits;
+  
+  try {
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+          throw new Error("Missing Authorization header");
+      }
+      const token = authHeader.split(" ")[1];
+      const verified = await clerkClient.verifyToken(token);
+      userId = verified.sub; // 'sub' is the user ID
+      
+      const user = await clerkClient.users.getUser(userId);
+      currentCredits = typeof user.publicMetadata.credits === 'number' ? user.publicMetadata.credits : 3;
+      
+      console.log(`👤 User ${userId} requests generation. Credits: ${currentCredits}`);
+      
+      if (currentCredits < 1) {
+          return new Response(JSON.stringify({ error: "رصيدك غير كافي! تحتاج إلى 1 نقطة على الأقل." }), { status: 403, headers });
+      }
+      
+  } catch (e) {
+      console.error("Auth/Credit Check Failed:", e);
+      return new Response(JSON.stringify({ error: "Unauthorized: Please login first." }), { status: 401, headers });
+  }
+
   try {
     const body = await req.json();
     const { personImage, clothImage, garmentDescription } = body;
@@ -79,6 +109,14 @@ export default async (req, context) => {
     const personDataURI = ensureDataURI(personImage);
     const clothDataURI = ensureDataURI(clothImage);
     const desc = garmentDescription || "A cool outfit";
+
+    // Deduct Credit (1 Credit)
+    await clerkClient.users.updateUserMetadata(userId, {
+        publicMetadata: {
+            credits: currentCredits - 1
+        }
+    });
+    console.log(`✅ Deducted 1 credit. New balance: ${currentCredits - 1}`);
 
     console.log("🚀 Starting Replicate prediction (google/nano-banana-pro)...");
 

@@ -20,7 +20,7 @@ export default function CreditDisplay() {
       if (!paddle || !user) return;
       
       paddle.Checkout.open({
-          items: [{ priceId: 'pro_01kfazqjc8qaaje7xaf18gncqs' }], // User provided Product ID
+          items: [{ priceId: 'pri_01kfb29tmedn0d9wx5ywd3r3ym' }], // User provided Price ID
           customData: {
               userId: user.id
           }

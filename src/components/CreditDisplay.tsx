@@ -20,7 +20,7 @@ export default function CreditDisplay() {
       if (!paddle || !user) return;
       
       paddle.Checkout.open({
-          items: [{ priceId: 'pri_01jk...' }], // TODO: Replace with your actual Price ID from Paddle Dashboard
+          items: [{ priceId: 'pro_01kfazqjc8qaaje7xaf18gncqs' }], // User provided Product ID
           customData: {
               userId: user.id
           }

@@ -287,24 +287,13 @@ const App: React.FC = () => {
       <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-12">
         {appState === AppState.IDLE || appState === AppState.ERROR ? (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <header className="relative mb-20 flex flex-col items-center select-none">
-              {/* Main Title */}
-              <h1 className="text-7xl md:text-[9rem] leading-[0.9] font-[900] tracking-tighter bg-gradient-to-b from-[#ffffff] via-[#d4d4d4] to-[#737373] bg-clip-text text-transparent z-10 mb-2 drop-shadow-2xl">
-                {t.header.title}
+            <header className="relative mb-12 flex flex-col items-center justify-center text-center select-none">
+              <h1 className="text-5xl md:text-7xl font-bold tracking-tighter text-white mb-4">
+                {t.header.title} <span className="text-zinc-600">Virtual Try On Apps</span>
               </h1>
-              
-              {/* Bottom Row: Description + Subtitle */}
-              <div className="w-full max-w-6xl mx-auto flex flex-col md:flex-row items-start justify-center gap-6 md:gap-8 px-4 mt-2">
-                {/* Description - Right Aligned Text on Desktop */}
-                <p className="text-[#888888] text-[10px] md:text-[13px] font-medium max-w-[260px] text-center md:text-right leading-tight tracking-wide md:pt-3">
-                  {t.header.description}
-                </p>
-                
-                {/* Subtitle - Left Aligned Text on Desktop */}
-                <h2 className="text-3xl md:text-5xl font-[800] text-white tracking-tight text-center md:text-left shadow-black drop-shadow-lg">
-                  {t.header.subtitle}
-                </h2>
-              </div>
+              <p className="text-zinc-400 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
+                {t.header.subtitle}
+              </p>
             </header>
 
             <div className="grid md:grid-cols-2 gap-12 items-start">

@@ -1,31 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useUser } from "@clerk/clerk-react";
-import { initializePaddle, Paddle } from '@paddle/paddle-js';
 
 export default function CreditDisplay() { 
   const { user, isLoaded } = useUser(); 
-  const [paddle, setPaddle] = useState<Paddle>();
-
-  useEffect(() => {
-    initializePaddle({ environment: 'production', token: 'live_72d8492263759d9f7ac0cce6413' }).then(
-      (paddleInstance) => {
-        if (paddleInstance) {
-          setPaddle(paddleInstance);
-        }
-      }
-    );
-  }, []);
-
-  const handleBuyCredits = () => {
-      if (!paddle || !user) return;
-      
-      paddle.Checkout.open({
-          items: [{ priceId: 'pri_01kfb29tmedn0d9wx5ywd3r3ym' }], // User provided Price ID
-          customData: {
-              userId: user.id
-          }
-      });
-  };
 
   if (!isLoaded || !user) return null; 
 
@@ -39,13 +16,15 @@ export default function CreditDisplay() {
         </span>
         {credits}
       </span> 
-      <button 
+      <a 
         className="bg-white text-black px-2 py-0.5 rounded hover:bg-zinc-200 text-xs transition-colors"
-          onClick={handleBuyCredits}
-          title="Add Credits"
-        > 
+        href="https://payhip.com/b/UvR8g"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Add Credits"
+      > 
         +
-      </button> 
+      </a> 
     </div> 
   ); 
 } 

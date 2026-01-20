@@ -23,7 +23,7 @@ export default function CreditDisplay() {
         rel="noopener noreferrer"
         title="Add Credits"
       > 
-        +
+        10 Credits
       </a> 
     </div> 
   ); 

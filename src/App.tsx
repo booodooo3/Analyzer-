@@ -93,7 +93,11 @@ const App: React.FC = () => {
   const t = {
     appName: 'Stylestoo',
     nav: { login: 'Login' },
-    header: { title: 'AI Fashion Experience', subtitle: 'Our advanced engine morphs any garment onto your photo with physical accuracy. No more fitting rooms.' },
+    header: {
+      title: 'AI Fashion Experience',
+      description: 'Our advanced engine morphs any garment onto your photo with physical accuracy. No more fitting rooms.',
+      subtitle: 'Virtual Try On Apps'
+    },
     step1: { 
       label: 'Step 1: Upload Photo', 
       desc: 'Use a clear front-facing portrait',
@@ -287,21 +291,17 @@ const App: React.FC = () => {
       <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-12">
         {appState === AppState.IDLE || appState === AppState.ERROR ? (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <header className="relative mb-20 flex flex-col items-center select-none">
-              {/* Main Title */}
-              <h1 className="text-7xl md:text-[8rem] lg:text-[9rem] leading-[0.9] font-[900] tracking-tighter bg-gradient-to-b from-[#ffffff] via-[#e5e5e5] to-[#737373] bg-clip-text text-transparent z-10 mb-8 drop-shadow-2xl text-center">
+            <header className="relative mb-12 flex flex-col items-center select-none">
+              <h1 className="text-5xl md:text-7xl lg:text-8xl leading-[0.95] font-[900] tracking-tighter bg-gradient-to-b from-[#ffffff] via-[#e5e5e5] to-[#737373] bg-clip-text text-transparent z-10 mb-6 drop-shadow-2xl text-center">
                 {t.header.title}
               </h1>
-              
-              {/* Bottom Row: Description + Subtitle */}
-              <div className="w-full max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 px-4">
-                {/* Description - Right Aligned Text on Desktop */}
-                <p className="text-[#888888] text-xs md:text-sm font-medium max-w-[280px] text-center md:text-right leading-relaxed tracking-wide">
+
+              <div className="w-full max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-10 px-4">
+                <p className="text-[#8a8a8a] text-[11px] md:text-sm font-medium max-w-[260px] text-center md:text-right leading-relaxed tracking-wide">
                   {t.header.description}
                 </p>
-                
-                {/* Subtitle - Left Aligned Text on Desktop */}
-                <h2 className="text-2xl md:text-4xl lg:text-5xl font-[800] text-white tracking-tight text-center md:text-left drop-shadow-lg">
+
+                <h2 className="text-xl md:text-3xl lg:text-4xl font-[800] text-white tracking-tight text-center md:text-left drop-shadow-lg">
                   {t.header.subtitle}
                 </h2>
               </div>
@@ -375,7 +375,7 @@ const App: React.FC = () => {
 
                     {/* Vertical Closet Strip */}
                     <div className="flex flex-col items-center gap-2 h-full">
-                      <span className="text-xs font-bold text-blue-500 uppercase tracking-widest">
+                      <span className="text-xs font-bold text-white uppercase tracking-widest">
                         {t.step2.samplesLabel}
                       </span>
                       <button 

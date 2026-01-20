@@ -33,11 +33,14 @@ export default function CreditDisplay() {
 
   return ( 
     <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800/50 border border-zinc-700 rounded-lg text-zinc-100">
-      <span className="text-sm font-medium"> 
-        💰 {credits}
+      <span className="text-sm font-medium flex items-center gap-2"> 
+        <span className="w-5 h-5 rounded-full border border-zinc-500 bg-gradient-to-b from-zinc-200 via-zinc-300 to-zinc-500 text-[11px] font-bold text-zinc-800 flex items-center justify-center leading-none">
+          $
+        </span>
+        {credits}
       </span> 
       <button 
-        className="bg-green-600 text-white px-2 py-0.5 rounded hover:bg-green-700 text-xs transition-colors"
+        className="bg-white text-black px-2 py-0.5 rounded hover:bg-zinc-200 text-xs transition-colors"
           onClick={handleBuyCredits}
           title="Add Credits"
         > 

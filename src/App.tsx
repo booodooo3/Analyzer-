@@ -287,13 +287,24 @@ const App: React.FC = () => {
       <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-12">
         {appState === AppState.IDLE || appState === AppState.ERROR ? (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <header className="relative mb-12 flex flex-col items-center justify-center text-center select-none">
-              <h1 className="text-5xl md:text-7xl font-bold tracking-tighter text-white mb-4">
-                {t.header.title} <span className="text-zinc-600">Virtual Try On Apps</span>
+            <header className="relative mb-20 flex flex-col items-center select-none">
+              {/* Main Title */}
+              <h1 className="text-7xl md:text-[8rem] lg:text-[9rem] leading-[0.9] font-[900] tracking-tighter bg-gradient-to-b from-[#ffffff] via-[#e5e5e5] to-[#737373] bg-clip-text text-transparent z-10 mb-8 drop-shadow-2xl text-center">
+                {t.header.title}
               </h1>
-              <p className="text-zinc-400 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
-                {t.header.subtitle}
-              </p>
+              
+              {/* Bottom Row: Description + Subtitle */}
+              <div className="w-full max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 px-4">
+                {/* Description - Right Aligned Text on Desktop */}
+                <p className="text-[#888888] text-xs md:text-sm font-medium max-w-[280px] text-center md:text-right leading-relaxed tracking-wide">
+                  {t.header.description}
+                </p>
+                
+                {/* Subtitle - Left Aligned Text on Desktop */}
+                <h2 className="text-2xl md:text-4xl lg:text-5xl font-[800] text-white tracking-tight text-center md:text-left drop-shadow-lg">
+                  {t.header.subtitle}
+                </h2>
+              </div>
             </header>
 
             <div className="grid md:grid-cols-2 gap-12 items-start">

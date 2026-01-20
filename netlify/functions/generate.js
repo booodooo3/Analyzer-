@@ -82,8 +82,9 @@ export default async (req, context) => {
       
       console.log(`👤 User ${userId} requests generation. Credits: ${currentCredits}`);
       
+      // Check credits (1 credit per generation)
       if (currentCredits < 1) {
-          return new Response(JSON.stringify({ error: "رصيدك غير كافي! تحتاج إلى 1 نقطة على الأقل." }), { status: 403, headers });
+          return new Response(JSON.stringify({ error: "Insufficient credits! You need at least 1 credit." }), { status: 403, headers });
       }
       
   } catch (e) {

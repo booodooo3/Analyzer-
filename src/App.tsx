@@ -26,61 +26,58 @@ interface ClothingSample {
   url: string;
 }
 
-type Lang = 'ar' | 'en';
-
 const CLOTHING_SAMPLES: ClothingSample[] = [
   { 
     id: 'mens-suit-classic', 
-    name: 'بدلة رجالية', 
+    name: 'Classic Mens Suit', 
     type: 'jacket', 
     url: 'https://media.alshaya.com/adobe/assets/urn:aaid:aem:c25ec5aa-1275-4fa6-a99f-ea651c765391/as/EID-b23b17624ba58e6ef254783aabe1506f45a66951.jpg?preferwebp=true&&auto=webp&width=960' 
   },
   { 
     id: 'chiffon-seamed-blouse', 
-    name: 'بلوزة شيفون بدرزات', 
+    name: 'Chiffon Seamed Blouse', 
     type: 'shirt', 
     url: 'https://media.alshaya.com/adobe/assets/urn:aaid:aem:22d952e5-353c-4d06-b868-1f7d10e692c3/as/EID-3d686024ff8b472a33b1000a82b88584f79afd20.jpg?preferwebp=true&width=1920&auto=webp' 
   },
   { 
     id: 'elegant-blue-patterned', 
-    name: 'قميص منقوش راقي', 
+    name: 'Elegant Patterned Shirt', 
     type: 'shirt', 
     url: 'https://media.alshaya.com/adobe/assets/urn:aaid:aem:1e10c2d1-6bc9-403d-8947-afcabf028707/as/EID-6c86442f168d579d8fcb0ceffa2df42a636c4a6b.jpg?preferwebp=true&width=1920&auto=webp' 
   },
   { 
     id: 'royal-red-dress', 
-    name: 'بنطلون رياضي واسع', 
+    name: 'Wide Sport Pants', 
     type: 'pants', 
     url: 'https://media.alshaya.com/adobe/assets/urn:aaid:aem:eb66fc0a-948b-4e5a-8fa0-6b53b09c3304/as/EID-672a43a479f4f10ff8d564eb44086ed6acbbd2ed.jpg?preferwebp=true&width=1920&auto=webp' 
   },
   { 
     id: 'boho-chic-dress', 
-    name: 'فستان عصري بوهيمي', 
+    name: 'Boho Chic Dress', 
     type: 'long_dress', 
     url: 'https://media.alshaya.com/adobe/assets/urn:aaid:aem:8a4bf0bb-855e-423f-88c3-9b52446e4e23/as/EID-dc1dccd77cc851bbde5ac37555247844bd237f89.jpg?preferwebp=true&width=1920&auto=webp' 
   },
   { 
     id: 'classic-elegant-dress', 
-    name: 'ترينق رياضي', 
+    name: 'Sport Tracksuit', 
     type: 'other', 
     url: 'https://media.alshaya.com/adobe/assets/urn:aaid:aem:26773462-c8e5-459a-9e22-036c022e9a98/as/EID-49827a42c05a4a93d83b184f1f8d310af5e56447.jpg?preferwebp=true&width=1920&auto=webp' 
   },
   { 
     id: 'patterned-elegant-dress', 
-    name: 'بنطلون قطني بخصر مطوي', 
+    name: 'Cotton Pants', 
     type: 'pants', 
     url: 'https://media.alshaya.com/adobe/assets/urn:aaid:aem:3d6a722e-89b1-4c42-9831-e237f816d7cf/as/EID-68bd8dab7afea82792aa1ceaa66e2746b4264615.jpg?preferwebp=true&auto=webp&width=960' 
   },
   { 
     id: 'formal-elegant-gown', 
-    name: 'فستان سهرة فاخر', 
+    name: 'Luxury Evening Gown', 
     type: 'long_dress', 
     url: 'https://media.alshaya.com/adobe/assets/urn:aaid:aem:b38ddb67-4525-4802-b0f1-f275e70c1d33/as/EID-35ef66eb61d951aba0405929a6152403d022ae63.jpg?preferwebp=true&width=1920&auto=webp' 
   }
 ];
 
 const App: React.FC = () => {
-  const [lang, setLang] = useState<Lang>('ar');
   const [personImage, setPersonImage] = useState<ImageData | null>(null);
   const [clothImage, setClothImage] = useState<ImageData | null>(null);
   const [garmentType, setGarmentType] = useState<GarmentType>('shirt');
@@ -93,105 +90,54 @@ const App: React.FC = () => {
   const [garmentDescription, setGarmentDescription] = useState("");
   const { getToken } = useAuth();
 
-  const translations = {
-    ar: {
-      appName: 'Stylestoo',
-      nav: { login: 'دخول' },
-      header: { title: 'تجربة الموضة بالذكاء الاصطناعي', subtitle: 'محركنا المتقدم يقوم بتركيب أي قطعة ملابس على صورتك بدقة فيزيائية عالية. لا داعي لغرف القياس بعد الآن.' },
-      step1: { 
-        label: 'الخطوة 1: ارفع صورتك', 
-        desc: 'استخدم صورة واضحة ومواجهة للكاميرا',
-        guidelinesTitle: 'إرشادات لصورتك الشخصية:',
-        guidelines: [
-          'قف بشكل مستقيم ومواجه للكاميرا مباشرة.',
-          'تأكد من وجود إضاءة جيدة على وجهك وجسمك.',
-          'يفضل ارتداء ملابس بسيطة وضيقة قليلاً لنتائج أفضل.',
-          'تجنب الخلفيات المزدحمة؛ الخلفية السادة هي الأفضل.'
-        ]
-      },
-      step2: { 
-        label: 'الخطوة 2: اختر الملابس', 
-        desc: 'ارفع صورة لقطعة الملابس التي تريد تجربتها',
-        typeLabel: 'حدد نوع القطعة:',
-        samplesLabel: 'خزانة الملابس',
-        openCloset: 'فتح الدولاب',
-        closeCloset: 'إغلاق',
-        garmentDescLabel: 'وصف الملابس (اختياري: واكتب اذا كنت تريد نفس المشهد بدون تغير اكتب بالوصف مثلا اللبس تي شيرت بدون تغير المكان)',
-        garmentDescPlaceholder: 'أدخل وصف للملابس مثل: فستان أحمر، قميص أزرق...',
-        types: {
-          shirt: 'قميص / تيشيرت',
-          long_dress: 'فستان طويل',
-          short_dress: 'فستان قصير',
-          long_skirt: 'تنورة طويلة',
-          short_skirt: 'تنورة قصيرة',
-          pants: 'بنطال',
-          jacket: 'جاكيت / معطف',
-          other: 'أخرى'
-        },
-        guidelinesTitle: 'إرشادات لنتائج مثالية:',
-        guidelines: [
-          'استخدم خلفية بيضاء أو سادة تماماً.',
-          'تأكد من أن قطعة الملابس مفرودة وغير مطوية.',
-          'تجنب وجود أشخاص أو عارضين في صورة الملابس.',
-          'صور القطعة في إضاءة جيدة وواضحة.'
-        ]
-      },
-      actions: { start: 'ابدأ التحويل', cancel: 'إلغاء', save: 'حفظ النتيجة', saveThis: 'حفظ الصورة', tryAgain: 'تجربة أخرى', downloading: 'جاري التحميل...' },
-      steps: ['تحليل الصور...', 'تحديد أنسجة القماش...', 'رسم أبعاد الجسم...', 'توليد الصورة...', 'اللمسات النهائية...'],
-      results: { title: 'النتائج النهائية', subtitle: 'تم توليد صورة لتجربة الملابس.', front: 'المظهر النهائي', side: 'من الجنب', full: 'الجسم كامل' },
-      analysis: { title: 'تحليل المظهر', fit: 'دقة المقاس', color: 'تناسق اللون', style: 'تقييم الستايل', tips: 'إرشادات للكمال' },
-      usedImages: 'الصور المستخدمة',
-      footer: '© 2026 Developed by boood0003'
+  const t = {
+    appName: 'Stylestoo',
+    nav: { login: 'Login' },
+    header: { title: 'AI Fashion Experience', subtitle: 'Our advanced engine morphs any garment onto your photo with physical accuracy. No more fitting rooms.' },
+    step1: { 
+      label: 'Step 1: Upload Photo', 
+      desc: 'Use a clear front-facing portrait',
+      guidelinesTitle: 'Guidelines for your photo:',
+      guidelines: [
+        'Stand straight and face the camera directly.',
+        'Ensure even and bright lighting on your body.',
+        'Wear simple, form-fitting clothes for best results.',
+        'Plain backgrounds yield the highest accuracy.'
+      ]
     },
-    en: {
-      appName: 'Stylestoo',
-      nav: { login: 'Login' },
-      header: { title: 'AI Fashion Experience', subtitle: 'Our advanced engine morphs any garment onto your photo with physical accuracy. No more fitting rooms.' },
-      step1: { 
-        label: 'Step 1: Upload Photo', 
-        desc: 'Use a clear front-facing portrait',
-        guidelinesTitle: 'Guidelines for your photo:',
-        guidelines: [
-          'Stand straight and face the camera directly.',
-          'Ensure even and bright lighting on your body.',
-          'Wear simple, form-fitting clothes for best results.',
-          'Plain backgrounds yield the highest accuracy.'
-        ]
+    step2: { 
+      label: 'Step 2: Choose Garment', 
+      desc: 'Upload the item you want to try',
+      typeLabel: 'Select Garment Type:',
+      samplesLabel: 'Smart Closet',
+      openCloset: 'Open Closet',
+      closeCloset: 'Close',
+      garmentDescLabel: 'Garment Description (Optional)',
+      garmentDescPlaceholder: 'Enter description e.g. Red dress, blue shirt...',
+      types: {
+        shirt: 'Shirt / T-Shirt',
+        long_dress: 'Long Dress',
+        short_dress: 'Short Dress',
+        long_skirt: 'Long Skirt',
+        short_skirt: 'Short Skirt',
+        pants: 'Pants',
+        jacket: 'Jacket / Coat',
+        other: 'Other'
       },
-      step2: { 
-        label: 'Step 2: Choose Garment', 
-        desc: 'Upload the item you want to try',
-        typeLabel: 'Select Garment Type:',
-        samplesLabel: 'Smart Closet',
-        openCloset: 'Open Closet',
-        closeCloset: 'Close',
-        garmentDescLabel: 'Garment Description (Optional)',
-        garmentDescPlaceholder: 'Enter description e.g. Red dress, blue shirt...',
-        types: {
-          shirt: 'Shirt / T-Shirt',
-          long_dress: 'Long Dress',
-          short_dress: 'Short Dress',
-          long_skirt: 'Long Skirt',
-          short_skirt: 'Short Skirt',
-          pants: 'Pants',
-          jacket: 'Jacket / Coat',
-          other: 'Other'
-        },
-        guidelinesTitle: 'Best results checklist:',
-        guidelines: [
-          'Use a plain or solid white background.',
-          'Ensure the garment is laid flat and unwrinkled.',
-          'Do not include models or people in the item photo.',
-          'Capture with bright, even lighting.'
-        ]
-      },
-      actions: { start: 'Start Morphing', cancel: 'Cancel', save: 'Save Result', saveThis: 'Save Image', tryAgain: 'Try Another', downloading: 'Downloading...' },
-      steps: ['Analyzing images...', 'Identifying textures...', 'Mapping physique...', 'Generating image...', 'Polishing results...'],
-      results: { title: 'Final Results', subtitle: 'Image generated for your preview.', front: 'Final Look', side: 'Side View', full: 'Full Body' },
-      analysis: { title: 'Style Analysis', fit: 'Fit Accuracy', color: 'Color Match', style: 'Style Score', tips: 'Tips for Perfection' },
-      usedImages: 'Input Images',
-      footer: '© 2026 Developed by boood0003'
-    }
+      guidelinesTitle: 'Best results checklist:',
+      guidelines: [
+        'Use a plain or solid white background.',
+        'Ensure the garment is laid flat and unwrinkled.',
+        'Do not include models or people in the item photo.',
+        'Capture with bright, even lighting.'
+      ]
+    },
+    actions: { start: 'Start Morphing', cancel: 'Cancel', save: 'Save Result', saveThis: 'Save Image', tryAgain: 'Try Another', downloading: 'Downloading...' },
+    steps: ['Analyzing images...', 'Identifying textures...', 'Mapping physique...', 'Generating image...', 'Polishing results...'],
+    results: { title: 'Final Results', subtitle: 'Image generated for your preview.', front: 'Final Look', side: 'Side View', full: 'Full Body' },
+    analysis: { title: 'Style Analysis', fit: 'Fit Accuracy', color: 'Color Match', style: 'Style Score', tips: 'Tips for Perfection' },
+    usedImages: 'Input Images',
+    footer: '© 2026 Developed by boood0003'
   };
 
   const garmentIcons: Record<GarmentType, React.ReactNode> = {
@@ -237,8 +183,6 @@ const App: React.FC = () => {
     )
   };
 
-  const t = translations[lang];
-
   useEffect(() => {
     if (appState === AppState.PROCESSING) {
       const interval = setInterval(() => {
@@ -275,7 +219,7 @@ const App: React.FC = () => {
       const resultData = await performVirtualTryOn(personImage, clothImage, garmentType, token, garmentDescription);
       setResults(resultData);
       
-      const styleAnalysis = await analyzeStyle(resultData.front, lang);
+      const styleAnalysis = await analyzeStyle(resultData.front);
       setAnalysis(styleAnalysis);
       
       setAppState(AppState.RESULT);
@@ -313,7 +257,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col bg-[#050505] text-white`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+    <div className={`min-h-screen flex flex-col bg-[#050505] text-white`}>
       {/* Navbar */}
       <nav className="p-6 flex justify-between items-center glass-effect sticky top-0 z-50">
         <div className="flex items-center gap-2">
@@ -326,12 +270,6 @@ const App: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-4">
-          <button 
-            onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
-            className="text-xs font-bold border border-zinc-700 px-3 py-1 rounded-full hover:bg-zinc-800 transition-colors"
-          >
-            {lang === 'ar' ? 'English' : 'عربي'}
-          </button>
           <SignedOut>
             <SignInButton mode="modal">
               <Button variant="outline" className="text-sm px-4 py-2">{t.nav.login}</Button>

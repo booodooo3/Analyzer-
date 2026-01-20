@@ -61,7 +61,7 @@ export const performVirtualTryOn = async (person: ImageData, cloth: ImageData, t
     const clothInput = cloth.file || cloth.base64 || cloth.url;
 
     if (!personInput || !clothInput) {
-        throw new Error("يجب توفير صورتين (الشخص والملابس)");
+        throw new Error("Two images are required (person and garment)");
     }
 
     const personImage = await resizeImage(personInput);
@@ -137,18 +137,16 @@ export const performVirtualTryOn = async (person: ImageData, cloth: ImageData, t
 
   } catch (error: any) {
     console.error("Virtual Try-On Error:", error);
-    throw new Error(error.message || 'حدث خطأ أثناء الاتصال بالخادم');
+    throw new Error(error.message || 'An error occurred while connecting to the server');
   }
 };
 
-export const analyzeStyle = async (image: string, lang: 'ar' | 'en') => {
-  // محاكاة للتحليل (Mock) لسرعة الاستجابة
+export const analyzeStyle = async (image: string) => {
+  // Mock analysis for speed
   return {
     fitScore: 94,
     colorScore: 88,
     styleGrade: 'A+',
-    tips: lang === 'ar'
-      ? ['الألوان متناسقة جداً مع البشرة', 'المقاس يبدو مثالياً عند الأكتاف', 'تنسيق رائع للمناسبة الرسمية']
-      : ['Colors match skin tone perfectly', 'Fit looks perfect at the shoulders', 'Great coordination for formal events']
+    tips: ['Colors match skin tone perfectly', 'Fit looks perfect at the shoulders', 'Great coordination for formal events']
   };
 };

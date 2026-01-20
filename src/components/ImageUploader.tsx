@@ -38,7 +38,7 @@ export const ImageUploader: React.FC<UploaderProps> = ({ description, currentIma
         <>
           <img src={displayImage} className={`w-full h-full ${objectFit === 'contain' ? 'object-contain p-2' : 'object-cover'}`} alt="Uploaded" />
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <span className="text-white font-bold">تغيير الصورة</span>
+            <span className="text-white font-bold">Change Image</span>
           </div>
         </>
       ) : (
@@ -49,7 +49,7 @@ export const ImageUploader: React.FC<UploaderProps> = ({ description, currentIma
             </svg>
           </div>
           <div>
-            <p className="font-bold text-white">اضغط للرفع</p>
+            <p className="font-bold text-white">Click to Upload</p>
             <p className="text-sm text-zinc-500 mt-2">{description}</p>
           </div>
         </div>

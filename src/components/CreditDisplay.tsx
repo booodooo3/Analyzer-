@@ -38,9 +38,9 @@ export default function CreditDisplay() {
       </span> 
       <button 
         className="bg-green-600 text-white px-2 py-0.5 rounded hover:bg-green-700 text-xs transition-colors"
-        onClick={handleBuyCredits}
-        title="شحن رصيد"
-      > 
+          onClick={handleBuyCredits}
+          title="Add Credits"
+        > 
         +
       </button> 
     </div> 

@@ -8,7 +8,7 @@ import { ClerkProvider } from '@clerk/clerk-react'
 const PUBLISHABLE_KEY = import.meta.env.VITE_PUBLIC_CLERK_PUBLISHABLE_KEY
 
 if (!PUBLISHABLE_KEY) {
-  // بدلاً من إيقاف التطبيق، سنظهر رسالة خطأ واضحة على الشاشة
+  // Instead of stopping the app, show a clear error message on screen
   console.error("Missing Publishable Key");
   const rootElement = document.getElementById('root');
   if (rootElement) {

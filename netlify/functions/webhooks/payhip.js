@@ -13,20 +13,34 @@ const getHeaderValue = (req, names) => {
 
 const normalizeSignature = (signature) => {
   if (!signature) return null;
-  if (signature.includes('=')) {
-    const parts = signature.split('=');
+  const trimmed = signature.trim();
+  if (trimmed.includes('=')) {
+    const parts = trimmed.split('=');
     return parts[parts.length - 1];
   }
-  return signature;
+  return trimmed;
+};
+
+const signatureToBuffer = (signature) => {
+  if (!signature) return null;
+  const normalized = normalizeSignature(signature);
+  if (!normalized) return null;
+  const hexPattern = /^[0-9a-f]{64}$/i;
+  if (hexPattern.test(normalized)) {
+    return Buffer.from(normalized, 'hex');
+  }
+  try {
+    return Buffer.from(normalized, 'base64');
+  } catch {
+    return null;
+  }
 };
 
 const isValidSignature = (body, signature, secret) => {
   if (!signature || !secret) return false;
-  const computed = createHmac('sha256', secret).update(body, 'utf8').digest('hex');
-  const provided = normalizeSignature(signature);
-  if (!provided) return false;
-  const computedBuffer = Buffer.from(computed, 'hex');
-  const providedBuffer = Buffer.from(provided, 'hex');
+  const computedBuffer = createHmac('sha256', secret).update(body, 'utf8').digest();
+  const providedBuffer = signatureToBuffer(signature);
+  if (!providedBuffer) return false;
   if (computedBuffer.length !== providedBuffer.length) return false;
   return timingSafeEqual(computedBuffer, providedBuffer);
 };
@@ -35,17 +49,25 @@ const extractEventType = (payload) => {
   return payload?.event || payload?.event_type || payload?.eventName || payload?.event_name || payload?.type || null;
 };
 
+const normalizeEventType = (eventType) => {
+  if (!eventType) return null;
+  return String(eventType).toLowerCase().replace(/[\s.-]+/g, '_');
+};
+
 const extractEmail = (payload) => {
-  return (
+  const email =
     payload?.email ||
     payload?.buyer_email ||
+    payload?.buyer?.email ||
     payload?.customer?.email ||
     payload?.order?.email ||
     payload?.data?.email ||
     payload?.data?.buyer_email ||
+    payload?.data?.buyer?.email ||
     payload?.data?.customer?.email ||
-    null
-  );
+    payload?.data?.order?.email ||
+    null;
+  return typeof email === 'string' ? email.trim().toLowerCase() : null;
 };
 
 const extractTransactionId = (payload) => {
@@ -69,8 +91,8 @@ export default async (req) => {
     return new Response("Method Not Allowed", { status: 405 });
   }
 
-  const secret = process.env.PAYHIP_API_KEY;
-  const signature = getHeaderValue(req, ['payhip-signature', 'x-payhip-signature', 'x-webhook-signature']);
+  const secret = process.env.PAYHIP_WEBHOOK_SECRET || process.env.PAYHIP_API_KEY;
+  const signature = getHeaderValue(req, ['payhip-signature', 'x-payhip-signature', 'x-webhook-signature', 'x-signature']);
 
   const body = await req.text();
 
@@ -85,8 +107,9 @@ export default async (req) => {
     return new Response("Invalid JSON", { status: 400 });
   }
 
-  const eventType = extractEventType(payload);
-  if (eventType !== 'payment_success') {
+  const eventType = normalizeEventType(extractEventType(payload));
+  const allowedEvents = new Set(['payment_success', 'payment_succeeded', 'payment_successful']);
+  if (!eventType || !allowedEvents.has(eventType)) {
     return new Response("OK", { status: 200 });
   }
 

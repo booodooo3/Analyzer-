@@ -54,6 +54,22 @@ const normalizeEventType = (eventType) => {
   return String(eventType).toLowerCase().replace(/[\s.-]+/g, '_');
 };
 
+const extractStatus = (payload) => {
+  return (
+    payload?.status ||
+    payload?.payment_status ||
+    payload?.order?.status ||
+    payload?.data?.status ||
+    payload?.data?.payment_status ||
+    null
+  );
+};
+
+const normalizeStatus = (status) => {
+  if (!status) return null;
+  return String(status).toLowerCase().replace(/[\s.-]+/g, '_');
+};
+
 const extractEmail = (payload) => {
   const email =
     payload?.email ||
@@ -93,7 +109,6 @@ export default async (req) => {
 
   const secret = process.env.PAYHIP_WEBHOOK_SECRET || process.env.PAYHIP_API_KEY;
   const signature = getHeaderValue(req, ['payhip-signature', 'x-payhip-signature', 'x-webhook-signature', 'x-signature']);
-
   const body = await req.text();
 
   if (!secret || !signature || !isValidSignature(body, signature, secret)) {
@@ -108,8 +123,11 @@ export default async (req) => {
   }
 
   const eventType = normalizeEventType(extractEventType(payload));
+  const status = normalizeStatus(extractStatus(payload));
   const allowedEvents = new Set(['payment_success', 'payment_succeeded', 'payment_successful']);
-  if (!eventType || !allowedEvents.has(eventType)) {
+  const allowedStatuses = new Set(['paid', 'completed', 'success', 'successful', 'payment_success', 'payment_succeeded', 'free', 'free_purchase', 'fully_paid']);
+
+  if (!allowedEvents.has(eventType) && !allowedStatuses.has(status)) {
     return new Response("OK", { status: 200 });
   }
 

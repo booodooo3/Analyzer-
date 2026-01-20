@@ -287,11 +287,24 @@ const App: React.FC = () => {
       <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-12">
         {appState === AppState.IDLE || appState === AppState.ERROR ? (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <header className="text-center space-y-4">
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent">
+            <header className="relative mb-20 flex flex-col items-center select-none">
+              {/* Main Title */}
+              <h1 className="text-7xl md:text-[9rem] leading-[0.9] font-[900] tracking-tighter bg-gradient-to-b from-[#ffffff] via-[#d4d4d4] to-[#737373] bg-clip-text text-transparent z-10 mb-2 drop-shadow-2xl">
                 {t.header.title}
               </h1>
-              <p className="text-zinc-400 max-w-xl mx-auto">{t.header.subtitle}</p>
+              
+              {/* Bottom Row: Description + Subtitle */}
+              <div className="w-full max-w-6xl mx-auto flex flex-col md:flex-row items-start justify-center gap-6 md:gap-8 px-4 mt-2">
+                {/* Description - Right Aligned Text on Desktop */}
+                <p className="text-[#888888] text-[10px] md:text-[13px] font-medium max-w-[260px] text-center md:text-right leading-tight tracking-wide md:pt-3">
+                  {t.header.description}
+                </p>
+                
+                {/* Subtitle - Left Aligned Text on Desktop */}
+                <h2 className="text-3xl md:text-5xl font-[800] text-white tracking-tight text-center md:text-left shadow-black drop-shadow-lg">
+                  {t.header.subtitle}
+                </h2>
+              </div>
             </header>
 
             <div className="grid md:grid-cols-2 gap-12 items-start">
@@ -361,43 +374,61 @@ const App: React.FC = () => {
                     </div>
 
                     {/* Vertical Closet Strip */}
-                    <button 
-                      onClick={() => setIsClosetOpen(true)}
-                      className="w-24 h-full bg-zinc-950 border border-zinc-800 rounded-3xl relative overflow-hidden group hover:border-white/20 transition-all shadow-2xl flex flex-col items-center justify-center gap-4 shrink-0"
-                    >
-                      <div className="absolute inset-x-0 top-0 h-[1px] bg-zinc-900 group-hover:bg-zinc-800" />
-                      
-                      <div className="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center border border-zinc-800 group-hover:scale-110 transition-transform duration-500">
-                        <svg viewBox="0 0 24 24" className="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="1.5">
-                           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5V2m0 2.5a2.5 2.5 0 00-2.5 2.5h5a2.5 2.5 0 00-2.5-2.5zM4 11.5c0-1.1.9-2 2-2h12a2 2 0 012 2l1 7c.1.6-.4 1.2-1 1.2H4a1 1 0 01-1-1.2l1-7z" />
-                           <path d="M7 9.5L12 6.5L17 9.5" strokeLinecap="round" />
-                        </svg>
-                      </div>
-                      
-                      <span className="text-[10px] font-bold text-zinc-500 group-hover:text-white uppercase tracking-tighter transition-colors rotate-90 whitespace-nowrap">
-                        {t.step2.openCloset}
+                    <div className="flex flex-col items-center gap-2 h-full">
+                      <span className="text-xs font-bold text-blue-500 uppercase tracking-widest">
+                        {t.step2.samplesLabel}
                       </span>
-                    </button>
+                      <button 
+                        onClick={() => setIsClosetOpen(true)}
+                        className="w-40 flex-1 bg-zinc-950 border border-zinc-800 rounded-[2.5rem] relative overflow-hidden group hover:border-white/20 transition-all shadow-2xl flex flex-col items-center justify-center gap-4 shrink-0"
+                      >
+                        {/* Vertical Line */}
+                        <div className="absolute inset-y-0 left-1/2 w-px bg-zinc-900 group-hover:bg-zinc-800 transition-colors" />
+                        
+                        {/* Handles */}
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 w-1.5 h-8 rounded-full bg-zinc-800 group-hover:bg-zinc-700 transition-colors" />
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 w-1.5 h-8 rounded-full bg-zinc-800 group-hover:bg-zinc-700 transition-colors" />
+
+                        <div className="relative z-10 flex flex-col items-center gap-3">
+                            <div className="w-12 h-12 rounded-full bg-zinc-900 flex items-center justify-center border border-zinc-800 group-hover:scale-110 transition-transform duration-500 shadow-lg">
+                              <svg viewBox="0 0 24 24" className="w-6 h-6 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5V2m0 2.5a2.5 2.5 0 00-2.5 2.5h5a2.5 2.5 0 00-2.5-2.5zM4 11.5c0-1.1.9-2 2-2h12a2 2 0 012 2l1 7c.1.6-.4 1.2-1 1.2H4a1 1 0 01-1-1.2l1-7z" />
+                                <path d="M7 9.5L12 6.5L17 9.5" strokeLinecap="round" />
+                              </svg>
+                            </div>
+                            
+                            <span className="text-[10px] font-bold text-zinc-500 group-hover:text-white uppercase tracking-widest transition-colors whitespace-nowrap">
+                              {t.step2.openCloset}
+                            </span>
+                        </div>
+                      </button>
+                    </div>
                   </div>
 
                   {/* Garment Type Grid Selector */}
-                  <div className="space-y-2 pt-2">
-                       <h4 className="text-sm font-bold text-zinc-400 uppercase tracking-widest">{t.step2.typeLabel}</h4>
-                       <div className="grid grid-cols-4 gap-2">
+                  <div className="space-y-3 pt-4">
+                       <h4 className="text-sm font-bold text-sky-500 uppercase tracking-widest">{t.step2.typeLabel}</h4>
+                       <div className="grid grid-cols-4 gap-3">
                          {(Object.keys(t.step2.types) as GarmentType[]).map((type) => (
                            <button
                              key={type}
                              onClick={() => setGarmentType(type)}
-                             className={`w-full aspect-square flex flex-col items-center justify-center p-1 rounded-xl border transition-all duration-300 gap-1 overflow-hidden ${
+                             className={`w-full aspect-square flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300 gap-3 group ${
                                garmentType === type 
-                               ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
-                               : 'bg-white/5 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:bg-white/10'
+                               ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.4)] scale-105 z-10' 
+                               : 'bg-[#0a0a0a] border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:bg-zinc-900'
                              }`}
                            >
-                             <div className={`${garmentType === type ? 'text-black' : 'text-zinc-400'} flex-shrink-0`}>
-                               {React.cloneElement(garmentIcons[type] as React.ReactElement, { className: "w-5 h-5" })}
+                             <div className={`${garmentType === type ? 'text-black' : 'text-zinc-500 group-hover:text-zinc-300'} transition-colors`}>
+                               {type === 'other' ? (
+                                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+                                  </svg>
+                               ) : (
+                                  React.cloneElement(garmentIcons[type] as React.ReactElement, { className: "w-6 h-6" })
+                               )}
                              </div>
-                             <span className="text-[8px] font-bold text-center leading-none w-full truncate px-0.5">
+                             <span className={`text-[10px] font-bold text-center leading-tight w-full ${garmentType === type ? 'text-black' : 'text-zinc-500 group-hover:text-zinc-400'}`}>
                                {t.step2.types[type]}
                              </span>
                            </button>

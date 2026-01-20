@@ -248,16 +248,41 @@ const App: React.FC = () => {
     setError(null);
   };
 
-  const downloadSingleImage = (base64: string, name: string) => {
-    const link = document.createElement('a');
-    link.href = base64;
-    link.download = `stylestoo-${name}.png`;
-    link.click();
+  const downloadSingleImage = async (base64: string, name: string) => {
+    try {
+      const response = await fetch(base64);
+      const blob = await response.blob();
+      const fileName = `stylestoo-${name}.png`;
+      const picker = (window as any).showSaveFilePicker;
+      if (picker) {
+        const handle = await picker({
+          suggestedName: fileName,
+          types: [
+            {
+              description: 'PNG Image',
+              accept: { 'image/png': ['.png'] }
+            }
+          ]
+        });
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      return;
+    }
   };
 
-  const handleSaveAll = () => {
+  const handleSaveAll = async () => {
     if (!results) return;
-    downloadSingleImage(results.front, 'generated-look');
+    await downloadSingleImage(results.front, 'generated-look');
   };
 
   return (

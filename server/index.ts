@@ -160,10 +160,17 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
         const desc = garmentDescription || "A cool outfit";
 
         // 1. Start Prediction
-        console.log(`🚀 Starting Replicate prediction (google/nano-banana-pro)... [Plus Mode: ${isPlusMode}]`);
+        // Define Models
+        // Standard Mode uses "Pro" (Gemini 3 Pro Image)
+        // Plus Mode uses "Nano Banana" (Gemini 2.5 Flash Image) as requested
+        const modelOwner = "google";
+        const modelName = isPlusMode ? "nano-banana" : "nano-banana-pro";
         
-        // Use hardcoded version ID to save time (avoid fetching model info)
-        const versionId = "f5318740f60d79bf0c480216aaf9ca7614977553170eacd19ff8cbcda2409ac8";
+        console.log(`🚀 Starting Replicate prediction (${modelOwner}/${modelName})... [Plus Mode: ${isPlusMode}]`);
+        
+        // Fetch latest version ID dynamically
+        const modelData = await replicate.models.get(modelOwner, modelName);
+        const versionId = modelData.latest_version.id;
 
         // Prepare Base64 for Replicate
         const personBase64 = personImage.startsWith('http') ? 

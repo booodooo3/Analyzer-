@@ -154,107 +154,92 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
         let usedModel = "Google Gemini Studio";
         let errorReason = "";
 
-        // 3. Try Replicate (IDM-VTON) -> Primary High Quality Model
-        try {
-            console.log("🚀 Trying IDM-VTON via Replicate...");
-            
-            // Ensure inputs are base64 string
-            // ... (rest of base64 processing) ...
-            
-            // NOTE: We need to make sure we don't break the existing logic.
-            // I will paste the surrounding code to ensure correct context match.
+        // 1. Start Prediction
+        console.log("🚀 Starting Replicate prediction (google/nano-banana-pro)...");
+        
+        // Use hardcoded version ID to save time (avoid fetching model info)
+        const versionId = "f5318740f60d79bf0c480216aaf9ca7614977553170eacd19ff8cbcda2409ac8";
 
-            
-            // Ensure inputs are base64 string
-            const personBase64 = personImage.startsWith('http') ? 
-                await (await fetch(personImage)).arrayBuffer().then(b => Buffer.from(b).toString('base64')) : 
-                personImage;
-             
-             const clothBase64 = clothImage.startsWith('http') ? 
-                await (await fetch(clothImage)).arrayBuffer().then(b => Buffer.from(b).toString('base64')) : 
-                clothImage;
-             
-             // Prepare Base64 for Replicate (must include data URI prefix)
-             const personDataURI = personBase64.startsWith('data:') ? personBase64 : `data:image/png;base64,${personBase64}`;
-             const clothDataURI = clothBase64.startsWith('data:') ? clothBase64 : `data:image/png;base64,${clothBase64}`;
+        // Prepare Base64 for Replicate
+        const personBase64 = personImage.startsWith('http') ? 
+            await (await fetch(personImage)).arrayBuffer().then(b => Buffer.from(b).toString('base64')) : 
+            personImage;
+         
+        const clothBase64 = clothImage.startsWith('http') ? 
+            await (await fetch(clothImage)).arrayBuffer().then(b => Buffer.from(b).toString('base64')) : 
+            clothImage;
+         
+        const personDataURI = personBase64.startsWith('data:') ? personBase64 : `data:image/png;base64,${personBase64}`;
+        const clothDataURI = clothBase64.startsWith('data:') ? clothBase64 : `data:image/png;base64,${clothBase64}`;
 
-             // Call Replicate
-             finalImageUrl = await queryReplicate(personDataURI, clothDataURI, garmentType, desc);
-             usedModel = "IDM-VTON (Replicate Premium)";
-            
-        } catch (error: any) {
-            console.error("❌ Replicate failed:", error.message);
-            errorReason = error.message;
-            
-            // 4. Fallback (OOTDiffusion or just fail gracefully)
-            console.log("⚠️ Falling back to OOTDiffusion...");
-            try {
-                finalImageUrl = await queryOOTDiffusion(personImage, clothImage, garmentType);
-                usedModel = "OOTDiffusion (Backup)";
-            } catch (ootdError: any) {
-                console.error("❌ OOTDiffusion failed:", ootdError.message);
-                errorReason = ootdError.message;
-
-                // FINAL FALLBACK: Return original image to prevent app crash
-                console.log("⚠️ All models failed. Returning original image as fallback.");
-                finalImageUrl = personImage; // Return original image
-                usedModel = "Original Image (AI Failed)";
+        const prediction = await replicate.predictions.create({
+            version: versionId,
+            input: {
+                prompt: `A photo of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic.`,
+                image_input: [personDataURI, clothDataURI],
+                aspect_ratio: "match_input_image",
+                output_format: "png",
+                safety_filter_level: "block_only_high"
             }
-        }
+        });
 
-        if (!finalImageUrl) {
-             throw new Error("Failed to generate image.");
-        }
+        console.log("✅ Prediction created:", prediction.id);
 
-        // Convert URL to Base64 if needed
-        let finalImageBase64 = finalImageUrl;
-        if (finalImageUrl.startsWith('http')) {
-            try {
-                const imgRes = await fetch(finalImageUrl);
-                const arrayBuffer = await imgRes.arrayBuffer();
-                const buffer = Buffer.from(arrayBuffer);
-                finalImageBase64 = `data:image/png;base64,${buffer.toString('base64')}`;
-            } catch (err) {
-                console.error("Error converting result to base64:", err);
-                finalImageBase64 = personImage; // Fallback again
+        // Deduct credit immediately (or wait? Netlify function deducts immediately)
+        await clerkClient.users.updateUserMetadata(userId, {
+            publicMetadata: {
+                credits: currentCredits - 1
             }
-        } else if (!finalImageUrl.startsWith('data:')) {
-            finalImageBase64 = `data:image/png;base64,${finalImageUrl}`;
-        }
+        });
 
-        console.log(`✅ Image processed successfully using ${usedModel}!`);
-
-        // 5. Deduct Credit (Only if AI worked? No, let's keep it simple or refund if failed)
-        if (usedModel === "Original Image (AI Failed)") {
-             console.log("ℹ️ AI Failed, refunding credit.");
-             // Don't deduct, or refund
-        } else {
-            await clerkClient.users.updateUserMetadata(userId, {
-                publicMetadata: {
-                    credits: currentCredits - 1
-                }
-            });
-            console.log(`✅ Deducted 1 credit. Remaining: ${currentCredits - 1}`);
-        }
-
-        res.json({
-            front: finalImageBase64,
-            side: finalImageBase64,
-            full: finalImageBase64,
-            analysis: {
-                fitScore: usedModel.includes("Failed") ? 0 : 99,
-                colorScore: usedModel.includes("Failed") ? 0 : 98,
-                styleGrade: usedModel.includes("Failed") ? "Error" : "A++",
-                tips: usedModel.includes("Failed") 
-                    ? ["⚠️ Service Overloaded", "We tried all models and they failed", "Try again later"] 
-                    : ["Perfect Fit", `Generated by ${usedModel}`, "High Quality"]
-            },
-            remaining: currentCredits - 1
+        res.status(202).json({
+            id: prediction.id,
+            status: prediction.status
         });
 
     } catch (error: any) {
         console.error("🔥 Server Error:", error.message);
         res.status(503).json({ error: error.message || "Service busy. Please try again later." });
+    }
+});
+
+app.get('/api/generate', async (req: any, res: any) => {
+    const predictionId = req.query.id;
+    if (!predictionId) {
+        return res.status(400).json({ error: "Missing id parameter" });
+    }
+
+    try {
+        const prediction = await replicate.predictions.get(predictionId);
+        
+        if (prediction.status === "succeeded") {
+            let finalImageUrl = prediction.output;
+             // Handle different output formats
+            if (typeof prediction.output !== 'string') {
+                if (Array.isArray(prediction.output) && prediction.output.length > 0) {
+                    finalImageUrl = prediction.output[0];
+                } else if (prediction.output?.url) {
+                    finalImageUrl = prediction.output.url.toString();
+                }
+            }
+            
+            res.json({
+                status: "succeeded",
+                output: {
+                    front: finalImageUrl,
+                    side: finalImageUrl, 
+                    full: finalImageUrl,
+                    analysis: "Generated successfully",
+                    remaining: 99
+                }
+            });
+        } else if (prediction.status === "failed" || prediction.status === "canceled") {
+            res.json({ status: "failed", error: prediction.error });
+        } else {
+            res.json({ status: prediction.status });
+        }
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
     }
 });
 

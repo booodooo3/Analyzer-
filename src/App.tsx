@@ -208,6 +208,8 @@ const App: React.FC = () => {
     setIsClosetOpen(false); // Close closet after selection
   };
 
+  const [isPlusMode, setIsPlusMode] = useState(false);
+
   const handleTryOn = async () => {
     if (!personImage || !clothImage) return;
     setAppState(AppState.PROCESSING);
@@ -220,7 +222,7 @@ const App: React.FC = () => {
       if (!token) {
         throw new Error('Please sign in to continue');
       }
-      const resultData = await performVirtualTryOn(personImage, clothImage, garmentType, token, garmentDescription);
+      const resultData = await performVirtualTryOn(personImage, clothImage, garmentType, token, garmentDescription, isPlusMode);
       setResults(resultData);
       
       const styleAnalysis = await analyzeStyle(resultData.front);
@@ -306,7 +308,10 @@ const App: React.FC = () => {
           </SignedOut>
           <SignedIn>
               <div className="flex items-center gap-3">
-                <CreditDisplay />
+                <CreditDisplay 
+                  isPlusMode={isPlusMode}
+                  onTogglePlus={() => setIsPlusMode(!isPlusMode)}
+                />
                 <UserButton />
               </div>
             </SignedIn>

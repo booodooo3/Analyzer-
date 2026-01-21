@@ -19,15 +19,21 @@ export default function CreditDisplay() {
       </span> 
       {checkoutUrl ? (
         <a
-          className="bg-white text-black px-2 py-0.5 rounded hover:bg-zinc-200 text-xs transition-colors"
+          className="bg-white text-black px-2 py-0.5 rounded hover:bg-zinc-200 text-xs transition-colors inline-flex items-center gap-1"
           href={checkoutUrl}
           target="_blank"
           rel="noopener noreferrer"
           title="شراء 10 نقاط"
         >
+          <span className="text-base leading-none">+</span>
           شراء 10 نقاط
         </a>
-      ) : null}
+      ) : (
+        <span className="bg-white/70 text-black/70 px-2 py-0.5 rounded text-xs inline-flex items-center gap-1 cursor-not-allowed">
+          <span className="text-base leading-none">+</span>
+          شراء 10 نقاط
+        </span>
+      )}
     </div> 
   ); 
 } 

@@ -8,6 +8,11 @@ export default function CreditDisplay() {
 
   const credits = (user.publicMetadata.credits as number) ?? 3; 
   const checkoutUrl = import.meta.env.VITE_FASTSPRING_CHECKOUT_URL as string | undefined;
+  const handleCheckoutClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!checkoutUrl) {
+      event.preventDefault();
+    }
+  };
 
   return ( 
     <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800/50 border border-zinc-700 rounded-lg text-zinc-100">
@@ -17,17 +22,16 @@ export default function CreditDisplay() {
         </span>
         {credits}
       </span> 
-      {checkoutUrl ? (
-        <a
-          className="w-6 h-6 rounded-full bg-white text-black text-sm font-bold flex items-center justify-center hover:bg-zinc-200 transition-colors"
-          href={checkoutUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          title="شراء 10 نقاط"
-        >
-          +
-        </a>
-      ) : null}
+      <a
+        className="w-6 h-6 rounded-full bg-white text-black text-sm font-bold flex items-center justify-center hover:bg-zinc-200 transition-colors"
+        href={checkoutUrl ?? '#'}
+        target="_blank"
+        rel="noopener noreferrer"
+        title="شراء 10 نقاط"
+        onClick={handleCheckoutClick}
+      >
+        +
+      </a>
     </div> 
   ); 
 } 

@@ -16,15 +16,6 @@ export default function CreditDisplay() {
         </span>
         {credits}
       </span> 
-      <a 
-        className="bg-white text-black px-2 py-0.5 rounded hover:bg-zinc-200 text-xs transition-colors"
-        href="https://payhip.com/b/UvR8g"
-        target="_blank"
-        rel="noopener noreferrer"
-        title="Add Credits"
-      > 
-        10 Credits
-      </a> 
     </div> 
   ); 
 } 

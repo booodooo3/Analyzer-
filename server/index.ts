@@ -185,15 +185,45 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
             safety_filter_level: "block_only_high"
         };
         
-        // If Plus Mode, we might want to generate more samples or just charge more for "Pro" model usage.
-        // Since google/nano-banana-pro doesn't explicitly support 'num_outputs' > 1 in all configurations easily without checking schema,
-        // and the user requirement is "generates 3 images", we can trigger 3 predictions or 1 prediction with n_samples if supported.
-        // Assuming we stick to 1 high quality image for now but charge 3 credits as requested, OR run it 3 times.
-        // For simplicity and reliability, let's run it once but mark it as a "Pro" run. 
-        // If the user REALLY wants 3 distinct images, we would need to run 3 concurrent requests or find a parameter.
-        // Let's assume we run 1 request for now to avoid complexity/timeouts, but charge 3 credits as per "Plus" toggle.
-        // If 3 images are strictly required, we can update this logic later.
+        // If Plus Mode, we generate 3 distinct views
+        if (isPlusMode) {
+             console.log("🚀 Starting Plus Mode Prediction (3 views)...");
+             
+             const prompts = [
+                { type: 'front', text: `Front view of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic.` },
+                { type: 'side', text: `Side profile view of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic.` },
+                { type: 'full', text: `Full body shot of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic.` }
+             ];
+
+             // Create 3 predictions in parallel
+             const predictions = await Promise.all(prompts.map(p => 
+                replicate.predictions.create({
+                    version: versionId,
+                    input: {
+                        ...inputPayload,
+                        prompt: p.text
+                    }
+                })
+             ));
+
+             const predictionIds = predictions.map(p => p.id).join('|');
+             console.log("✅ Plus Mode Predictions created:", predictionIds);
+
+             // Deduct credit immediately (3 credits)
+             await clerkClient.users.updateUserMetadata(userId, {
+                publicMetadata: {
+                    credits: currentCredits - cost
+                }
+             });
+
+             return res.status(202).json({
+                id: predictionIds,
+                status: "starting",
+                cost: cost
+             });
+        }
         
+        // Standard Mode (Single Image)
         const prediction = await replicate.predictions.create({
             version: versionId,
             input: inputPayload
@@ -227,6 +257,45 @@ app.get('/api/generate', async (req: any, res: any) => {
     }
 
     try {
+        // Handle Multiple IDs (Plus Mode)
+        if (predictionId.includes('|')) {
+            const ids = predictionId.split('|');
+            const predictions = await Promise.all(ids.map((id: string) => replicate.predictions.get(id)));
+            
+            // Check statuses
+            const allSucceeded = predictions.every((p: any) => p.status === "succeeded");
+            const anyFailed = predictions.find((p: any) => p.status === "failed" || p.status === "canceled");
+            
+            if (allSucceeded) {
+                // Map outputs to front, side, full
+                // Order matches the prompts array: [front, side, full]
+                const getUrl = (p: any) => {
+                    if (typeof p.output === 'string') return p.output;
+                    if (Array.isArray(p.output) && p.output.length > 0) return p.output[0];
+                    if (p.output?.url) return p.output.url.toString();
+                    return "";
+                };
+
+                res.json({
+                    status: "succeeded",
+                    output: {
+                        front: getUrl(predictions[0]),
+                        side: getUrl(predictions[1]),
+                        full: getUrl(predictions[2]),
+                        analysis: "Generated successfully (Plus Mode)",
+                        remaining: 99
+                    }
+                });
+            } else if (anyFailed) {
+                res.json({ status: "failed", error: anyFailed.error || "One of the generations failed" });
+            } else {
+                // Still processing
+                res.json({ status: "processing" });
+            }
+            return;
+        }
+
+        // Standard Single ID Logic
         const prediction = await replicate.predictions.get(predictionId);
         
         if (prediction.status === "succeeded") {

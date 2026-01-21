@@ -138,7 +138,7 @@ const App: React.FC = () => {
     },
     actions: { start: 'Start Morphing', cancel: 'Cancel', save: 'Save Result', saveThis: 'Save Image', tryAgain: 'Try Another', downloading: 'Downloading...' },
     steps: ['Analyzing images...', 'Identifying textures...', 'Mapping physique...', 'Generating image...', 'Polishing results...'],
-    results: { title: 'Final Results', subtitle: 'Image generated for your preview.', front: 'Final Look', side: 'Side View', full: 'Full Body' },
+    results: { title: 'Final Results', subtitle: 'Three distinct angles generated for your preview.', front: 'FRONT VIEW', side: 'SIDE VIEW', full: 'FULL BODY' },
     analysis: { title: 'Style Analysis', fit: 'Fit Accuracy', color: 'Color Match', style: 'Style Score', tips: 'Tips for Perfection' },
     usedImages: 'Input Images',
     footer: '© 2026 Developed by boood0003'
@@ -546,21 +546,23 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex justify-center">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
               {[
-                { img: results?.front, label: t.results.front, id: 'generated-look' }
+                { img: results?.front, label: t.results.front, id: 'front-view' },
+                { img: results?.side, label: t.results.side, id: 'side-view' },
+                { img: results?.full, label: t.results.full, id: 'full-body' }
               ].map((view, i) => (
-                <div key={i} className="space-y-3 group w-full max-w-lg">
+                <div key={i} className="space-y-4 group w-full">
                   <p className="text-xs uppercase tracking-widest text-zinc-500 font-bold text-center">{view.label}</p>
-                  <div className="glass-effect rounded-2xl overflow-hidden shadow-xl aspect-[3/4] relative hover:ring-2 hover:ring-white/20 transition-all duration-300">
+                  <div className="glass-effect rounded-3xl overflow-hidden shadow-2xl aspect-[3/4] relative hover:ring-2 hover:ring-white/20 transition-all duration-500 hover:scale-[1.02]">
                     <img src={view.img} alt={view.label} className="w-full h-full object-cover" />
                     
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
                       <button 
                         onClick={() => downloadSingleImage(view.img!, view.id)}
-                        className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-white hover:text-black transition-colors flex items-center gap-2"
+                        className="bg-black/50 backdrop-blur-md border border-white/20 text-white px-5 py-2.5 rounded-full text-xs font-bold hover:bg-white hover:text-black transition-all flex items-center gap-2 shadow-lg"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
                         {t.actions.saveThis}

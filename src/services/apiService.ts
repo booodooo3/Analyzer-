@@ -111,7 +111,7 @@ export const performVirtualTryOn = async (person: ImageData, cloth: ImageData, t
         attempts++;
         await new Promise(r => setTimeout(r, pollInterval));
 
-        const statusResponse = await fetch(`/api/generate?id=${predictionId}`, {
+        const statusResponse = await fetch(`/api/generate?id=${encodeURIComponent(predictionId)}`, {
              headers: { 'Authorization': `Bearer ${token}` }
         });
         

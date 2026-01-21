@@ -681,7 +681,13 @@ const App: React.FC = () => {
       <footer className="p-12 border-t border-zinc-900 mt-auto bg-zinc-950">
         <div className="max-w-6xl mx-auto text-center space-y-2">
            <p className="text-zinc-600 text-sm">{t.footer}</p>
-           <p className="text-zinc-600 text-sm">support@analyzer-a.org</p>
+          <p className="text-zinc-600 text-sm">
+            <span>support@analyzer-a.org</span>
+            <span className="mx-2 text-zinc-700">|</span>
+            <a href="https://analyzer-a.org" className="text-white" target="_blank" rel="noreferrer">
+              analyzer-a.org
+            </a>
+          </p>
         </div>
       </footer>
 

@@ -141,6 +141,9 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
         }
 
         const { personImage, clothImage, type, garmentDescription, isPlusMode } = req.body;
+        
+        console.log("📥 Received Request Body Keys:", Object.keys(req.body));
+        console.log("👉 isPlusMode value:", isPlusMode, "Type:", typeof isPlusMode);
 
         if (!personImage || !clothImage) {
             return res.status(400).json({ error: "Both person and cloth images are required." });

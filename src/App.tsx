@@ -211,6 +211,7 @@ const App: React.FC = () => {
   const [isPlusMode, setIsPlusMode] = useState(false);
 
   const handleTryOn = async () => {
+    console.log("🔘 handleTryOn called. isPlusMode:", isPlusMode);
     if (!personImage || !clothImage) return;
     setAppState(AppState.PROCESSING);
     setError(null);

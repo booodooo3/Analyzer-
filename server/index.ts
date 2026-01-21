@@ -142,15 +142,23 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
 
         const { personImage, clothImage, type, garmentDescription, isPlusMode } = req.body;
         
+        // Robust parsing of isPlusMode
+        let isPlusModeBool = false;
+        if (typeof isPlusMode === 'boolean') {
+            isPlusModeBool = isPlusMode;
+        } else if (typeof isPlusMode === 'string') {
+            isPlusModeBool = (isPlusMode === 'true');
+        }
+
         console.log("📥 Received Request Body Keys:", Object.keys(req.body));
-        console.log("👉 isPlusMode value:", isPlusMode, "Type:", typeof isPlusMode);
+        console.log("👉 isPlusMode raw:", isPlusMode, "Parsed:", isPlusModeBool);
 
         if (!personImage || !clothImage) {
             return res.status(400).json({ error: "Both person and cloth images are required." });
         }
         
         // Plus Mode Logic
-        const cost = isPlusMode ? 3 : 1;
+        const cost = isPlusModeBool ? 3 : 1;
         if (currentCredits < cost) {
              return res.status(403).json({
                 error: `Insufficient credits! This action requires ${cost} credits.`,
@@ -167,9 +175,9 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
         // Standard Mode uses "Pro" (Gemini 3 Pro Image)
         // Plus Mode uses "Nano Banana" (Gemini 2.5 Flash Image) as requested
         const modelOwner = "google";
-        const modelName = isPlusMode ? "nano-banana" : "nano-banana-pro";
+        const modelName = isPlusModeBool ? "nano-banana" : "nano-banana-pro";
         
-        console.log(`🚀 Starting Replicate prediction (${modelOwner}/${modelName})... [Plus Mode: ${isPlusMode}]`);
+        console.log(`🚀 Starting Replicate prediction (${modelOwner}/${modelName})... [Plus Mode: ${isPlusModeBool}]`);
         
         // Fetch latest version ID dynamically
         const modelData = await replicate.models.get(modelOwner, modelName);
@@ -196,7 +204,7 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
         };
         
         // If Plus Mode, we generate 3 distinct views
-        if (isPlusMode) {
+        if (isPlusModeBool) {
              console.log("🚀 Starting Plus Mode Prediction (3 views)...");
              
              const prompts = [

@@ -7,6 +7,7 @@ export default function CreditDisplay() {
   if (!isLoaded || !user) return null; 
 
   const credits = (user.publicMetadata.credits as number) ?? 3; 
+  const checkoutUrl = import.meta.env.VITE_FASTSPRING_CHECKOUT_URL as string | undefined;
 
   return ( 
     <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800/50 border border-zinc-700 rounded-lg text-zinc-100">
@@ -16,6 +17,17 @@ export default function CreditDisplay() {
         </span>
         {credits}
       </span> 
+      {checkoutUrl ? (
+        <a
+          className="bg-white text-black px-2 py-0.5 rounded hover:bg-zinc-200 text-xs transition-colors"
+          href={checkoutUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="شراء 10 نقاط"
+        >
+          شراء 10 نقاط
+        </a>
+      ) : null}
     </div> 
   ); 
 } 

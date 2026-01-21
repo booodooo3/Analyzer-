@@ -1,6 +1,5 @@
 
 import { createHmac, timingSafeEqual } from 'crypto';
-import { createHmac, timingSafeEqual } from 'crypto';
 import { createClerkClient } from "@clerk/clerk-sdk-node";
 
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });

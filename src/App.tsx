@@ -87,6 +87,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [isClosetOpen, setIsClosetOpen] = useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [garmentDescription, setGarmentDescription] = useState("");
   const { getToken } = useAuth();
 
@@ -696,8 +697,74 @@ const App: React.FC = () => {
               analyzer-a.org
             </a>
           </p>
+          <button 
+            onClick={() => setIsPrivacyOpen(true)}
+            className="text-zinc-600 text-sm hover:text-white transition-colors underline underline-offset-4 mt-2"
+          >
+            Privacy Policy
+          </button>
         </div>
       </footer>
+
+      {/* PRIVACY POLICY MODAL */}
+      {isPrivacyOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
+           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsPrivacyOpen(false)} />
+           
+           <div className="relative glass-effect w-full max-w-2xl p-8 rounded-[40px] border border-white/10 shadow-2xl space-y-8 overflow-hidden animate-in zoom-in-95 duration-500 max-h-[80vh] overflow-y-auto custom-scrollbar">
+              <div className="flex justify-between items-center border-b border-white/10 pb-4">
+                 <h2 className="text-2xl font-bold tracking-tight text-white">Privacy Policy</h2>
+                 <button 
+                  onClick={() => setIsPrivacyOpen(false)}
+                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+                 >
+                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                   </svg>
+                 </button>
+              </div>
+
+              <div className="space-y-6 text-zinc-300">
+                <p className="text-sm leading-relaxed">
+                  Your privacy is important to us. This policy outlines how we handle your data when you use our AI Virtual Try-On application.
+                </p>
+
+                <div className="space-y-4">
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <h3 className="text-white font-bold mb-1">Data Usage</h3>
+                    <p className="text-sm text-zinc-400">User photos are processed solely for the purpose of generating the try-on result.</p>
+                  </div>
+
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <h3 className="text-white font-bold mb-1">Data Retention</h3>
+                    <p className="text-sm text-zinc-400">Original photos and generated results are automatically permanently deleted from our servers after 24 hours.</p>
+                  </div>
+
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <h3 className="text-white font-bold mb-1">Privacy</h3>
+                    <p className="text-sm text-zinc-400">No human team members view user photos; the process is fully automated.</p>
+                  </div>
+
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <h3 className="text-white font-bold mb-1">AI Training</h3>
+                    <p className="text-sm text-zinc-400">We do NOT use user photos to train our AI models.</p>
+                  </div>
+
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <h3 className="text-white font-bold mb-1">Security</h3>
+                    <p className="text-sm text-zinc-400">We prioritize user privacy given the visual nature of the service.</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="text-center pt-4 border-t border-white/10">
+                <Button variant="outline" onClick={() => setIsPrivacyOpen(false)} className="px-8">
+                  Close
+                </Button>
+              </div>
+           </div>
+        </div>
+      )}
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {

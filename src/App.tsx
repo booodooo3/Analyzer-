@@ -88,6 +88,7 @@ const App: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isClosetOpen, setIsClosetOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [garmentDescription, setGarmentDescription] = useState("");
   const { getToken } = useAuth();
 
@@ -697,12 +698,20 @@ const App: React.FC = () => {
               analyzer-a.org
             </a>
           </p>
-          <button 
-            onClick={() => setIsPrivacyOpen(true)}
-            className="text-zinc-600 text-sm hover:text-white transition-colors underline underline-offset-4 mt-2"
-          >
-            Privacy Policy
-          </button>
+          <div className="flex justify-center gap-6 mt-2">
+            <button 
+              onClick={() => setIsPrivacyOpen(true)}
+              className="text-zinc-600 text-sm hover:text-white transition-colors underline underline-offset-4"
+            >
+              Privacy Policy
+            </button>
+            <button 
+              onClick={() => setIsTermsOpen(true)}
+              className="text-zinc-600 text-sm hover:text-white transition-colors underline underline-offset-4"
+            >
+              Terms of Use
+            </button>
+          </div>
         </div>
       </footer>
 
@@ -759,6 +768,66 @@ const App: React.FC = () => {
               
               <div className="text-center pt-4 border-t border-white/10">
                 <Button variant="outline" onClick={() => setIsPrivacyOpen(false)} className="px-8">
+                  Close
+                </Button>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {/* TERMS OF USE MODAL */}
+      {isTermsOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
+           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsTermsOpen(false)} />
+           
+           <div className="relative glass-effect w-full max-w-2xl p-8 rounded-[40px] border border-white/10 shadow-2xl space-y-8 overflow-hidden animate-in zoom-in-95 duration-500 max-h-[80vh] overflow-y-auto custom-scrollbar">
+              <div className="flex justify-between items-center border-b border-white/10 pb-4">
+                 <h2 className="text-2xl font-bold tracking-tight text-white">Terms of Use</h2>
+                 <button 
+                  onClick={() => setIsTermsOpen(false)}
+                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+                 >
+                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                   </svg>
+                 </button>
+              </div>
+
+              <div className="space-y-6 text-zinc-300">
+                <p className="text-sm leading-relaxed">
+                  Welcome to Analyzer A. By using our AI Virtual Try-On services, you agree to the following terms.
+                </p>
+
+                <div className="space-y-4">
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <h3 className="text-white font-bold mb-1">Prohibited Content</h3>
+                    <p className="text-sm text-zinc-400">Strict ban on uploading nudity, sexually explicit content, or illegal images. Immediate ban for violators.</p>
+                  </div>
+
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <h3 className="text-white font-bold mb-1">AI Disclaimer</h3>
+                    <p className="text-sm text-zinc-400">Acknowledge that AI results may vary and are not guaranteed to be perfect or 100% realistic.</p>
+                  </div>
+
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <h3 className="text-white font-bold mb-1">Refund Policy</h3>
+                    <p className="text-sm text-zinc-400">No refunds are issued once credits have been used to generate images.</p>
+                  </div>
+
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <h3 className="text-white font-bold mb-1">User Responsibility</h3>
+                    <p className="text-sm text-zinc-400">Users warrant they own the rights to the photos they upload.</p>
+                  </div>
+
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <h3 className="text-white font-bold mb-1">Account Termination</h3>
+                    <p className="text-sm text-zinc-400">We reserve the right to ban users who abuse the system.</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="text-center pt-4 border-t border-white/10">
+                <Button variant="outline" onClick={() => setIsTermsOpen(false)} className="px-8">
                   Close
                 </Button>
               </div>

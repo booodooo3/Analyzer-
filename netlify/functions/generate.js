@@ -101,7 +101,7 @@ export default async (req, context) => {
 
   try {
     const body = await req.json();
-    const { personImage, clothImage, garmentDescription, isPlusMode } = body;
+    const { personImage, clothImage, garmentDescription, isPlusMode, type } = body;
 
     // Robust parsing of isPlusMode
     let isPlusModeBool = false;
@@ -157,7 +157,20 @@ export default async (req, context) => {
 
     const personDataURI = ensureDataURI(personImage);
     const clothDataURI = ensureDataURI(clothImage);
-    const desc = garmentDescription || "A cool outfit";
+    const garmentType = type || 'upper_body';
+    const typeHints = {
+      long_dress: 'long dress (full length)',
+      short_dress: 'short dress (above the knees)',
+      long_skirt: 'long skirt (ankle length)',
+      short_skirt: 'short skirt (above the knees)',
+      shirt: 'top',
+      pants: 'pants',
+      jacket: 'jacket or coat',
+      other: ''
+    };
+    const baseDesc = garmentDescription || "A cool outfit";
+    const typeHint = typeHints[garmentType] || '';
+    const desc = typeHint ? `${baseDesc}. The garment is a ${typeHint}` : baseDesc;
 
     // Deduct Credit
     const cost = isPlusModeBool ? 3 : 1;

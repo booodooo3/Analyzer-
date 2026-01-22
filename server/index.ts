@@ -168,7 +168,19 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
 
         // Default type if not provided
         const garmentType = type || 'upper_body'; 
-        const desc = garmentDescription || "A cool outfit";
+        const typeHints: Record<string, string> = {
+            long_dress: 'long dress (full length)',
+            short_dress: 'short dress (above the knees)',
+            long_skirt: 'long skirt (ankle length)',
+            short_skirt: 'short skirt (above the knees)',
+            shirt: 'top',
+            pants: 'pants',
+            jacket: 'jacket or coat',
+            other: ''
+        };
+        const baseDesc = garmentDescription || "A cool outfit";
+        const typeHint = typeHints[garmentType] || '';
+        const desc = typeHint ? `${baseDesc}. The garment is a ${typeHint}` : baseDesc;
 
         // 1. Start Prediction
         // Define Models
@@ -181,7 +193,10 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
         
         // Fetch latest version ID dynamically
         const modelData = await replicate.models.get(modelOwner, modelName);
-        const versionId = modelData.latest_version.id;
+        const versionId = modelData?.latest_version?.id;
+        if (!versionId) {
+            throw new Error("Model version not available");
+        }
 
         // Prepare Base64 for Replicate
         const personBase64 = personImage.startsWith('http') ? 

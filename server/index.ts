@@ -47,7 +47,7 @@ async function queryReplicate(personImageBase64: string, garmentImageBase64: str
             "google/nano-banana-pro",
             {
               input: {
-                prompt: `A photo of a person wearing ${garmentDescription}. The person is wearing the garment shown in the second image. High quality, realistic.`,
+                prompt: `A photo of a person wearing ${garmentDescription}. The person is wearing the garment shown in the second image. High quality, realistic. MANDATORY: Preserve the person's identity, facial features, and hairstyle from the first image EXACTLY. Do not alter the face, skin tone, or hair. Only modify the clothing area.`,
                 image_input: [personImageBase64, garmentImageBase64],
                 aspect_ratio: "match_input_image",
                 output_format: "png",
@@ -196,7 +196,7 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
         const clothDataURI = clothBase64.startsWith('data:') ? clothBase64 : `data:image/png;base64,${clothBase64}`;
 
         const inputPayload = {
-            prompt: `A photo of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic.`,
+            prompt: `A photo of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. MANDATORY: Preserve the person's identity, facial features, and hairstyle from the first image EXACTLY. Do not alter the face, skin tone, or hair. Only modify the clothing area.`,
             image_input: [personDataURI, clothDataURI],
             aspect_ratio: "match_input_image",
             output_format: "png",
@@ -208,9 +208,9 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
              console.log("🚀 Starting Plus Mode Prediction (3 views)...");
              
              const prompts = [
-                { type: 'front', text: `Front view of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic.` },
-                { type: 'side', text: `Side profile view of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic.` },
-                { type: 'full', text: `Full body shot of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic.` }
+                { type: 'front', text: `Front view of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. MANDATORY: Preserve the person's identity, facial features, and hairstyle from the first image EXACTLY. Do not alter the face, skin tone, or hair. Only modify the clothing area.` },
+                { type: 'side', text: `Side profile view of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. MANDATORY: Preserve the person's identity, facial features, and hairstyle from the first image EXACTLY. Do not alter the face, skin tone, or hair. Only modify the clothing area.` },
+                { type: 'full', text: `Full body shot of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. MANDATORY: Preserve the person's identity, facial features, and hairstyle from the first image EXACTLY. Do not alter the face, skin tone, or hair. Only modify the clothing area.` }
              ];
 
              // Create 3 predictions in parallel

@@ -14,7 +14,7 @@ const HostedButton = () => {
         }
     }, [isResolved]);
 
-    return <div ref={containerRef} id="paypal-container-SBPEKLY44BE8J" className="w-full flex flex-col items-center justify-center min-h-[200px]" />;
+    return <div ref={containerRef} id="paypal-container-SBPEKLY44BE8J" className="w-full min-h-[200px]" />;
 };
 
 export default function PayPalPayment() {
@@ -31,7 +31,9 @@ export default function PayPalPayment() {
         <PayPalScriptProvider options={initialOptions}>
             <div className="w-full">
                 <h2 className="text-xl font-bold mb-6 text-center text-white">Buy 10 Credits ($5)</h2>
-                <HostedButton />
+                <div style={{ width: "300px", margin: "20px auto" }} className="max-w-full">
+                    <HostedButton />
+                </div>
             </div>
         </PayPalScriptProvider>
     );

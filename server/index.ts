@@ -30,6 +30,125 @@ const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
+const paypalBase =
+  process.env.PAYPAL_API_BASE ||
+  (process.env.PAYPAL_ENV === "sandbox"
+    ? "https://api-m.sandbox.paypal.com"
+    : "https://api-m.paypal.com");
+
+async function getPayPalAccessToken(): Promise<string> {
+  const clientId = process.env.PAYPAL_CLIENT_ID;
+  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+  if (!clientId || !clientSecret) {
+    throw new Error("Missing PayPal credentials");
+  }
+
+  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+  const response = await fetch(`${paypalBase}/v1/oauth2/token`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Basic ${auth}`,
+    },
+    body: "grant_type=client_credentials",
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || "Failed to get PayPal access token");
+  }
+
+  const data = await response.json();
+  return data.access_token;
+}
+
+async function getPayPalOrder(orderId: string) {
+  const accessToken = await getPayPalAccessToken();
+  const response = await fetch(`${paypalBase}/v2/checkout/orders/${orderId}`, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || "Failed to fetch PayPal order");
+  }
+
+  return response.json();
+}
+
+function getCreditsFromAmount(amountValue: string) {
+  const creditsPerUsd = Number(process.env.PAYPAL_CREDITS_PER_USD || "2");
+  const amountNumber = Number(amountValue);
+  if (!Number.isFinite(amountNumber) || amountNumber <= 0 || creditsPerUsd <= 0) {
+    return 0;
+  }
+  return Math.round(amountNumber * creditsPerUsd);
+}
+
+app.post('/api/user/add-points', ClerkExpressWithAuth(), async (req: any, res: any) => {
+  try {
+    const { userId } = req.auth;
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const { orderID, amount } = req.body || {};
+    if (!orderID || typeof orderID !== 'string') {
+      return res.status(400).json({ error: "Missing orderID" });
+    }
+
+    const order = await getPayPalOrder(orderID);
+    const status = order?.status;
+    const purchaseUnit = order?.purchase_units?.[0];
+    const captureAmount =
+      purchaseUnit?.payments?.captures?.[0]?.amount?.value ||
+      purchaseUnit?.amount?.value;
+
+    if (status !== "COMPLETED" || !captureAmount) {
+      return res.status(400).json({ error: "Payment not completed" });
+    }
+
+    if (amount && Number(amount) !== Number(captureAmount)) {
+      return res.status(400).json({ error: "Amount mismatch" });
+    }
+
+    const creditsToAdd = getCreditsFromAmount(String(captureAmount));
+    if (!creditsToAdd) {
+      return res.status(400).json({ error: "Invalid amount for credits" });
+    }
+
+    const user = await clerkClient.users.getUser(userId);
+    const currentCredits = typeof user.publicMetadata?.credits === "number" ? user.publicMetadata.credits : 0;
+    const existingOrders = Array.isArray(user.privateMetadata?.paypalOrders)
+      ? user.privateMetadata.paypalOrders.filter((id: any) => typeof id === "string")
+      : [];
+
+    if (existingOrders.includes(orderID)) {
+      return res.json({ ok: true, creditsAdded: 0, credits: currentCredits, alreadyProcessed: true });
+    }
+
+    await clerkClient.users.updateUserMetadata(userId, {
+      publicMetadata: {
+        credits: currentCredits + creditsToAdd
+      },
+      privateMetadata: {
+        paypalOrders: [...existingOrders, orderID]
+      }
+    });
+
+    return res.json({
+      ok: true,
+      creditsAdded: creditsToAdd,
+      credits: currentCredits + creditsToAdd
+    });
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message || "Failed to update points" });
+  }
+});
+
 async function queryReplicate(personImageBase64: string, garmentImageBase64: string, category: string, garmentDescription: string = "A cool outfit"): Promise<string> {
     console.log("🚀 Connecting to Replicate (IDM-VTON)...");
     

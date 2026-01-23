@@ -21,7 +21,7 @@ export default function PayPalPayment() {
     
     // Hosted Buttons Configuration
     const initialOptions = {
-        clientId: "BAA-2DKrXqYDZpVUgC3XUJbfQF39Q7GIOhwuL3MSIOjhghOV4BwpN0hKNVMQu6S7hiW7i_MZVe-cZ1yTiM",
+        clientId: "AQNoA7KjWTwuNVuhy9nKnBzc9jHp6mFif6vFOgLkm7N2M5aHHXHTicVNr09mg_9hJemDso1H2UXwDeDA",
         components: "hosted-buttons",
         disableFunding: "venmo",
         currency: "USD",

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useUser } from "@clerk/clerk-react";
 
 export default function CreditDisplay({ isPlusMode, onTogglePlus }: { isPlusMode?: boolean, onTogglePlus?: () => void }) { 
@@ -13,6 +13,33 @@ export default function CreditDisplay({ isPlusMode, onTogglePlus }: { isPlusMode
       event.preventDefault();
     }
   };
+
+  const paypalContainerId = "paypal-container-VH2RX7QQAK2AG";
+
+  useEffect(() => {
+    const renderButtons = () => {
+      const paypal = (window as any).paypal;
+      const container = document.getElementById(paypalContainerId);
+      if (!paypal?.HostedButtons || !container) return;
+      container.innerHTML = "";
+      paypal.HostedButtons({
+        hostedButtonId: "VH2RX7QQAK2AG",
+      }).render(`#${paypalContainerId}`);
+    };
+
+    const existingScript = document.getElementById("paypal-sdk");
+    if (existingScript) {
+      renderButtons();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.id = "paypal-sdk";
+    script.src = "https://www.paypal.com/sdk/js?client-id=BAA-2DKrXqYDZpVUgC3XUJbfQF39Q7GIOhwuL3MSIOjhghOV4BwpN0hKNVMQu6S7hiW7i_MZVe-cZ1yTiM&components=hosted-buttons&disable-funding=venmo&currency=USD";
+    script.async = true;
+    script.onload = renderButtons;
+    document.head.appendChild(script);
+  }, []);
 
   return ( 
     <div className="flex items-center gap-3">
@@ -57,6 +84,7 @@ export default function CreditDisplay({ isPlusMode, onTogglePlus }: { isPlusMode
           +
         </a>
       </div> 
+      <div id={paypalContainerId} className="min-w-[160px]" />
     </div>
   ); 
 } 

@@ -581,8 +581,8 @@ const App: React.FC = () => {
               ].map((view, i) => (
                 <div key={i} className="space-y-4 group w-full">
                   <p className="text-xs uppercase tracking-widest text-zinc-500 font-bold text-center">{view.label}</p>
-                  <div className="glass-effect rounded-3xl overflow-hidden shadow-2xl aspect-[3/4] relative hover:ring-2 hover:ring-white/20 transition-all duration-500 hover:scale-[1.02]">
-                    <img src={view.img} alt={view.label} className="w-full h-full object-cover" />
+                  <div className="glass-effect rounded-3xl overflow-hidden shadow-2xl aspect-[3/4] relative hover:ring-2 hover:ring-white/20 transition-all duration-500 hover:scale-[1.02] bg-black/30">
+                    <img src={view.img} alt={view.label} className="w-full h-full object-contain" />
                     
                     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
                       <button 
@@ -648,11 +648,11 @@ const App: React.FC = () => {
               <div className="glass-effect p-8 rounded-3xl space-y-4">
                  <h3 className="text-xl font-bold">{t.usedImages}</h3>
                  <div className="flex gap-4">
-                   <div className="flex-1 aspect-square rounded-2xl overflow-hidden border border-zinc-800 grayscale hover:grayscale-0 transition-all">
-                     <img src={personImage?.base64} className="w-full h-full object-cover" />
+                  <div className="flex-1 aspect-square rounded-2xl overflow-hidden border border-zinc-800 grayscale hover:grayscale-0 transition-all bg-black/30">
+                    <img src={personImage?.base64} className="w-full h-full object-contain" />
                    </div>
-                   <div className="flex-1 aspect-square rounded-2xl overflow-hidden border border-zinc-800 grayscale hover:grayscale-0 transition-all">
-                     <img src={clothImage?.base64 || clothImage?.url} className="w-full h-full object-cover" />
+                  <div className="flex-1 aspect-square rounded-2xl overflow-hidden border border-zinc-800 grayscale hover:grayscale-0 transition-all bg-black/30">
+                    <img src={clothImage?.base64 || clothImage?.url} className="w-full h-full object-contain" />
                    </div>
                  </div>
                  <p className="text-[10px] text-zinc-500 italic opacity-50">Powered by Stylestoo AI Engine</p>

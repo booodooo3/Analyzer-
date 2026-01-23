@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from "@clerk/clerk-react";
 import CreditDisplay from './components/CreditDisplay';
+import PayPalPayment from './components/PayPalPayment';
 import { ImageUploader } from './components/ImageUploader';
 import { Button } from './components/Button';
 import { performVirtualTryOn, analyzeStyle } from './services/apiService';
@@ -90,6 +91,7 @@ const App: React.FC = () => {
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [garmentDescription, setGarmentDescription] = useState("");
+  const [currentPath, setCurrentPath] = useState(window.location.pathname || "/");
   const { getToken } = useAuth();
 
   const t = {
@@ -187,6 +189,23 @@ const App: React.FC = () => {
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
       </svg>
     )
+  };
+
+  const isCheckout = currentPath === "/checkout";
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname || "/");
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  const goToCheckout = () => {
+    window.history.pushState({}, "", "/checkout");
+    setCurrentPath("/checkout");
   };
 
   useEffect(() => {
@@ -314,6 +333,7 @@ const App: React.FC = () => {
                 <CreditDisplay 
                   isPlusMode={isPlusMode}
                   onTogglePlus={() => setIsPlusMode(!isPlusMode)}
+                  onCheckout={goToCheckout}
                 />
                 <UserButton />
               </div>
@@ -321,8 +341,12 @@ const App: React.FC = () => {
         </div>
       </nav>
 
-      <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-12">
-        {appState === AppState.IDLE || appState === AppState.ERROR ? (
+      <main className={isCheckout ? "flex-1 w-full px-6 py-12 flex items-center justify-center" : "flex-1 max-w-6xl mx-auto w-full px-6 py-12"}>
+        {isCheckout ? (
+          <div className="w-full max-w-[500px]">
+            <PayPalPayment />
+          </div>
+        ) : appState === AppState.IDLE || appState === AppState.ERROR ? (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <header className="relative mb-12 flex flex-col items-center select-none">
               <h1 className="text-5xl md:text-7xl lg:text-8xl leading-[0.95] font-[900] tracking-tighter bg-gradient-to-b from-[#ffffff] via-[#e5e5e5] to-[#737373] bg-clip-text text-transparent z-10 mb-6 drop-shadow-2xl text-center">

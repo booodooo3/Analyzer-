@@ -1,19 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useUser } from "@clerk/clerk-react";
-import PayPalPayment from './PayPalPayment';
 
-export default function CreditDisplay({ isPlusMode, onTogglePlus }: { isPlusMode?: boolean, onTogglePlus?: () => void }) { 
+export default function CreditDisplay({ isPlusMode, onTogglePlus, onCheckout }: { isPlusMode?: boolean, onTogglePlus?: () => void, onCheckout?: () => void }) { 
   const { user, isLoaded } = useUser(); 
-  const [showPayment, setShowPayment] = useState(false);
 
   if (!isLoaded || !user) return null; 
 
   const credits = (user.publicMetadata.credits as number) ?? 3; 
 
   return ( 
-    <>
-      <div className="flex items-center gap-3">
-        {/* Plus Toggle Button */}
+    <div className="flex items-center gap-3">
         {onTogglePlus && (
           <div className="flex items-center gap-2">
               <span className="text-[9px] text-zinc-500 max-w-[80px] leading-tight text-right hidden sm:block">
@@ -45,29 +41,12 @@ export default function CreditDisplay({ isPlusMode, onTogglePlus }: { isPlusMode
           </span> 
           <button
             className="w-6 h-6 rounded-full bg-white text-black text-sm font-bold flex items-center justify-center hover:bg-zinc-200 transition-colors"
-            onClick={() => setShowPayment(true)}
+            onClick={onCheckout}
             title="شراء نقاط"
           >
             +
           </button>
         </div> 
       </div>
-
-      {showPayment && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in zoom-in-95 duration-200">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md relative shadow-2xl">
-            <button 
-              onClick={() => setShowPayment(false)}
-              className="absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            <PayPalPayment />
-          </div>
-        </div>
-      )}
-    </>
   ); 
 } 

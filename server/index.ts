@@ -127,6 +127,7 @@ app.post('/api/user/add-points', ClerkExpressWithAuth(), async (req: any, res: a
       : [];
 
     if (existingOrders.includes(orderID)) {
+      console.log(`⚠️ Order ${orderID} already processed.`);
       return res.json({ ok: true, creditsAdded: 0, credits: currentCredits, alreadyProcessed: true });
     }
 
@@ -138,6 +139,8 @@ app.post('/api/user/add-points', ClerkExpressWithAuth(), async (req: any, res: a
         paypalOrders: [...existingOrders, orderID]
       }
     });
+    
+    console.log(`✅ Successfully added ${creditsToAdd} credits to user ${userId}. New total: ${currentCredits + creditsToAdd}`);
 
     return res.json({
       ok: true,
@@ -145,6 +148,11 @@ app.post('/api/user/add-points', ClerkExpressWithAuth(), async (req: any, res: a
       credits: currentCredits + creditsToAdd
     });
   } catch (error: any) {
+    console.error("❌ Error in /api/user/add-points:", error);
+    console.error("Stack:", error.stack);
+    if (error.response) {
+       console.error("Response data:", await error.response.text().catch(() => "No text"));
+    }
     return res.status(500).json({ error: error.message || "Failed to update points" });
   }
 });

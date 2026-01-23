@@ -1,8 +1,11 @@
 import React from "react";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import { useAuth, useUser } from "@clerk/clerk-react";
 
 export default function PayPalPayment() {
-    
+    const { getToken } = useAuth();
+    const { user } = useUser();
+
     const initialOptions = {
         clientId: "AQNoA7KjWTwuNVuhy9nKnBzc9jHp6mFif6vFOgLkm7N2M5aHHXHTicVNr09mg_9hJemDso1H2UXwDeDA",
         currency: "USD",
@@ -28,8 +31,37 @@ export default function PayPalPayment() {
                     }}
                     onApprove={async (_, actions) => {
                         const order = await actions.order!.capture();
-                        console.log("Payment Successful:", order);
-                        alert("تم الدفع بنجاح! سيتم إضافة النقاط لحسابك.");
+                        const orderID = order?.id;
+                        const amount = order?.purchase_units?.[0]?.amount?.value;
+
+                        if (!orderID || !amount) {
+                            throw new Error("Invalid PayPal order response");
+                        }
+
+                        const token = await getToken();
+                        if (!token) {
+                            throw new Error("Unauthorized");
+                        }
+
+                        const response = await fetch("/api/user/add-points", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": `Bearer ${token}`
+                            },
+                            body: JSON.stringify({
+                                orderID,
+                                amount
+                            })
+                        });
+
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(errorText || "Failed to update points");
+                        }
+
+                        await user?.reload();
+                        alert("تم الدفع بنجاح! تم إضافة النقاط لحسابك.");
                     }}
                     onError={(err) => {
                         console.error("PayPal Error:", err);

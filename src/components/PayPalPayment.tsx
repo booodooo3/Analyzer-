@@ -14,7 +14,7 @@ const HostedButton = () => {
         }
     }, [isResolved]);
 
-    return <div ref={containerRef} id="paypal-container-SBPEKLY44BE8J" className="flex justify-center" />;
+    return <div ref={containerRef} id="paypal-container-SBPEKLY44BE8J" className="w-full flex flex-col items-center justify-center min-h-[200px]" />;
 };
 
 export default function PayPalPayment() {

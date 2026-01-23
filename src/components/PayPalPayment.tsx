@@ -1,53 +1,37 @@
-import React from "react";
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import React, { useEffect, useRef } from "react";
+import { PayPalScriptProvider, usePayPalScriptReducer } from "@paypal/react-paypal-js";
+
+const HostedButton = () => {
+    const [{ isResolved }] = usePayPalScriptReducer();
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (isResolved && containerRef.current && window.paypal && window.paypal.HostedButtons) {
+            containerRef.current.innerHTML = ""; // Clear previous content
+            window.paypal.HostedButtons({
+                hostedButtonId: "SBPEKLY44BE8J",
+            }).render(containerRef.current);
+        }
+    }, [isResolved]);
+
+    return <div ref={containerRef} id="paypal-container-SBPEKLY44BE8J" className="flex justify-center" />;
+};
 
 export default function PayPalPayment() {
     
-    // إعدادات الكونفيج مع الكلاينت آيدي الخاص بك
+    // Hosted Buttons Configuration
     const initialOptions = {
         clientId: "BAA-2DKrXqYDZpVUgC3XUJbfQF39Q7GIOhwuL3MSIOjhghOV4BwpN0hKNVMQu6S7hiW7i_MZVe-cZ1yTiM",
+        components: "hosted-buttons",
+        disableFunding: "venmo",
         currency: "USD",
-        intent: "capture",
     };
 
     return (
         <PayPalScriptProvider options={initialOptions}>
-            <div style={{ maxWidth: "750px", minHeight: "200px" }} className="w-full">
-                
-                <h2 className="text-xl font-bold mb-4 text-center text-white">شراء 10 نقاط (5$)</h2>
-                
-                <PayPalButtons
-                    style={{ layout: "vertical" }}
-                    
-                    // 1. إنشاء الطلب عند الضغط
-                    createOrder={(data, actions) => {
-                        return actions.order.create({
-                            purchase_units: [
-                                {
-                                    description: "10 Points Package",
-                                    amount: {
-                                        value: "5.00", // السعر هنا
-                                    },
-                                },
-                            ],
-                        });
-                    }}
-
-                    // 2. ماذا يحدث عند نجاح الدفع
-                    onApprove={async (data, actions) => {
-                        const order = await actions.order!.capture();
-                        console.log("Payment Successful:", order);
-                        
-                        // هنا تضع كود إضافة النقاط للمستخدم
-                        alert("تم الدفع بنجاح! سيتم إضافة النقاط لحسابك.");
-                    }}
-
-                    // 3. التعامل مع الأخطاء
-                    onError={(err) => {
-                        console.error("PayPal Error:", err);
-                        alert("حدث خطأ أثناء عملية الدفع.");
-                    }}
-                />
+            <div className="w-full">
+                <h2 className="text-xl font-bold mb-6 text-center text-white">Buy 10 Credits ($5)</h2>
+                <HostedButton />
             </div>
         </PayPalScriptProvider>
     );

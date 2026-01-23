@@ -43,7 +43,7 @@ export default function PayPalPayment() {
                             throw new Error("Unauthorized");
                         }
 
-                        const response = await fetch("/api/user/add-points", {
+                        const response = await fetch("/api/add-points", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
@@ -57,15 +57,21 @@ export default function PayPalPayment() {
 
                         if (!response.ok) {
                             const errorText = await response.text();
-                            throw new Error(errorText || "Failed to update points");
+                            // Try to parse JSON error if possible
+                            try {
+                                const errorJson = JSON.parse(errorText);
+                                throw new Error(errorJson.error || errorText);
+                            } catch (e) {
+                                throw new Error(errorText || "Failed to update points");
+                            }
                         }
 
                         await user?.reload();
                         alert("تم الدفع بنجاح! تم إضافة النقاط لحسابك.");
                     }}
-                    onError={(err) => {
+                    onError={(err: any) => {
                         console.error("PayPal Error:", err);
-                        alert("حدث خطأ أثناء عملية الدفع.");
+                        alert(`حدث خطأ أثناء عملية الدفع: ${err.message || err}`);
                     }}
                 />
             </div>

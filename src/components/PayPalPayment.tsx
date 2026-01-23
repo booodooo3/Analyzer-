@@ -7,6 +7,7 @@ export default function PayPalPayment() {
         clientId: "AQNoA7KjWTwuNVuhy9nKnBzc9jHp6mFif6vFOgLkm7N2M5aHHXHTicVNr09mg_9hJemDso1H2UXwDeDA",
         currency: "USD",
         intent: "capture",
+        disableFunding: "applepay,venmo",
     };
 
     return (

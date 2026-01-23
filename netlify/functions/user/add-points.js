@@ -118,6 +118,7 @@ export default async (req) => {
       : [];
 
     if (existingOrders.includes(orderID)) {
+      console.log(`⚠️ Order ${orderID} already processed.`);
       return new Response(JSON.stringify({ ok: true, creditsAdded: 0, credits: currentCredits, alreadyProcessed: true }), { status: 200, headers });
     }
 
@@ -130,12 +131,15 @@ export default async (req) => {
       }
     });
 
+    console.log(`✅ Successfully added ${creditsToAdd} credits to user ${userId}. New total: ${currentCredits + creditsToAdd}`);
+
     return new Response(JSON.stringify({
       ok: true,
       creditsAdded: creditsToAdd,
       credits: currentCredits + creditsToAdd
     }), { status: 200, headers });
   } catch (error) {
+    console.error("❌ Error in add-points function:", error);
     return new Response(JSON.stringify({ error: error.message || "Failed to update points" }), { status: 500, headers });
   }
 };

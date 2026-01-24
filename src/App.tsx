@@ -573,7 +573,7 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            <div className={`grid grid-cols-1 ${isPlusMode ? "md:grid-cols-3" : "md:grid-cols-1"} gap-8 w-full`}>
+            <div className={`grid grid-cols-1 ${isPlusMode ? "md:grid-cols-3" : "md:grid-cols-1 max-w-md mx-auto"} gap-8 w-full`}>
               {(isPlusMode ? [
                 { img: results?.front, label: t.results.front, id: 'front-view' },
                 { img: results?.side, label: t.results.side, id: 'side-view' },

@@ -142,7 +142,7 @@ const App: React.FC = () => {
     },
     actions: { start: 'Start Morphing', cancel: 'Cancel', save: 'Save Result', saveThis: 'Save Image', tryAgain: 'Try Another', downloading: 'Downloading...' },
     steps: ['Analyzing images...', 'Identifying textures...', 'Mapping physique...', 'Generating image...', 'Polishing results...'],
-    results: { title: 'Final Results', subtitle: 'Three distinct angles generated for your preview.', front: 'FRONT VIEW', side: 'SIDE VIEW', full: 'FULL BODY' },
+    results: { title: 'Final Results', subtitle: 'Three distinct angles generated for your preview.', singleSubtitle: 'Single image generated for your preview.', single: 'RESULT', front: 'FRONT VIEW', side: 'SIDE VIEW', full: 'FULL BODY' },
     analysis: { title: 'Style Analysis', fit: 'Fit Accuracy', color: 'Color Match', style: 'Style Score', tips: 'Tips for Perfection' },
     usedImages: 'Input Images',
     footer: '© 2026 Developed by boood0003'
@@ -565,7 +565,7 @@ const App: React.FC = () => {
             <div className="flex flex-col md:flex-row justify-between items-center md:items-end gap-4 mb-8">
               <div className="text-center md:text-right">
                 <h2 className="text-3xl font-bold">{t.results.title}</h2>
-                <p className="text-zinc-400">{t.results.subtitle}</p>
+                <p className="text-zinc-400">{isPlusMode ? t.results.subtitle : t.results.singleSubtitle}</p>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={reset}>{t.actions.tryAgain}</Button>
@@ -573,12 +573,14 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
-              {[
+            <div className={`grid grid-cols-1 ${isPlusMode ? "md:grid-cols-3" : "md:grid-cols-1"} gap-8 w-full`}>
+              {(isPlusMode ? [
                 { img: results?.front, label: t.results.front, id: 'front-view' },
                 { img: results?.side, label: t.results.side, id: 'side-view' },
                 { img: results?.full, label: t.results.full, id: 'full-body' }
-              ].map((view, i) => (
+              ] : [
+                { img: results?.front, label: t.results.single, id: 'result-view' }
+              ]).map((view, i) => (
                 <div key={i} className="space-y-4 group w-full">
                   <p className="text-xs uppercase tracking-widest text-zinc-500 font-bold text-center">{view.label}</p>
                   <div className="glass-effect rounded-3xl overflow-hidden shadow-2xl aspect-[3/4] relative hover:ring-2 hover:ring-white/20 transition-all duration-500 hover:scale-[1.02] bg-black/30">

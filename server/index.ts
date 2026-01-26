@@ -271,8 +271,7 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
             image_input: [personDataURI, clothDataURI],
             aspect_ratio: "match_input_image",
             output_format: isPlusModeBool ? "png" : "jpg",
-            output_quality: isPlusModeBool ? 90 : 50,
-            num_inference_steps: isPlusModeBool ? 50 : 20,
+            resolution: isPlusModeBool ? "2K" : "1K",
             safety_filter_level: "block_only_high"
         };
         

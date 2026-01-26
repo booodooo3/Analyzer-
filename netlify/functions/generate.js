@@ -201,8 +201,7 @@ export default async (req, context) => {
           image_input: [personDataURI, clothDataURI],
           aspect_ratio: "match_input_image",
           output_format: effectivePlusMode ? "png" : "jpg",
-          output_quality: effectivePlusMode ? 90 : 50,
-          num_inference_steps: effectivePlusMode ? 50 : 20,
+          resolution: effectivePlusMode ? "2K" : "1K",
           safety_filter_level: "block_only_high"
     };
 

@@ -178,6 +178,7 @@ async function queryReplicate(personImageBase64: string, garmentImageBase64: str
                 image_input: [personImageBase64, garmentImageBase64],
                 aspect_ratio: "match_input_image",
                 output_format: "png",
+                num_inference_steps: 30,
                 safety_filter_level: "block_only_high"
               }
             }

@@ -101,7 +101,7 @@ export default async (req, context) => {
 
   try {
     const body = await req.json();
-    const { personImage, clothImage, garmentDescription, isPlusMode, type } = body;
+    const { personImage, clothImage, garmentDescription, isPlusMode, isBronzeMode, type } = body;
 
     // Robust parsing of isPlusMode
     let isPlusModeBool = false;
@@ -111,8 +111,18 @@ export default async (req, context) => {
         isPlusModeBool = (isPlusMode === 'true');
     }
 
+    let isBronzeModeBool = false;
+    if (typeof isBronzeMode === 'boolean') {
+        isBronzeModeBool = isBronzeMode;
+    } else if (typeof isBronzeMode === 'string') {
+        isBronzeModeBool = (isBronzeMode === 'true');
+    }
+
+    const effectivePlusMode = isPlusModeBool && !isBronzeModeBool;
+
     console.log("📥 Received Request Body Keys:", Object.keys(body));
     console.log("👉 isPlusMode raw:", isPlusMode, "Parsed:", isPlusModeBool);
+    console.log("👉 isBronzeMode raw:", isBronzeMode, "Parsed:", isBronzeModeBool);
 
     // 1. Verify Auth & Credits
     let userId;
@@ -133,7 +143,7 @@ export default async (req, context) => {
         console.log(`👤 User ${userId} requests generation. Credits: ${currentCredits}`);
         
         // Cost Calculation
-        const cost = isPlusModeBool ? 3 : 1;
+        const cost = effectivePlusMode ? 3 : 1;
 
         if (currentCredits < cost) {
             return new Response(JSON.stringify({ error: `Insufficient credits! You need ${cost} credits.` }), { status: 403, headers });
@@ -173,7 +183,7 @@ export default async (req, context) => {
     const desc = typeHint ? `${baseDesc}. The garment is a ${typeHint}` : baseDesc;
 
     // Deduct Credit
-    const cost = isPlusModeBool ? 3 : 1;
+    const cost = effectivePlusMode ? 3 : 1;
     await clerkClient.users.updateUserMetadata(userId, {
         publicMetadata: {
             credits: currentCredits - cost
@@ -183,9 +193,14 @@ export default async (req, context) => {
 
     // Select Model
     const modelOwner = "google";
-    const modelName = isPlusModeBool ? "nano-banana" : "nano-banana-pro";
+    let modelName = "nano-banana-pro";
+    if (isBronzeModeBool) {
+        modelName = "imagen-4";
+    } else if (effectivePlusMode) {
+        modelName = "nano-banana";
+    }
     
-    console.log(`🚀 Starting Replicate prediction (${modelOwner}/${modelName})... [Plus Mode: ${isPlusModeBool}]`);
+    console.log(`🚀 Starting Replicate prediction (${modelOwner}/${modelName})... [Plus Mode: ${effectivePlusMode}] [Bronze Mode: ${isBronzeModeBool}]`);
 
     // Fetch latest version ID dynamically
     const modelData = await replicate.models.get(modelOwner, modelName);
@@ -200,7 +215,7 @@ export default async (req, context) => {
     };
 
     // If Plus Mode, we generate 3 distinct views
-    if (isPlusModeBool) {
+    if (effectivePlusMode) {
          console.log("🚀 Starting Plus Mode Prediction (3 views)...");
          
          const prompts = [

@@ -826,6 +826,17 @@ const App: React.FC = () => {
 
                 <div className="space-y-4">
                   <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <h3 className="text-white font-bold mb-1">Credits & Models</h3>
+                    <p className="text-sm text-zinc-400">Credits 10</p>
+                    <p className="text-sm text-zinc-400 mt-2">
+                      If you us (Plus) he will be ( google/nano-banana ) Click for 3 different images & 3 credits off cost one photo 0.4$ so the three will be 0.12$
+                    </p>
+                    <p className="text-sm text-zinc-400 mt-2">
+                      but without ( plus ) will be one photo and the model ( google/nano-banana-pro ) cost 0.15$ for photo
+                    </p>
+                  </div>
+
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
                     <h3 className="text-white font-bold mb-1">Prohibited Content</h3>
                     <p className="text-sm text-zinc-400">Strict ban on uploading nudity, sexually explicit content, or illegal images. Immediate ban for violators.</p>
                   </div>

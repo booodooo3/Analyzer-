@@ -332,7 +332,15 @@ const App: React.FC = () => {
               <div className="flex items-center gap-3">
                 <CreditDisplay 
                   isPlusMode={isPlusMode}
-                  onTogglePlus={() => setIsPlusMode(!isPlusMode)}
+                  onTogglePlus={() => {
+                    setIsPlusMode(!isPlusMode);
+                    if (!isPlusMode) setIsBronzeMode(false);
+                  }}
+                  isBronzeMode={isBronzeMode}
+                  onToggleBronze={() => {
+                    setIsBronzeMode(!isBronzeMode);
+                    if (!isBronzeMode) setIsPlusMode(false);
+                  }}
                   onCheckout={goToCheckout}
                 />
                 <UserButton />

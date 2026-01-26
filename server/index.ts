@@ -267,7 +267,7 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
             });
         }
 
-        const { personImage, clothImage, type, garmentDescription, isPlusMode } = req.body;
+        const { personImage, clothImage, type, garmentDescription, isPlusMode, isBronzeMode } = req.body;
         
         // Robust parsing of isPlusMode
         let isPlusModeBool = false;
@@ -277,14 +277,25 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
             isPlusModeBool = (isPlusMode === 'true');
         }
 
+        // Robust parsing of isBronzeMode
+        let isBronzeModeBool = false;
+        if (typeof isBronzeMode === 'boolean') {
+            isBronzeModeBool = isBronzeMode;
+        } else if (typeof isBronzeMode === 'string') {
+            isBronzeModeBool = (isBronzeMode === 'true');
+        }
+
         console.log("📥 Received Request Body Keys:", Object.keys(req.body));
         console.log("👉 isPlusMode raw:", isPlusMode, "Parsed:", isPlusModeBool);
+        console.log("👉 isBronzeMode raw:", isBronzeMode, "Parsed:", isBronzeModeBool);
 
         if (!personImage || !clothImage) {
             return res.status(400).json({ error: "Both person and cloth images are required." });
         }
         
-        // Plus Mode Logic
+        // Plus Mode Logic (3 credits)
+        // Bronze Mode Logic (let's assume 1 credit for now unless specified, but user didn't specify cost)
+        // Standard Mode (1 credit)
         const cost = isPlusModeBool ? 3 : 1;
         if (currentCredits < cost) {
              return res.status(403).json({
@@ -312,11 +323,18 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
         // 1. Start Prediction
         // Define Models
         // Standard Mode uses "Pro" (Gemini 3 Pro Image)
-        // Plus Mode uses "Nano Banana" (Gemini 2.5 Flash Image) as requested
+        // Plus Mode uses "Nano Banana" (Gemini 2.5 Flash Image)
+        // Bronze Mode uses "Imagen 4" (google/imagen-4)
         const modelOwner = "google";
-        const modelName = isPlusModeBool ? "nano-banana" : "nano-banana-pro";
+        let modelName = "nano-banana-pro"; // Default
+
+        if (isBronzeModeBool) {
+            modelName = "imagen-4";
+        } else if (isPlusModeBool) {
+            modelName = "nano-banana";
+        }
         
-        console.log(`🚀 Starting Replicate prediction (${modelOwner}/${modelName})... [Plus Mode: ${isPlusModeBool}]`);
+        console.log(`🚀 Starting Replicate prediction (${modelOwner}/${modelName})... [Plus: ${isPlusModeBool}, Bronze: ${isBronzeModeBool}]`);
         
         // Fetch latest version ID dynamically
         const modelData = await replicate.models.get(modelOwner, modelName);

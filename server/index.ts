@@ -157,93 +157,6 @@ app.post('/api/user/add-points', ClerkExpressWithAuth(), async (req: any, res: a
   }
 });
 
-async function queryReplicate(personImageBase64: string, garmentImageBase64: string, category: string, garmentDescription: string = "A cool outfit"): Promise<string> {
-    console.log("🚀 Connecting to Replicate (IDM-VTON)...");
-    
-    // Ensure we have a token
-    if (!process.env.REPLICATE_API_TOKEN) {
-        throw new Error("REPLICATE_API_TOKEN is missing from .env.local");
-    }
-
-    // Run the model
-    // Using: google/nano-banana-pro
-    console.log("🍌 Using Model: google/nano-banana-pro");
-    let output;
-    try {
-        output = await replicate.run(
-            "google/nano-banana-pro",
-            {
-              input: {
-                prompt: `A photo of a person wearing ${garmentDescription}. The person is wearing the garment shown in the second image. High quality, realistic. MANDATORY: Preserve the person's identity, facial features, and hairstyle from the first image EXACTLY. Do not alter the face, skin tone, or hair. Only modify the clothing area.`,
-                image_input: [personImageBase64, garmentImageBase64],
-                aspect_ratio: "match_input_image",
-                output_format: "png",
-                safety_filter_level: "block_only_high"
-              }
-            }
-        );
-        console.log("✅ Raw Replicate Output:", output);
-    } catch (err) {
-        console.error("❌ Replicate Run Error:", err);
-        throw err;
-    }
-
-    console.log("✅ Replicate Output Type:", typeof output);
-    
-    // Replicate returns the URL directly (usually string or string[])
-    if (typeof output === 'string') return output;
-    if (Array.isArray(output) && output.length > 0) return output[0];
-    
-    // Handle FileOutput object (has url() method) - common for google/nano-banana
-    if (output && typeof (output as any).url === 'function') {
-        console.log("✅ Output is a FileOutput, calling .url()");
-        return (output as any).url().toString();
-    }
-
-    // Handle if it is an object with url property
-    if (output && (output as any).url) {
-        return (output as any).url.toString();
-    }
-    
-    console.error("❌ Unexpected Replicate Output:", output);
-    throw new Error("Replicate did not return a valid image URL.");
-}
-
-
-async function queryOOTDiffusion(personImageBase64: string, garmentImageBase64: string, category: string): Promise<string> {
-    console.log(`🚀 Connecting to Hugging Face (OOTDiffusion) for ${category}...`);
-    
-    const token = process.env.HUGGING_FACE_TOKEN;
-    const options = token ? { hf_token: token as `hf_${string}` } : undefined;
-    
-    const client = await Client.connect("levihsu/OOTDiffusion", options as any);
-    
-    // Map 'type' to OOTDiffusion categories: 'Upper-body', 'Lower-body', 'Dress'
-    // Note: These values are case-sensitive and must match the API exactly.
-    let modelCategory = 'Upper-body';
-    if (category === 'bottom') modelCategory = 'Lower-body';
-    if (category === 'full' || category === 'dresses') modelCategory = 'Dress';
-
-    // OOTDiffusion expects specific parameters including category
-    const result = await client.predict("/process_dc", { 
-		vton_img: await (await fetch(personImageBase64)).blob(), 
-		garm_img: await (await fetch(garmentImageBase64)).blob(), 
-		category: modelCategory,
-		n_samples: 1, 
-		n_steps: 20, 
-		image_scale: 2, 
-		seed: -1, 
-    });
-
-    const generatedImage = (result as any).data[0];
-    
-    if (!generatedImage || !generatedImage.url) {
-        throw new Error("OOTDiffusion did not return a valid image URL.");
-    }
-    
-    return generatedImage.url;
-}
-
 app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => {
     try {
         // 1. Auth Check
@@ -269,6 +182,9 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
 
         const { personImage, clothImage, type, garmentDescription, isPlusMode, isBronzeMode } = req.body;
         
+        console.log("📥 Request Body keys:", Object.keys(req.body));
+        console.log("👉 Raw isBronzeMode:", isBronzeMode, "Type:", typeof isBronzeMode);
+        
         // Robust parsing of isPlusMode
         let isPlusModeBool = false;
         if (typeof isPlusMode === 'boolean') {
@@ -285,9 +201,8 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
             isBronzeModeBool = (isBronzeMode === 'true');
         }
 
-        console.log("📥 Received Request Body Keys:", Object.keys(req.body));
-        console.log("👉 isPlusMode raw:", isPlusMode, "Parsed:", isPlusModeBool);
-        console.log("👉 isBronzeMode raw:", isBronzeMode, "Parsed:", isBronzeModeBool);
+        console.log("� Parsed isPlusMode:", isPlusModeBool);
+        console.log("👉 Parsed isBronzeMode:", isBronzeModeBool);
 
         if (!personImage || !clothImage) {
             return res.status(400).json({ error: "Both person and cloth images are required." });
@@ -330,11 +245,15 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
 
         if (isBronzeModeBool) {
             modelName = "imagen-4";
+            console.log("🥉 BRONZE MODE DETECTED: Switching to google/imagen-4");
         } else if (isPlusModeBool) {
             modelName = "nano-banana";
+            console.log("➕ PLUS MODE DETECTED: Switching to google/nano-banana");
+        } else {
+            console.log("🍌 STANDARD MODE: Using google/nano-banana-pro");
         }
         
-        console.log(`🚀 Starting Replicate prediction (${modelOwner}/${modelName})... [Plus: ${isPlusModeBool}, Bronze: ${isBronzeModeBool}]`);
+        console.log(`🚀 Starting Replicate prediction (${modelOwner}/${modelName})...`);
         
         // Fetch latest version ID dynamically
         const modelData = await replicate.models.get(modelOwner, modelName);

@@ -180,10 +180,9 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
             });
         }
 
-        const { personImage, clothImage, type, garmentDescription, isPlusMode, isBronzeMode } = req.body;
+        const { personImage, clothImage, type, garmentDescription, isPlusMode } = req.body;
         
         console.log("📥 Request Body keys:", Object.keys(req.body));
-        console.log("👉 Raw isBronzeMode:", isBronzeMode, "Type:", typeof isBronzeMode);
         
         // Robust parsing of isPlusMode
         let isPlusModeBool = false;
@@ -193,16 +192,7 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
             isPlusModeBool = (isPlusMode === 'true');
         }
 
-        // Robust parsing of isBronzeMode
-        let isBronzeModeBool = false;
-        if (typeof isBronzeMode === 'boolean') {
-            isBronzeModeBool = isBronzeMode;
-        } else if (typeof isBronzeMode === 'string') {
-            isBronzeModeBool = (isBronzeMode === 'true');
-        }
-
-        console.log("� Parsed isPlusMode:", isPlusModeBool);
-        console.log("👉 Parsed isBronzeMode:", isBronzeModeBool);
+        console.log(" Parsed isPlusMode:", isPlusModeBool);
 
         if (!personImage || !clothImage) {
             return res.status(400).json({ error: "Both person and cloth images are required." });
@@ -239,14 +229,10 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
         // Define Models
         // Standard Mode uses "Pro" (Gemini 3 Pro Image)
         // Plus Mode uses "Nano Banana" (Gemini 2.5 Flash Image)
-        // Bronze Mode uses "Imagen 4" (google/imagen-4)
         const modelOwner = "google";
         let modelName = "nano-banana-pro"; // Default
 
-        if (isBronzeModeBool) {
-            modelName = "imagen-4";
-            console.log("🥉 BRONZE MODE DETECTED: Switching to google/imagen-4");
-        } else if (isPlusModeBool) {
+        if (isPlusModeBool) {
             modelName = "nano-banana";
             console.log("➕ PLUS MODE DETECTED: Switching to google/nano-banana");
         } else {

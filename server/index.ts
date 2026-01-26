@@ -270,7 +270,7 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
             prompt: `A photo of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. MANDATORY: Preserve the person's identity, facial features, and hairstyle from the first image EXACTLY. Do not alter the face, skin tone, or hair. Only modify the clothing area.`,
             image_input: [personDataURI, clothDataURI],
             aspect_ratio: "match_input_image",
-            output_format: "png",
+            output_format: isPlusModeBool ? "png" : "jpg",
             safety_filter_level: "block_only_high"
         };
         

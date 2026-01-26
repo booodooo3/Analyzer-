@@ -101,7 +101,7 @@ export default async (req, context) => {
 
   try {
     const body = await req.json();
-    const { personImage, clothImage, garmentDescription, isPlusMode, isBronzeMode, type } = body;
+    const { personImage, clothImage, garmentDescription, isPlusMode, type } = body;
 
     // Robust parsing of isPlusMode
     let isPlusModeBool = false;
@@ -111,18 +111,10 @@ export default async (req, context) => {
         isPlusModeBool = (isPlusMode === 'true');
     }
 
-    let isBronzeModeBool = false;
-    if (typeof isBronzeMode === 'boolean') {
-        isBronzeModeBool = isBronzeMode;
-    } else if (typeof isBronzeMode === 'string') {
-        isBronzeModeBool = (isBronzeMode === 'true');
-    }
-
-    const effectivePlusMode = isPlusModeBool && !isBronzeModeBool;
+    const effectivePlusMode = isPlusModeBool;
 
     console.log("📥 Received Request Body Keys:", Object.keys(body));
     console.log("👉 isPlusMode raw:", isPlusMode, "Parsed:", isPlusModeBool);
-    console.log("👉 isBronzeMode raw:", isBronzeMode, "Parsed:", isBronzeModeBool);
 
     // 1. Verify Auth & Credits
     let userId;
@@ -194,13 +186,11 @@ export default async (req, context) => {
     // Select Model
     const modelOwner = "google";
     let modelName = "nano-banana-pro";
-    if (isBronzeModeBool) {
-        modelName = "imagen-4";
-    } else if (effectivePlusMode) {
+    if (effectivePlusMode) {
         modelName = "nano-banana";
     }
     
-    console.log(`🚀 Starting Replicate prediction (${modelOwner}/${modelName})... [Plus Mode: ${effectivePlusMode}] [Bronze Mode: ${isBronzeModeBool}]`);
+    console.log(`🚀 Starting Replicate prediction (${modelOwner}/${modelName})... [Plus Mode: ${effectivePlusMode}]`);
 
     // Fetch latest version ID dynamically
     const modelData = await replicate.models.get(modelOwner, modelName);
@@ -209,7 +199,7 @@ export default async (req, context) => {
     const inputPayload = {
           prompt: `A photo of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. MANDATORY: Preserve the person's identity, facial features, and hairstyle from the first image EXACTLY. Do not alter the face, skin tone, or hair. Only modify the clothing area.`,
           image_input: [personDataURI, clothDataURI],
-          aspect_ratio: isBronzeModeBool ? "3:4" : "match_input_image",
+          aspect_ratio: "match_input_image",
           output_format: "png",
           safety_filter_level: "block_only_high"
     };

@@ -230,10 +230,9 @@ const App: React.FC = () => {
   };
 
   const [isPlusMode, setIsPlusMode] = useState(false);
-  const [isBronzeMode, setIsBronzeMode] = useState(false);
 
   const handleTryOn = async () => {
-    console.log("🔘 handleTryOn called. isPlusMode:", isPlusMode, "isBronzeMode:", isBronzeMode);
+    console.log("🔘 handleTryOn called. isPlusMode:", isPlusMode);
     if (!personImage || !clothImage) return;
     setAppState(AppState.PROCESSING);
     setError(null);
@@ -245,7 +244,7 @@ const App: React.FC = () => {
       if (!token) {
         throw new Error('Please sign in to continue');
       }
-      const resultData = await performVirtualTryOn(personImage, clothImage, garmentType, token, garmentDescription, isPlusMode, isBronzeMode);
+      const resultData = await performVirtualTryOn(personImage, clothImage, garmentType, token, garmentDescription, isPlusMode);
       setResults(resultData);
       
       const styleAnalysis = await analyzeStyle(resultData.front);
@@ -335,12 +334,6 @@ const App: React.FC = () => {
                   isPlusMode={isPlusMode}
                   onTogglePlus={() => {
                     setIsPlusMode(!isPlusMode);
-                    if (!isPlusMode) setIsBronzeMode(false);
-                  }}
-                  isBronzeMode={isBronzeMode}
-                  onToggleBronze={() => {
-                    setIsBronzeMode(!isBronzeMode);
-                    if (!isBronzeMode) setIsPlusMode(false);
                   }}
                   onCheckout={goToCheckout}
                 />

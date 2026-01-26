@@ -52,6 +52,9 @@ async function getPayPalOrder(orderId) {
 }
 
 function getCreditsFromAmount(amountValue) {
+  if (String(amountValue) === "15.00" || String(amountValue) === "15") {
+    return 10;
+  }
   const creditsPerUsd = Number(process.env.PAYPAL_CREDITS_PER_USD || "2");
   const amountNumber = Number(amountValue);
   if (!Number.isFinite(amountNumber) || amountNumber <= 0 || creditsPerUsd <= 0) {

@@ -16,15 +16,18 @@ export default function PayPalPayment() {
     return (
         <PayPalScriptProvider options={initialOptions}>
             <div className="w-full">
-                <h2 className="text-xl font-bold mb-6 text-center text-white">Buy 10 Credits ($5)</h2>
+                <h2 className="text-xl font-bold mb-6 text-center text-white">Buy 10 Credits ($15)</h2>
                 <PayPalButtons
                     style={{ layout: "vertical" }}
                     createOrder={(_, actions) => {
                         return actions.order.create({
                             purchase_units: [
                                 {
-                                    description: "10 Points Package",
-                                    amount: { value: "5.00" },
+                                    description: "10 Credits",
+                                    amount: {
+                                        value: "15.00",
+                                        currency_code: "USD",
+                                    },
                                 },
                             ],
                         });

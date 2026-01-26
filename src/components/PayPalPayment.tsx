@@ -5,6 +5,20 @@ import { useAuth, useUser } from "@clerk/clerk-react";
 export default function PayPalPayment() {
     const { getToken } = useAuth();
     const { user } = useUser();
+    const credits = (user?.publicMetadata?.credits as number) || 0;
+
+    if (credits > 0) {
+        return (
+            <div className="text-center py-6 border border-gray-600 rounded-lg bg-gray-900">
+                <h3 className="text-xl text-white font-bold mb-2">
+                    You have {credits} {credits === 1 ? 'Credit' : 'Credits'}
+                </h3>
+                <p className="text-gray-400 text-sm">
+                    Please use all your credits before purchasing a new pack.
+                </p>
+            </div>
+        );
+    }
 
     const initialOptions = {
         clientId: "AQNoA7KjWTwuNVuhy9nKnBzc9jHp6mFif6vFOgLkm7N2M5aHHXHTicVNr09mg_9hJemDso1H2UXwDeDA",

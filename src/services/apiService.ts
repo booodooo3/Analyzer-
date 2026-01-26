@@ -104,7 +104,7 @@ export const performVirtualTryOn = async (person: ImageData, cloth: ImageData, t
 
     // 2. Poll for status
     const pollInterval = 3000; // 3 seconds
-    const maxAttempts = 40; // 2 minutes timeout
+    const maxAttempts = 100; // 5 minutes timeout
     let attempts = 0;
 
     while (attempts < maxAttempts) {

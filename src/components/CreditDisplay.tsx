@@ -41,6 +41,7 @@ export default function CreditDisplay({
                 </span>
                 <div className={`w-2 h-2 rounded-full ${isPlusMode ? 'bg-white animate-pulse' : 'bg-zinc-600'}`} />
                 </button>
+                <span className="text-[9px] font-thin text-zinc-500 mt-0.5 tracking-wider">Press</span>
               </div>
           </div>
         )}

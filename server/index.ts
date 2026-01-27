@@ -30,6 +30,39 @@ const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
+// Helper: Sleep function
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+// Helper: Retry Mechanism for Replicate API
+async function createPredictionWithRetry(replicateInstance: any, options: any, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await replicateInstance.predictions.create(options);
+    } catch (error: any) {
+      // Check for 429 Too Many Requests
+      const isRateLimit = error.message?.includes("429") || error.status === 429;
+      
+      if (isRateLimit && i < maxRetries - 1) {
+        let waitTime = 2000; // Default 2 seconds
+        
+        // Try to extract retry_after from error message or object
+        // Example: ... "retry_after":1 ...
+        const match = error.message?.match(/"retry_after":\s*(\d+)/);
+        if (match && match[1]) {
+             waitTime = parseInt(match[1], 10) * 1000;
+        } else if (error.retry_after) {
+             waitTime = error.retry_after * 1000;
+        }
+
+        console.log(`⚠️ Rate limited (429). Retrying in ${waitTime/1000}s... (Attempt ${i + 1}/${maxRetries})`);
+        await sleep(waitTime);
+        continue;
+      }
+      throw error;
+    }
+  }
+}
+
 const paypalBase =
   process.env.PAYPAL_API_BASE ||
   (process.env.PAYPAL_ENV === "sandbox"
@@ -287,7 +320,7 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
 
              // Create 3 predictions in parallel
              const predictions = await Promise.all(prompts.map(p => 
-                replicate.predictions.create({
+                createPredictionWithRetry(replicate, {
                     version: versionId,
                     input: {
                         ...inputPayload,
@@ -314,7 +347,7 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
         }
         
         // Standard Mode (Single Image)
-        const prediction = await replicate.predictions.create({
+        const prediction = await createPredictionWithRetry(replicate, {
             version: versionId,
             input: inputPayload
         });

@@ -3,6 +3,39 @@ import { createClerkClient } from "@clerk/clerk-sdk-node";
 
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
+// Helper: Sleep function
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+// Helper: Retry Mechanism for Replicate API
+async function createPredictionWithRetry(replicateInstance, options, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await replicateInstance.predictions.create(options);
+    } catch (error) {
+      // Check for 429 Too Many Requests
+      const isRateLimit = error.message?.includes("429") || error.status === 429;
+      
+      if (isRateLimit && i < maxRetries - 1) {
+        let waitTime = 2000; // Default 2 seconds
+        
+        // Try to extract retry_after from error message or object
+        // Example: ... "retry_after":1 ...
+        const match = error.message?.match(/"retry_after":\s*(\d+)/);
+        if (match && match[1]) {
+             waitTime = parseInt(match[1], 10) * 1000;
+        } else if (error.retry_after) {
+             waitTime = error.retry_after * 1000;
+        }
+
+        console.log(`⚠️ Rate limited (429). Retrying in ${waitTime/1000}s... (Attempt ${i + 1}/${maxRetries})`);
+        await sleep(waitTime);
+        continue;
+      }
+      throw error;
+    }
+  }
+}
+
 export default async (req, context) => {
   const replicate = new Replicate({
     auth: process.env.REPLICATE_API_TOKEN,
@@ -217,7 +250,7 @@ export default async (req, context) => {
 
          // Create 3 predictions in parallel
          const predictions = await Promise.all(prompts.map(p => 
-            replicate.predictions.create({
+            createPredictionWithRetry(replicate, {
                 version: versionId,
                 input: {
                     ...inputPayload,
@@ -237,7 +270,7 @@ export default async (req, context) => {
     }
 
     // Standard Mode (Single Image)
-    const prediction = await replicate.predictions.create({
+    const prediction = await createPredictionWithRetry(replicate, {
       version: versionId,
       input: inputPayload
     });

@@ -277,6 +277,18 @@ const App: React.FC = () => {
       const response = await fetch(base64);
       const blob = await response.blob();
       const fileName = `stylestoo-${name}.png`;
+
+      // Check if mobile
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+      if (isMobile) {
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        // Clean up after a delay
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        return;
+      }
+
       const picker = (window as any).showSaveFilePicker;
       if (picker) {
         const handle = await picker({

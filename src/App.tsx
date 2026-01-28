@@ -546,19 +546,24 @@ const App: React.FC = () => {
               </div>
             )}
 
-            <div className="flex flex-col md:flex-row justify-center gap-4 pt-8">
-              <Button 
-                onClick={handleTryOn} 
-                className="w-full md:w-64 text-lg font-bold"
-                disabled={!personImage || (!clothImage?.base64 && !clothImage?.url)}
-              >
-                {t.actions.start}
-              </Button>
-              {(personImage || clothImage) && (
-                <Button variant="outline" onClick={reset} className="w-full md:w-32">
-                  {t.actions.cancel}
+            <div className="flex flex-col items-center gap-2 pt-8">
+              <p className="text-[10px] text-zinc-500 font-medium opacity-80">
+                ( للموبايلات: الحفظ يكون بالضغط على الصورة للتحميل، و Save للمشاركة )
+              </p>
+              <div className="flex flex-col md:flex-row justify-center gap-4 w-full">
+                <Button 
+                  onClick={handleTryOn} 
+                  className="w-full md:w-64 text-lg font-bold"
+                  disabled={!personImage || (!clothImage?.base64 && !clothImage?.url)}
+                >
+                  {t.actions.start}
                 </Button>
-              )}
+                {(personImage || clothImage) && (
+                  <Button variant="outline" onClick={reset} className="w-full md:w-32">
+                    {t.actions.cancel}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         ) : appState === AppState.PROCESSING ? (

@@ -548,7 +548,7 @@ const App: React.FC = () => {
 
             <div className="flex flex-col items-center gap-2 pt-8">
               <p className="text-[10px] text-zinc-500 font-medium opacity-80">
-                ( للموبايلات: الحفظ يكون بالضغط على الصورة للتحميل، و Save للمشاركة )
+                (Mobile: Long press image to save, or use Save button to share)
               </p>
               <div className="flex flex-col md:flex-row justify-center gap-4 w-full">
                 <Button 

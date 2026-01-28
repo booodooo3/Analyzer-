@@ -278,17 +278,25 @@ const App: React.FC = () => {
       const blob = await response.blob();
       const fileName = `stylestoo-${name}.png`;
 
-      // Check if mobile
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-      if (isMobile) {
-        const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
-        // Clean up after a delay
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        return;
+      // Try Web Share API first (Mobile friendly)
+      if (navigator.share) {
+        const file = new File([blob], fileName, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: 'Generated Look',
+              text: 'Check out my generated look!'
+            });
+            return;
+          } catch (err) {
+            // User cancelled or share failed, continue to fallback
+            console.log('Share failed or cancelled', err);
+          }
+        }
       }
 
+      // Desktop / Fallback
       const picker = (window as any).showSaveFilePicker;
       if (picker) {
         const handle = await picker({
@@ -305,14 +313,18 @@ const App: React.FC = () => {
         await writable.close();
         return;
       }
+
+      // Classic Download Link Fallback
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = fileName;
+      document.body.appendChild(link); // Required for some browsers
       link.click();
+      document.body.removeChild(link);
       URL.revokeObjectURL(url);
-    } catch {
-      return;
+    } catch (e) {
+      console.error('Download failed', e);
     }
   };
 

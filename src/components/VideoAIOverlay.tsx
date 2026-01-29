@@ -314,34 +314,15 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                   </div>
 
                 {/* AI Style Filter */}
-                      <div className="space-y-2 animate-in fade-in duration-300">
+                      <div className="space-y-2 relative group cursor-not-allowed">
                           <div className="flex justify-between items-end">
-                              <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
-                                  AI Style Filter
-                                  <button 
-                                      onClick={() => setHelpCategory(helpCategory === 'style' ? null : 'style')}
-                                      className="text-[10px] text-zinc-500 hover:text-white transition-colors cursor-pointer"
-                                  >
-                                      For Help
-                                  </button>
-                              </label>
+                            <label className="text-sm font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                                AI Style Filter
+                            </label>
                           </div>
-                          <div className="relative group">
-                              <select 
-                                  value={aiFilter}
-                                  onChange={(e) => setAiFilter(e.target.value)}
-                                  className="w-full bg-black border border-zinc-800 rounded-xl p-3 text-zinc-400 appearance-none focus:outline-none focus:ring-1 focus:ring-white focus:border-white focus:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 cursor-pointer"
-                              >
-                                  {AI_FILTERS.map(filter => (
-                                      <option key={filter} value={filter}>{filter}</option>
-                                  ))}
-                              </select>
-                              {/* Custom Arrow for Select */}
-                              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-600 group-hover:text-zinc-400 transition-colors">
-                                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                      <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                  </svg>
-                              </div>
+                          <div className="relative bg-black/50 border border-zinc-800/50 rounded-xl p-3 flex items-center justify-between">
+                            <span className="text-zinc-600 font-medium">Locked (Seedance)</span>
+                            <Lock size={16} className="text-zinc-600" />
                           </div>
                       </div>
               </div>

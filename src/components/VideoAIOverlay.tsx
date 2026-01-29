@@ -203,10 +203,10 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                     </label>
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm border transition-all duration-300 ${
                         activeImageCount >= 2 
-                        ? 'bg-blue-500 border-blue-400 text-white shadow-[0_0_10px_rgba(59,130,246,0.5)]' 
+                        ? 'bg-yellow-500/10 border-yellow-400 text-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]' 
                         : 'bg-zinc-800 border-zinc-700 text-zinc-600'
                     }`} title={activeImageCount >= 2 ? "Composition/Dubbing Mode Active" : "Upload 2+ images for Composition Mode"}>
-                        d
+                        D
                     </div>
                   </div>
                   
@@ -219,14 +219,14 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       loop
                     />
                   ) : (
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2">
                         {[0, 1, 2, 3].map((index) => (
                             <ImageUploader 
                                 key={index}
                                 description={`Image ${index + 1}`}
                                 currentImage={images[index]?.base64}
                                 onImageSelected={(data) => updateImage(index, data)}
-                                className="aspect-square w-full"
+                                className="aspect-video w-full h-24"
                                 objectFit="contain"
                             />
                         ))}

@@ -222,13 +222,40 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                   </div>
                   
                   {videoUrl ? (
-                    <video 
-                      src={videoUrl} 
-                      controls 
-                      className="w-full rounded-xl aspect-video bg-black"
-                      autoPlay
-                      loop
-                    />
+                    <div className="flex gap-4 items-start">
+                        <div className="flex-1">
+                            <video 
+                                src={videoUrl} 
+                                controls 
+                                className="w-full rounded-xl aspect-video bg-black shadow-lg"
+                                autoPlay
+                                loop
+                            />
+                        </div>
+                        <div className="flex flex-col gap-3 min-w-[140px]">
+                            <Button 
+                                onClick={() => {
+                                    const a = document.createElement('a');
+                                    a.href = videoUrl;
+                                    a.download = 'generated-video.mp4';
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                }}
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white gap-2"
+                            >
+                                <Download size={18} />
+                                Download
+                            </Button>
+                            <Button 
+                                onClick={() => setVideoUrl(null)}
+                                className="w-full bg-zinc-700 hover:bg-zinc-600 text-white gap-2"
+                            >
+                                <RotateCcw size={18} />
+                                Try Again
+                            </Button>
+                        </div>
+                    </div>
                   ) : (
                     <div className="grid grid-cols-2 gap-2">
                         {[0, 1, 2, 3].map((index) => (

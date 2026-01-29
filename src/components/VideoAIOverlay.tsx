@@ -286,13 +286,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                   <div className="space-y-2">
                       <div className="flex justify-between items-end">
                         <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Camera Effect</label>
-                        <button 
-                          onClick={() => setHelpCategory('camera')}
-                          className="text-xs font-medium text-zinc-500 hover:text-white transition-colors cursor-pointer"
-                          title="Get Help"
-                        >
-                          For Help
-                        </button>
                       </div>
                       <select 
                           value={cameraEffect}
@@ -308,13 +301,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                   <div className="space-y-2">
                       <div className="flex justify-between items-end">
                         <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">AI Style Filter</label>
-                        <button 
-                          onClick={() => setHelpCategory('style')}
-                          className="text-xs font-medium text-zinc-500 hover:text-white transition-colors cursor-pointer"
-                          title="Get Help"
-                        >
-                          For Help
-                        </button>
                       </div>
                       <select 
                           value={aiFilter}

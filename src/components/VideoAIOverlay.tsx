@@ -211,14 +211,15 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
               <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                      <div className="flex items-center gap-2">
+                      <div className="flex justify-between items-end">
                         <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Camera Effect</label>
                         <button 
                           onClick={() => setShowHelp(true)}
-                          className="text-xs text-zinc-500 hover:text-white transition-colors"
+                          className="text-[10px] text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-600 px-2 py-0.5 rounded transition-colors flex items-center gap-1"
                           title="Press (H) for help"
                         >
-                          (H) <span className="text-[10px]">for help</span>
+                          <span className="font-bold text-blue-400">(H)</span>
+                          <span>for help</span>
                         </button>
                       </div>
                       <select 

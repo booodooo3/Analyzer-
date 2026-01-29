@@ -471,7 +471,7 @@ const App: React.FC = () => {
                   {/* Garment Type Grid Selector */}
                   <div className="space-y-3 pt-4">
                        <h4 className="text-sm font-bold text-white uppercase tracking-widest">
-                         {t.step2.typeLabel} <span className="text-[10px] text-yellow-400 normal-case ml-2 font-medium opacity-90">(Double click to Remove Pants For Short Dress)</span>
+                         {t.step2.typeLabel} <span className="text-[10px] text-green-400 normal-case ml-2 font-medium opacity-90">(Double click to Remove Pants For Short Dress)</span>
                        </h4>
                        <div className="grid grid-cols-4 gap-3">
                          {(Object.keys(t.step2.types) as GarmentType[]).map((type) => (
@@ -488,7 +488,7 @@ const App: React.FC = () => {
                              className={`w-full aspect-square flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300 gap-3 group ${
                                garmentType === type 
                                ? (isMakeoverMode 
-                                    ? 'bg-white text-black border-yellow-400 border-4 shadow-[0_0_15px_rgba(253,224,71,0.6)] scale-105 z-10' 
+                                    ? 'bg-white text-black border-green-400 border-4 shadow-[0_0_15px_rgba(74,222,128,0.6)] scale-105 z-10' 
                                     : 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.4)] scale-105 z-10')
                                : 'bg-[#0a0a0a] border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:bg-zinc-900'
                              }`}

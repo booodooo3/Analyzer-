@@ -68,7 +68,7 @@ export default async (req, context) => {
                 return new Response(JSON.stringify({ error: `Insufficient credits! You need ${cost} credits for video generation.` }), { status: 403, headers });
             }
 
-            const { image, description, duration, cameraEffect, aiFilter } = await req.json();
+            const { image, audio, description, duration, cameraEffect, aiFilter } = await req.json();
 
             // Construct Enhanced Prompt
             let enhancedPrompt = description;
@@ -97,14 +97,21 @@ export default async (req, context) => {
                 return new Response(JSON.stringify({ error: "Model bytedance/seedance-1.5-pro not found or accessible." }), { status: 500, headers });
             }
 
+            const input = {
+                image: image, // Expecting data URI or URL
+                prompt: enhancedPrompt,
+                duration: duration || 8,
+                fps: 24
+            };
+
+            // Add audio if provided
+            if (audio) {
+                input.audio = audio;
+            }
+
             const prediction = await replicate.predictions.create({
                 version: version,
-                input: {
-                    image: image, // Expecting data URI or URL
-                    prompt: enhancedPrompt,
-                    duration: duration || 8,
-                    fps: 24
-                }
+                input: input
             });
 
             // 3. Deduct Credit ONLY if prediction started successfully

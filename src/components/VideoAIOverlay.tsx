@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, Upload, Languages, Download, RotateCcw } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Upload, Languages, Download, RotateCcw, Mic, Trash2 } from 'lucide-react';
 import { ImageUploader } from './ImageUploader';
 import { Button } from './Button';
 import { ImageData } from '../types';
@@ -12,7 +12,8 @@ interface VideoAIOverlayProps {
 }
 
 export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose, getToken }) => {
-  const [images, setImages] = useState<(ImageData | null)[]>([null, null, null, null]);
+  const [images, setImages] = useState<(ImageData | null)[]>([null, null]);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
   const [description, setDescription] = useState('');
   const [isConverting, setIsConverting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,10 +21,12 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [cameraEffect, setCameraEffect] = useState('Static');
   const [aiFilter, setAiFilter] = useState('No Filter');
   const [helpCategory, setHelpCategory] = useState<'camera' | 'style' | null>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!isOpen) {
-      setImages([null, null, null, null]);
+      setImages([null, null]);
+      setAudioFile(null);
       setDescription('');
       setVideoUrl(null);
       setError(null);
@@ -37,6 +40,18 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       newImages[index] = data;
       return newImages;
     });
+  };
+
+  const handleAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        setError('Audio file too large (max 10MB)');
+        return;
+      }
+      setAudioFile(file);
+      setError(null);
+    }
   };
 
   const activeImageCount = images.filter(img => img !== null).length;
@@ -116,6 +131,17 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
       const processedImage = await processImage(primaryImage.base64);
 
+      // Process Audio if exists
+      let audioBase64 = null;
+      if (audioFile) {
+        audioBase64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(audioFile);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+        });
+      }
+
       // 2. Call API to deduct credits and start generation
       const response = await fetch('/api/video-generate', {
         method: 'POST',
@@ -125,6 +151,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         },
         body: JSON.stringify({
           image: processedImage,
+          audio: audioBase64,
           description,
           cameraEffect,
           aiFilter,
@@ -278,17 +305,62 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                         </div>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 gap-2">
-                        {[0, 1, 2, 3].map((index) => (
-                            <ImageUploader 
-                                key={index}
-                                description={`Image ${index + 1}`}
-                                currentImage={images[index]?.base64}
-                                onImageSelected={(data) => updateImage(index, data)}
-                                className="aspect-video w-full h-24"
-                                objectFit="contain"
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-2">
+                            {[0, 1].map((index) => (
+                                <ImageUploader 
+                                    key={index}
+                                    description={`Image ${index + 1}`}
+                                    currentImage={images[index]?.base64}
+                                    onImageSelected={(data) => updateImage(index, data)}
+                                    className="aspect-video w-full h-24"
+                                    objectFit="contain"
+                                />
+                            ))}
+                        </div>
+
+                        {/* Audio Uploader */}
+                        <div className="flex items-center gap-3 bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl transition-all hover:border-zinc-700">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${audioFile ? 'bg-green-500/10 text-green-500' : 'bg-zinc-800 text-zinc-400'}`}>
+                                <Mic size={20} />
+                            </div>
+                            <div className="flex-1 overflow-hidden">
+                                {audioFile ? (
+                                    <div className="flex flex-col">
+                                        <span className="text-sm text-white truncate font-medium">{audioFile.name}</span>
+                                        <span className="text-xs text-zinc-500">{(audioFile.size / 1024 / 1024).toFixed(2)} MB</span>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col">
+                                        <span className="text-sm text-zinc-300 font-medium">Add Audio (Optional)</span>
+                                        <span className="text-xs text-zinc-500">For lip-sync / talking character</span>
+                                    </div>
+                                )}
+                            </div>
+                            {audioFile ? (
+                                <button 
+                                    onClick={() => setAudioFile(null)}
+                                    className="p-2 hover:bg-red-500/10 text-zinc-500 hover:text-red-500 rounded-full transition-colors"
+                                    title="Remove audio"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            ) : (
+                                <button 
+                                    onClick={() => audioInputRef.current?.click()}
+                                    className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold rounded-lg transition-colors border border-zinc-700"
+                                >
+                                    Upload
+                                </button>
+                            )}
+                            <input 
+                                type="file" 
+                                ref={audioInputRef}
+                                className="hidden" 
+                                accept="audio/*"
+                                onChange={handleAudioUpload}
                             />
-                        ))}
+                        </div>
                     </div>
                   )}
               </div>

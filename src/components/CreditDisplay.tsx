@@ -4,11 +4,13 @@ import { useUser } from "@clerk/clerk-react";
 export default function CreditDisplay({ 
   isPlusMode, 
   onTogglePlus, 
-  onCheckout 
+  onCheckout,
+  onOpenVideoAI
 }: { 
   isPlusMode?: boolean, 
   onTogglePlus?: () => void, 
-  onCheckout?: () => void 
+  onCheckout?: () => void,
+  onOpenVideoAI?: () => void
 }) { 
   const { user, isLoaded } = useUser(); 
   
@@ -43,6 +45,24 @@ export default function CreditDisplay({
                 </button>
                 <span className="text-[9px] font-thin text-zinc-500 mt-0.5 tracking-wider">Press</span>
               </div>
+
+              {/* Video AI Button */}
+              {onOpenVideoAI && (
+                <div className="flex flex-col items-center ml-2">
+                  <span className="text-[9px] font-thin text-zinc-400 mb-0.5 tracking-wider">5</span>
+                  <button
+                    onClick={onOpenVideoAI}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-zinc-400 bg-gradient-to-r from-zinc-300 to-zinc-400 text-black shadow-[0_0_10px_rgba(255,255,255,0.2)] hover:shadow-[0_0_20px_rgba(255,255,255,0.6)] hover:bg-white transition-all duration-300 active:scale-95"
+                    title="Convert Image to Video (Cost: 5 Credits)"
+                  >
+                    <span className="text-xs font-bold uppercase tracking-wider">
+                      video Ai
+                    </span>
+                    <div className="w-2 h-2 rounded-full bg-white animate-pulse shadow-[0_0_5px_white]" />
+                  </button>
+                  <span className="text-[9px] font-thin text-zinc-500 mt-0.5 tracking-wider">Press</span>
+                </div>
+              )}
           </div>
         )}
 

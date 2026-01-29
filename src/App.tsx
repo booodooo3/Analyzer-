@@ -4,6 +4,7 @@ import CreditDisplay from './components/CreditDisplay';
 import PayPalPayment from './components/PayPalPayment';
 import { ImageUploader } from './components/ImageUploader';
 import { Button } from './components/Button';
+import { VideoAIOverlay } from './components/VideoAIOverlay';
 import { performVirtualTryOn, analyzeStyle } from './services/apiService';
 import { ImageData, AppState, GarmentType } from './types';
 
@@ -88,6 +89,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [isClosetOpen, setIsClosetOpen] = useState(false);
+  const [isVideoAIOpen, setIsVideoAIOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [garmentDescription, setGarmentDescription] = useState("");
@@ -360,6 +362,7 @@ const App: React.FC = () => {
                     setIsPlusMode(!isPlusMode);
                   }}
                   onCheckout={goToCheckout}
+                  onOpenVideoAI={() => setIsVideoAIOpen(true)}
                 />
                 <UserButton />
               </div>
@@ -744,6 +747,13 @@ const App: React.FC = () => {
            </div>
         </div>
       )}
+
+      {/* Video AI Overlay */}
+      <VideoAIOverlay 
+        isOpen={isVideoAIOpen}
+        onClose={() => setIsVideoAIOpen(false)}
+        getToken={getToken}
+      />
 
       <footer className="p-12 border-t border-zinc-900 mt-auto bg-zinc-950">
         <div className="max-w-6xl mx-auto text-center space-y-2">

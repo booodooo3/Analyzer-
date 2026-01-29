@@ -303,9 +303,9 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                         <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Camera Effect</label>
                         <button
                           onClick={() => setHelpCategory('camera')}
-                          className="text-[10px] px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-400 border border-zinc-700 transition-colors font-arabic"
+                          className="text-[9px] px-2 py-1 rounded-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-500 hover:text-zinc-300 border border-zinc-700/50 transition-colors tracking-wide uppercase"
                         >
-                          اقرأ
+                          This For Help
                         </button>
                       </div>
                       <select 

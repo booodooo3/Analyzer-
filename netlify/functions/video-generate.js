@@ -87,37 +87,43 @@ export default async (req, context) => {
             let modelOwner = "bytedance";
             let modelName = "seedance-1.5-pro";
             let input = {
-                image: image,
                 prompt: enhancedPrompt,
-                duration: duration || 8,
-                fps: 24
+                duration: duration || 10,
             };
 
             if (model === 'kling') {
                 modelOwner = "kwaivgi";
-                modelName = "kling-v2.1"; // Assuming this is the correct public model name or similar
-                // Adjust input params for Kling if needed. Kling might have different params.
-                // Assuming standard Replicate video-to-video/image-to-video input schema for now.
-                // If audio is supported by Kling:
+                modelName = "kling-v2.1"; 
+                
+                // Kling v2.1 specific inputs
+                input.start_image = image; // Kling uses 'start_image'
+                input.mode = "standard";   // Default to standard
+                input.aspect_ratio = "16:9";
+
+                // Kling v2.1 does not officially list 'audio' in standard image-to-video, 
+                // but we pass it if the user provided it, in case a newer version supports it.
+                // If the API rejects it, we might need to remove it.
+                // For now, we'll keep it conditional.
                 if (audio) {
-                    input.audio = audio;
+                     // Note: Verify if the specific version supports audio input.
+                     // If not, this might be ignored or cause an error.
+                     // input.audio = audio; 
                 }
             } else {
-                // Seedance default params are already set above
+                // Default / Seedance
+                // Assuming Seedance uses 'image'
+                input.image = image;
+                input.fps = 24;
             }
 
             // Get latest version of the model
             let version;
             try {
-                // For kwaivgi/kling-v2.1, we might need to be specific if it's not a standard public model
-                // But let's try to get it.
-                // Note: The user specified "kwaivgi/kling-v2.1".
                 const replicateModel = await replicate.models.get(modelOwner, modelName);
                 version = replicateModel.latest_version.id;
             } catch (e) {
                 console.error("Model fetch error:", e);
-                // Fallback specific hardcoded versions could be used here if needed
-                 return new Response(JSON.stringify({ error: `Model ${modelOwner}/${modelName} not found or accessible.` }), { status: 500, headers });
+                return new Response(JSON.stringify({ error: `Model ${modelOwner}/${modelName} not found or accessible. Details: ${e.message}` }), { status: 500, headers });
             }
 
             const prediction = await replicate.predictions.create({
@@ -135,7 +141,7 @@ export default async (req, context) => {
                 message: "Video generation started",
                 id: prediction.id,
                 deducted: cost,
-                model: "bytedance/seedance-1.5-pro"
+                model: `${modelOwner}/${modelName}`
             }), { status: 200, headers });
 
         } catch (error) {

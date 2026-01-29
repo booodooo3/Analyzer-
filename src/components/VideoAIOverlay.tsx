@@ -22,7 +22,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [helpCategory, setHelpCategory] = useState<'camera' | 'style' | null>(null);
   const [selectedModel, setSelectedModel] = useState<'kling' | 'seedance'>('seedance');
   const [audioFile, setAudioFile] = useState<File | null>(null);
-  const [duration, setDuration] = useState(5);
+  const [duration, setDuration] = useState(10);
 
   useEffect(() => {
     if (!isOpen) {
@@ -33,7 +33,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       setIsConverting(false);
       setSelectedModel('seedance');
       setAudioFile(null);
-      setDuration(5);
+      setDuration(10);
     }
   }, [isOpen]);
 

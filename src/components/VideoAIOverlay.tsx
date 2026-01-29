@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ImageUploader } from './ImageUploader';
 import { Button } from './Button';
 import { ImageData } from '../types';
+import HelpModal from './HelpModal';
 
 interface VideoAIOverlayProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [cameraEffect, setCameraEffect] = useState('Static');
   const [aiFilter, setAiFilter] = useState('No Filter');
+  const [showHelp, setShowHelp] = useState(false);
 
   const CAMERA_EFFECTS = [
     'Static', 'Zoom In', 'Zoom Out', 'Pan Left', 'Pan Right', 'Pan Up', 'Pan Down',
@@ -30,6 +32,17 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
     'Cinematic', 'Cyberpunk', 'Oil Painting', 'Pencil Sketch', 'Origami',
     'Arabic Heritage', 'Modern Saudi'
   ];
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isOpen && (e.key === 'h' || e.key === 'H')) {
+        setShowHelp(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -133,104 +146,117 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={onClose} />
+    <>
+      <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
       
-      {/* Panel */}
-      <div className="relative glass-effect w-full max-w-2xl p-8 rounded-[40px] border border-white/10 shadow-2xl space-y-8 overflow-hidden animate-in zoom-in-95 duration-500 bg-zinc-900/50">
-        <div className="flex justify-between items-center border-b border-white/10 pb-4">
-            <h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                Video AI
-            </h2>
-            <button 
-            onClick={onClose}
-            className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
-            >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            </button>
-        </div>
+      <div className="fixed inset-0 z-[50] flex items-center justify-center p-6 animate-in fade-in duration-300">
+        {/* Backdrop */}
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={onClose} />
+        
+        {/* Panel */}
+        <div className="relative glass-effect w-full max-w-2xl p-8 rounded-[40px] border border-white/10 shadow-2xl space-y-8 overflow-hidden animate-in zoom-in-95 duration-500 bg-zinc-900/50">
+          <div className="flex justify-between items-center border-b border-white/10 pb-4">
+              <h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                  Video AI
+              </h2>
+              <button 
+              onClick={onClose}
+              className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+              >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              </button>
+          </div>
 
-        <div className="space-y-6">
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm">
-                {error}
+          <div className="space-y-6">
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm">
+                  {error}
+                </div>
+              )}
+              
+              <div className="space-y-2">
+                  <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">
+                    {videoUrl ? 'Generated Video' : 'Upload Image'}
+                  </label>
+                  {videoUrl ? (
+                    <video 
+                      src={videoUrl} 
+                      controls 
+                      className="w-full rounded-xl aspect-video bg-black"
+                      autoPlay
+                      loop
+                    />
+                  ) : (
+                    <ImageUploader 
+                        description="Upload image to convert to video"
+                        currentImage={image?.base64}
+                        onImageSelected={setImage}
+                        className="aspect-video"
+                    />
+                  )}
               </div>
-            )}
-            
-            <div className="space-y-2">
-                <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">
-                  {videoUrl ? 'Generated Video' : 'Upload Image'}
-                </label>
-                {videoUrl ? (
-                  <video 
-                    src={videoUrl} 
-                    controls 
-                    className="w-full rounded-xl aspect-video bg-black"
-                    autoPlay
-                    loop
+
+              <div className="space-y-2">
+                  <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Video Description</label>
+                  <textarea 
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Describe the motion and scene (e.g. 'A futuristic city with flying cars')..."
+                      className="w-full h-24 bg-zinc-900/50 border border-zinc-700/50 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20 resize-none"
                   />
-                ) : (
-                  <ImageUploader 
-                      description="Upload image to convert to video"
-                      currentImage={image?.base64}
-                      onImageSelected={setImage}
-                      className="aspect-video"
-                  />
-                )}
-            </div>
+              </div>
 
-            <div className="space-y-2">
-                <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Video Description</label>
-                <textarea 
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Describe the motion and scene (e.g. 'A futuristic city with flying cars')..."
-                    className="w-full h-24 bg-zinc-900/50 border border-zinc-700/50 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20 resize-none"
-                />
-            </div>
+              <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Camera Effect</label>
+                        <button 
+                          onClick={() => setShowHelp(true)}
+                          className="text-xs text-zinc-500 hover:text-white transition-colors"
+                          title="Press (H) for help"
+                        >
+                          (H) <span className="text-[10px]">for help</span>
+                        </button>
+                      </div>
+                      <select 
+                          value={cameraEffect}
+                          onChange={(e) => setCameraEffect(e.target.value)}
+                          className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-white/20"
+                      >
+                          {CAMERA_EFFECTS.map(effect => (
+                              <option key={effect} value={effect}>{effect}</option>
+                          ))}
+                      </select>
+                  </div>
 
-            <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Camera Effect</label>
-                    <select 
-                        value={cameraEffect}
-                        onChange={(e) => setCameraEffect(e.target.value)}
-                        className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-white/20"
-                    >
-                        {CAMERA_EFFECTS.map(effect => (
-                            <option key={effect} value={effect}>{effect}</option>
-                        ))}
-                    </select>
-                </div>
+                  <div className="space-y-2">
+                      <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">AI Style Filter</label>
+                      <select 
+                          value={aiFilter}
+                          onChange={(e) => setAiFilter(e.target.value)}
+                          className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-white/20"
+                      >
+                          {AI_FILTERS.map(filter => (
+                              <option key={filter} value={filter}>{filter}</option>
+                          ))}
+                      </select>
+                  </div>
+              </div>
 
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">AI Style Filter</label>
-                    <select 
-                        value={aiFilter}
-                        onChange={(e) => setAiFilter(e.target.value)}
-                        className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-white/20"
-                    >
-                        {AI_FILTERS.map(filter => (
-                            <option key={filter} value={filter}>{filter}</option>
-                        ))}
-                    </select>
-                </div>
-            </div>
-
-            <Button 
-                onClick={handleConvert}
-                disabled={!image || isConverting}
-                isLoading={isConverting}
-                className="w-full bg-gradient-to-r from-zinc-700 to-zinc-600 hover:from-zinc-600 hover:to-zinc-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-white/5 transition-all duration-300"
-            >
-                {isConverting ? 'Generating Video...' : 'Generate Video (5 Credits)'}
-            </Button>
+              <Button 
+                  onClick={handleConvert}
+                  disabled={!image || isConverting}
+                  isLoading={isConverting}
+                  className="w-full bg-gradient-to-r from-zinc-700 to-zinc-600 hover:from-zinc-600 hover:to-zinc-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-white/5 transition-all duration-300"
+              >
+                  {isConverting ? 'Generating Video...' : 'Generate Video (5 Credits)'}
+              </Button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };

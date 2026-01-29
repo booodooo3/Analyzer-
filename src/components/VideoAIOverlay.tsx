@@ -11,7 +11,7 @@ interface VideoAIOverlayProps {
 }
 
 export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose, getToken }) => {
-  const [image, setImage] = useState<ImageData | null>(null);
+  const [images, setImages] = useState<(ImageData | null)[]>([null, null, null, null]);
   const [description, setDescription] = useState('');
   const [isConverting, setIsConverting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,6 +19,16 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [cameraEffect, setCameraEffect] = useState('Static');
   const [aiFilter, setAiFilter] = useState('No Filter');
   const [helpCategory, setHelpCategory] = useState<'camera' | 'style' | null>(null);
+
+  const updateImage = (index: number, data: ImageData) => {
+    setImages(prev => {
+      const newImages = [...prev];
+      newImages[index] = data;
+      return newImages;
+    });
+  };
+
+  const activeImageCount = images.filter(img => img !== null).length;
 
   const CAMERA_EFFECTS = [
     'Static', 'Zoom In', 'Zoom Out', 'Pan Left', 'Pan Right', 'Pan Up', 'Pan Down',
@@ -47,7 +57,9 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   if (!isOpen) return null;
 
   const handleConvert = async () => {
-    if (!image) return;
+    const primaryImage = images.find(img => img !== null);
+    if (!primaryImage) return;
+    
     setIsConverting(true);
     setError(null);
 
@@ -87,7 +99,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         });
       };
 
-      const processedImage = await processImage(image.base64);
+      const processedImage = await processImage(primaryImage.base64);
 
       // 2. Call API to deduct credits and start generation
       const response = await fetch('/api/video-generate', {
@@ -160,9 +172,12 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         {/* Panel */}
         <div className="relative glass-effect w-full max-w-2xl p-8 rounded-[40px] border border-white/10 shadow-2xl space-y-8 overflow-hidden animate-in zoom-in-95 duration-500 bg-zinc-900/50">
           <div className="flex justify-between items-center border-b border-white/10 pb-4">
-              <h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                  Video AI
+              <h2 className="text-2xl font-bold tracking-tight text-white flex flex-col gap-0.5">
+                  <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                      Analyzer Ai
+                  </div>
+                  <span className="text-xs font-normal text-zinc-400 ml-4">Image To Video</span>
               </h2>
               <button 
               onClick={onClose}
@@ -182,9 +197,19 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
               )}
               
               <div className="space-y-2">
-                  <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">
-                    {videoUrl ? 'Generated Video' : 'Upload Image'}
-                  </label>
+                  <div className="flex justify-between items-center">
+                    <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">
+                      {videoUrl ? 'Generated Video' : 'Upload Images'}
+                    </label>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm border transition-all duration-300 ${
+                        activeImageCount >= 2 
+                        ? 'bg-blue-500 border-blue-400 text-white shadow-[0_0_10px_rgba(59,130,246,0.5)]' 
+                        : 'bg-zinc-800 border-zinc-700 text-zinc-600'
+                    }`} title={activeImageCount >= 2 ? "Composition/Dubbing Mode Active" : "Upload 2+ images for Composition Mode"}>
+                        d
+                    </div>
+                  </div>
+                  
                   {videoUrl ? (
                     <video 
                       src={videoUrl} 
@@ -194,12 +219,18 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       loop
                     />
                   ) : (
-                    <ImageUploader 
-                        description="Upload image to convert to video"
-                        currentImage={image?.base64}
-                        onImageSelected={setImage}
-                        className="aspect-video"
-                    />
+                    <div className="grid grid-cols-2 gap-3">
+                        {[0, 1, 2, 3].map((index) => (
+                            <ImageUploader 
+                                key={index}
+                                description={`Image ${index + 1}`}
+                                currentImage={images[index]?.base64}
+                                onImageSelected={(data) => updateImage(index, data)}
+                                className="aspect-square w-full"
+                                objectFit="contain"
+                            />
+                        ))}
+                    </div>
                   )}
               </div>
 
@@ -263,7 +294,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
               <Button 
                   onClick={handleConvert}
-                  disabled={!image || isConverting}
+                  disabled={activeImageCount === 0 || isConverting}
                   isLoading={isConverting}
                   className="w-full bg-gradient-to-r from-zinc-700 to-zinc-600 hover:from-zinc-600 hover:to-zinc-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-white/5 transition-all duration-300"
               >

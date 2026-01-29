@@ -68,7 +68,20 @@ export default async (req, context) => {
                 return new Response(JSON.stringify({ error: `Insufficient credits! You need ${cost} credits for video generation.` }), { status: 403, headers });
             }
 
-            const { image, description, duration } = await req.json();
+            const { image, description, duration, cameraEffect, aiFilter } = await req.json();
+
+            // Construct Enhanced Prompt
+            let enhancedPrompt = description;
+            
+            // Append Camera Effect
+            if (cameraEffect && cameraEffect !== 'Static') {
+                enhancedPrompt += `, ${cameraEffect} camera movement`;
+            }
+
+            // Append AI Filter Style
+            if (aiFilter && aiFilter !== 'No Filter') {
+                enhancedPrompt += `, ${aiFilter} style`;
+            }
 
             // 2. Start Replicate Prediction
             // Get latest version of the model
@@ -88,7 +101,7 @@ export default async (req, context) => {
                 version: version,
                 input: {
                     image: image, // Expecting data URI or URL
-                    prompt: description,
+                    prompt: enhancedPrompt,
                     duration: duration || 8,
                     fps: 24
                 }

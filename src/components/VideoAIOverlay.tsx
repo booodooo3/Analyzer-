@@ -15,6 +15,21 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [isConverting, setIsConverting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [cameraEffect, setCameraEffect] = useState('Static');
+  const [aiFilter, setAiFilter] = useState('No Filter');
+
+  const CAMERA_EFFECTS = [
+    'Static', 'Zoom In', 'Zoom Out', 'Pan Left', 'Pan Right', 'Pan Up', 'Pan Down',
+    'Slow Motion', 'Hyperlapse / Timelapse', 'Freeze Frame', 'Reverse', 'Roll',
+    'Dolly / Tracking', 'Orbit / Arc', 'Crane / Boom / Pedestal', 'Handheld / Shake',
+    'Rack Focus', 'Dolly Zoom'
+  ];
+
+  const AI_FILTERS = [
+    'No Filter', 'Claymation', 'Pixel Art', '3D Cartoon (Pixar Style)', 'Anime',
+    'Cinematic', 'Cyberpunk', 'Oil Painting', 'Pencil Sketch', 'Origami',
+    'Arabic Heritage', 'Modern Saudi'
+  ];
 
   if (!isOpen) return null;
 
@@ -62,25 +77,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       const processedImage = await processImage(image.base64);
 
       // 2. Call API to deduct credits and start generation
-      // We can reuse the generate endpoint but with a special flag or create a new one.
-      // For simplicity, we'll try to use the existing one but we might need to modify it or create a new endpoint.
-      // Since the user asked to "program the operation", I will assume we need a new handler on the server or use the existing one with a special type.
-      
-      // However, checking the generate.js, it expects personImage and clothImage.
-      // Video generation is different.
-      // Let's assume we call a new endpoint or the same one with different parameters.
-      // Given the restrictions, I will simulate the call but ensuring credit deduction logic exists on server.
-      
-      // Let's try to hit the generate endpoint but with a flag that indicates "video" mode if possible, 
-      // OR we create a new server function. Since I can edit files, I will create a new function `video-generate.js` 
-      // or modify `generate.js` to handle video requests.
-      
-      // Let's modify generate.js to handle this new type of request? 
-      // Or better, let's keep it simple and just do the credit deduction for now as requested.
-      
-      // But the user said "program the operation on this thing". 
-      // I will create a specific endpoint for video generation simulation that handles credit deduction.
-      
       const response = await fetch('/api/video-generate', {
         method: 'POST',
         headers: {
@@ -90,6 +86,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         body: JSON.stringify({
           image: processedImage,
           description,
+          cameraEffect,
+          aiFilter,
           model: 'bytedance/seedance-1.5-pro',
           duration: 8 // Request 8 seconds video
         })
@@ -186,27 +184,51 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
             </div>
 
             <div className="space-y-2">
-                <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Description</label>
+                <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Video Description</label>
                 <textarea 
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Describe the video motion..."
-                    className="w-full bg-black/20 border border-zinc-800 rounded-xl p-4 text-white placeholder-zinc-600 focus:outline-none focus:border-white/20 transition-colors min-h-[100px] resize-none"
+                    placeholder="Describe the motion and scene (e.g. 'A futuristic city with flying cars')..."
+                    className="w-full h-24 bg-zinc-900/50 border border-zinc-700/50 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20 resize-none"
                 />
             </div>
 
-            <div className="pt-4">
-                <Button 
-                    onClick={handleConvert}
-                    disabled={!image || isConverting}
-                    className="w-full bg-white text-black hover:bg-zinc-200"
-                >
-                    {isConverting ? 'Converting...' : 'Start Conversion (5 Credits)'}
-                </Button>
-                <p className="text-center text-[10px] text-zinc-600 mt-2 uppercase tracking-widest">
-                    Model: bytedance/seedance-1.5-pro
-                </p>
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Camera Effect</label>
+                    <select 
+                        value={cameraEffect}
+                        onChange={(e) => setCameraEffect(e.target.value)}
+                        className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-white/20"
+                    >
+                        {CAMERA_EFFECTS.map(effect => (
+                            <option key={effect} value={effect}>{effect}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="space-y-2">
+                    <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">AI Style Filter</label>
+                    <select 
+                        value={aiFilter}
+                        onChange={(e) => setAiFilter(e.target.value)}
+                        className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-white/20"
+                    >
+                        {AI_FILTERS.map(filter => (
+                            <option key={filter} value={filter}>{filter}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
+
+            <Button 
+                onClick={handleConvert}
+                disabled={!image || isConverting}
+                isLoading={isConverting}
+                className="w-full bg-gradient-to-r from-zinc-700 to-zinc-600 hover:from-zinc-600 hover:to-zinc-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-white/5 transition-all duration-300"
+            >
+                {isConverting ? 'Generating Video...' : 'Generate Video (5 Credits)'}
+            </Button>
         </div>
       </div>
     </div>

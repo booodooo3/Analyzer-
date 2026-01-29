@@ -4,6 +4,7 @@ import { X, Languages } from 'lucide-react';
 interface HelpModalProps {
   isOpen: boolean;
   onClose: () => void;
+  category?: 'camera' | 'style';
 }
 
 type ContentItem = {
@@ -19,12 +20,12 @@ type Section = {
   items: ContentItem[];
 };
 
-const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
+const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, category = 'camera' }) => {
   const [language, setLanguage] = useState<'ar' | 'en'>('en');
 
   if (!isOpen) return null;
 
-  const content: Record<'ar' | 'en', Section[]> = {
+  const cameraContent: Record<'ar' | 'en', Section[]> = {
     ar: [
       {
         title: "1. الحركات الأساسية (Basic Movements)",
@@ -247,8 +248,194 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
     ]
   };
 
-  const currentContent = content[language];
+  const styleContent: Record<'ar' | 'en', Section[]> = {
+    ar: [
+      {
+        title: "1. الأنماط العامة (General Styles)",
+        colorClass: "text-blue-400",
+        borderColorClass: "border-blue-500/20",
+        items: [
+          {
+            title: "No Filter (بدون فلتر)",
+            desc: "الشرح: يترك الصورة كما هي أو كما وصفتها في النص دون إجبارها على نمط فني معين.",
+            usage: "النتيجة: عادة متوازنة وطبيعية."
+          },
+          {
+            title: "Cinematic (سينمائي)",
+            desc: "الشرح: يجعل النتيجة تبدو كقطعة من فيلم هوليوودي.",
+            usage: "المظهر: إضاءة درامية، تباين عالٍ، ألوان واقعية لكن غنية، وتركيز عالٍ على الجودة والواقعية (Photorealistic)."
+          },
+          {
+            title: "Cyberpunk (سايبر بانك/مستقبلي)",
+            desc: "الشرح: نمط الخيال العلمي المستقبلي البائس (مثل فيلم Blade Runner).",
+            usage: "المظهر: مليء بأضواء النيون (الوردي والأزرق)، مدن مستقبلية، تكنولوجيا متقدمة، أجواء ليلية ممطرة، وروبوتات."
+          }
+        ]
+      },
+      {
+        title: "2. أنماط الرسوم المتحركة (Animation Styles)",
+        colorClass: "text-purple-400",
+        borderColorClass: "border-purple-500/20",
+        items: [
+          {
+            title: "Claymation (تحريك الصلصال)",
+            desc: "الشرح: يحاكي أفلام الـ \"Stop Motion\" المصنوعة يدوياً.",
+            usage: "المظهر: الأشياء تبدو وكأنها مصنوعة من الطين أو المعجون، مع إضاءة ناعمة وحركة قد تبدو متقطعة قليلاً لتقليد هذا الفن."
+          },
+          {
+            title: "3D Cartoon (Pixar Style) (كرتون ثلاثي الأبعاد)",
+            desc: "الشرح: يحاكي أسلوب أفلام ديزني وبيكسار الحديثة.",
+            usage: "المظهر: شخصيات لطيفة، عيون كبيرة ومعبرة، ألوان زاهية جداً، ملمس ناعم (Smooth)، وإضاءة مثالية."
+          },
+          {
+            title: "Anime (أنيمي)",
+            desc: "الشرح: أسلوب الرسوم المتحركة اليابانية.",
+            usage: "المظهر: رسم ثنائي الأبعاد (2D)، خطوط محددة، عيون مميزة، وتظليل بسيط (Cel-shaded)."
+          }
+        ]
+      },
+      {
+        title: "3. الأنماط الفنية (Artistic Styles)",
+        colorClass: "text-green-400",
+        borderColorClass: "border-green-500/20",
+        items: [
+          {
+            title: "Pixel Art (فن البكسل)",
+            desc: "الشرح: يحاكي ألعاب الفيديو القديمة في الثمانينات والتسعينات.",
+            usage: "المظهر: الصورة تتكون من مربعات صغيرة ظاهرة، ألوان محدودة، تعطي شعوراً بالنوستالجيا."
+          },
+          {
+            title: "Oil Painting (لوحة زيتية)",
+            desc: "الشرح: يحاكي الرسم الكلاسيكي بالفرشاة والألوان الزيتية.",
+            usage: "المظهر: ستظهر ضربات الفرشاة بوضوح، ألوان متداخلة، وملمس قماشي، كأنها لوحة لفان جوخ أو دافنشي."
+          },
+          {
+            title: "Pencil Sketch (رسم بالقلم الرصاص)",
+            desc: "الشرح: يحاكي التخطيط اليدوي السريع (Sketch).",
+            usage: "المظهر: عادة يكون أبيض وأسود، خطوط خشنة، تظليل باستخدام الخطوط المتقاطعة، ويبدو كأنه مرسوم على ورق."
+          },
+          {
+            title: "Origami (أوريغامي - فن طي الورق)",
+            desc: "الشرح: يحول كل شيء في المشهد وكأنه مصنوع من الورق المطوي.",
+            usage: "المظهر: أشكال هندسية حادة، زوايا واضحة، وملمس ورقي، دون تفاصيل ناعمة أو منحنيات."
+          }
+        ]
+      },
+      {
+        title: "4. الأنماط الثقافية (Cultural Styles)",
+        colorClass: "text-orange-400",
+        borderColorClass: "border-orange-500/20",
+        items: [
+          {
+            title: "Arabic Heritage (التراث العربي)",
+            desc: "الشرح: يركز على الطابع التاريخي والتقليدي للمنطقة العربية.",
+            usage: "المظهر: يستخدم ألواناً دافئة (صحراوية)، زخارف إسلامية أو عربية قديمة، مباني طينية أو تاريخية، وأزياء تقليدية قديمة."
+          },
+          {
+            title: "Modern Saudi (سعودي حديث)",
+            desc: "الشرح: يعكس الهوية السعودية المعاصرة التي تمزج بين الأصالة والتطور.",
+            usage: "المظهر: يظهر أشخاصاً بأزياء سعودية (ثوب شماغ / عباية) لكن في بيئات حديثة وعصرية، ناطحات سحاب، أو مشاريع مستقبلية."
+          }
+        ]
+      }
+    ],
+    en: [
+      {
+        title: "1. General Styles",
+        colorClass: "text-blue-400",
+        borderColorClass: "border-blue-500/20",
+        items: [
+          {
+            title: "No Filter",
+            desc: "Explanation: Keeps the image as is or as described in text without forcing a specific style.",
+            usage: "Result: Usually balanced and natural."
+          },
+          {
+            title: "Cinematic",
+            desc: "Explanation: Makes the result look like a Hollywood movie shot.",
+            usage: "Appearance: Dramatic lighting, high contrast, rich realistic colors, photorealistic quality."
+          },
+          {
+            title: "Cyberpunk",
+            desc: "Explanation: Dystopian futuristic sci-fi style (like Blade Runner).",
+            usage: "Appearance: Neon lights (pink/blue), futuristic cities, advanced tech, rainy night vibes, robots."
+          }
+        ]
+      },
+      {
+        title: "2. Animation Styles",
+        colorClass: "text-purple-400",
+        borderColorClass: "border-purple-500/20",
+        items: [
+          {
+            title: "Claymation",
+            desc: "Explanation: Mimics handmade stop-motion movies.",
+            usage: "Appearance: Objects look like clay/dough, soft lighting, slightly jerky movement to mimic the art form."
+          },
+          {
+            title: "3D Cartoon (Pixar Style)",
+            desc: "Explanation: Mimics modern Disney/Pixar movie style.",
+            usage: "Appearance: Cute characters, large expressive eyes, vivid colors, smooth texture, perfect lighting."
+          },
+          {
+            title: "Anime",
+            desc: "Explanation: Japanese animation style.",
+            usage: "Appearance: 2D drawing, defined lines, distinct eyes, cel-shaded."
+          }
+        ]
+      },
+      {
+        title: "3. Artistic Styles",
+        colorClass: "text-green-400",
+        borderColorClass: "border-green-500/20",
+        items: [
+          {
+            title: "Pixel Art",
+            desc: "Explanation: Mimics 80s/90s retro video games.",
+            usage: "Appearance: Visible small squares (pixels), limited color palette, nostalgic feel."
+          },
+          {
+            title: "Oil Painting",
+            desc: "Explanation: Mimics classic brush and oil paint art.",
+            usage: "Appearance: Visible brush strokes, blended colors, canvas texture, like Van Gogh or Da Vinci."
+          },
+          {
+            title: "Pencil Sketch",
+            desc: "Explanation: Mimics quick hand sketching.",
+            usage: "Appearance: Black and white, rough lines, cross-hatching shading, paper texture."
+          },
+          {
+            title: "Origami",
+            desc: "Explanation: Transforms everything to look like folded paper.",
+            usage: "Appearance: Sharp geometric shapes, clear angles, paper texture, no smooth curves."
+          }
+        ]
+      },
+      {
+        title: "4. Cultural Styles",
+        colorClass: "text-orange-400",
+        borderColorClass: "border-orange-500/20",
+        items: [
+          {
+            title: "Arabic Heritage",
+            desc: "Explanation: Focuses on historical/traditional Arab themes.",
+            usage: "Appearance: Warm desert colors, Islamic/old Arab patterns, mud/historical buildings, traditional attire."
+          },
+          {
+            title: "Modern Saudi",
+            desc: "Explanation: Reflects contemporary Saudi identity mixing authenticity with progress.",
+            usage: "Appearance: People in Saudi attire (Thobe/Abaya) in modern settings, skyscrapers, futuristic projects."
+          }
+        ]
+      }
+    ]
+  };
+
+  const currentContent = category === 'camera' ? cameraContent[language] : styleContent[language];
   const isRTL = language === 'ar';
+  const modalTitle = category === 'camera' 
+    ? (language === 'en' ? 'Camera Effects Guide' : 'دليل تأثيرات الكاميرا')
+    : (language === 'en' ? 'AI Style Filters Guide' : 'دليل أنماط الذكاء الاصطناعي');
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -258,7 +445,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
         <div className="flex items-center justify-between p-6 border-b border-zinc-800 bg-zinc-900/50">
           <div className="flex items-center gap-4">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              {language === 'en' ? 'Camera Effects Guide' : 'دليل تأثيرات الكاميرا'}
+              {modalTitle}
             </h2>
             
             {/* Language Toggle */}

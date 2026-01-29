@@ -319,19 +319,16 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       </select>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 relative group cursor-not-allowed">
                       <div className="flex justify-between items-end">
-                        <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">AI Style Filter</label>
+                        <label className="text-sm font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                            AI Style Filter
+                        </label>
                       </div>
-                      <select 
-                          value={aiFilter}
-                          onChange={(e) => setAiFilter(e.target.value)}
-                          className="w-full bg-black border border-zinc-800 rounded-xl p-3 text-zinc-400 focus:outline-none focus:ring-1 focus:ring-white focus:border-white focus:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300"
-                      >
-                          {AI_FILTERS.map(filter => (
-                              <option key={filter} value={filter}>{filter}</option>
-                          ))}
-                      </select>
+                      <div className="relative bg-black/50 border border-zinc-800/50 rounded-xl p-3 flex items-center justify-between">
+                        <span className="text-zinc-600 font-medium">Locked</span>
+                        <Lock size={16} className="text-zinc-600" />
+                      </div>
                   </div>
               </div>
 

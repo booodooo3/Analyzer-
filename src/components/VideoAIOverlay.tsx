@@ -232,7 +232,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                 loop
                             />
                         </div>
-                        <div className="flex flex-col gap-3 min-w-[140px]">
+                        <div className="flex flex-col gap-2 min-w-[120px]">
                             <Button 
                                 onClick={() => {
                                     const a = document.createElement('a');
@@ -242,16 +242,16 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                     a.click();
                                     document.body.removeChild(a);
                                 }}
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white gap-2"
+                                className="w-full bg-black hover:bg-zinc-900 text-zinc-400 border border-white/20 hover:border-white/60 hover:shadow-[0_0_10px_rgba(255,255,255,0.15)] text-xs py-2 h-auto gap-2 transition-all duration-300"
                             >
-                                <Download size={18} />
+                                <Download size={14} />
                                 Download
                             </Button>
                             <Button 
                                 onClick={() => setVideoUrl(null)}
-                                className="w-full bg-zinc-700 hover:bg-zinc-600 text-white gap-2"
+                                className="w-full bg-black hover:bg-zinc-900 text-zinc-400 border border-white/20 hover:border-white/60 hover:shadow-[0_0_10px_rgba(255,255,255,0.15)] text-xs py-2 h-auto gap-2 transition-all duration-300"
                             >
-                                <RotateCcw size={18} />
+                                <RotateCcw size={14} />
                                 Try Again
                             </Button>
                         </div>

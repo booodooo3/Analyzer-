@@ -56,6 +56,10 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if typing in an input or textarea
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
       if (isOpen && (e.key === 'h' || e.key === 'H')) {
         setHelpCategory(prev => prev ? null : 'camera');
       }
@@ -242,14 +246,14 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                     a.click();
                                     document.body.removeChild(a);
                                 }}
-                                className="w-full bg-black hover:bg-zinc-900 text-zinc-400 border border-white/20 hover:border-white/60 hover:shadow-[0_0_10px_rgba(255,255,255,0.15)] text-xs py-2 h-auto gap-2 transition-all duration-300"
+                                className="w-full bg-white hover:bg-zinc-200 text-black text-xs py-1.5 h-auto gap-2 transition-all duration-300 font-bold shadow-lg"
                             >
                                 <Download size={14} />
                                 Download
                             </Button>
                             <Button 
                                 onClick={() => setVideoUrl(null)}
-                                className="w-full bg-black hover:bg-zinc-900 text-zinc-400 border border-white/20 hover:border-white/60 hover:shadow-[0_0_10px_rgba(255,255,255,0.15)] text-xs py-2 h-auto gap-2 transition-all duration-300"
+                                className="w-full bg-white hover:bg-zinc-200 text-black text-xs py-1.5 h-auto gap-2 transition-all duration-300 font-bold shadow-lg"
                             >
                                 <RotateCcw size={14} />
                                 Try Again

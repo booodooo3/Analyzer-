@@ -212,9 +212,9 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                     <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">
                       {videoUrl ? 'Generated Video' : 'Upload Images'}
                     </label>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm border transition-all duration-300 ${
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg border-2 transition-all duration-300 ${
                         activeImageCount >= 2 
-                        ? 'bg-yellow-500/10 border-yellow-400 text-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]' 
+                        ? 'bg-yellow-500/10 border-yellow-400 text-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.6)]' 
                         : 'bg-zinc-800 border-zinc-700 text-zinc-600'
                     }`} title={activeImageCount >= 2 ? "Composition/Dubbing Mode Active" : "Upload 2+ images for Composition Mode"}>
                         D

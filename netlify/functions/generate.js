@@ -134,7 +134,7 @@ export default async (req, context) => {
 
   try {
     const body = await req.json();
-    const { personImage, clothImage, garmentDescription, isPlusMode, type } = body;
+    const { personImage, clothImage, garmentDescription, isPlusMode, type, isMakeoverMode } = body;
 
     // Robust parsing of isPlusMode
     let isPlusModeBool = false;
@@ -148,6 +148,7 @@ export default async (req, context) => {
 
     console.log("📥 Received Request Body Keys:", Object.keys(body));
     console.log("👉 isPlusMode raw:", isPlusMode, "Parsed:", isPlusModeBool);
+    console.log("👉 isMakeoverMode:", isMakeoverMode);
 
     // 1. Verify Auth & Credits
     let userId;
@@ -229,8 +230,14 @@ export default async (req, context) => {
     const modelData = await replicate.models.get(modelOwner, modelName);
     const versionId = modelData.latest_version.id;
 
+    let promptText = `A photo of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. MANDATORY: Preserve the person's identity, facial features, and hairstyle from the first image EXACTLY. Do not alter the face, skin tone, or hair. Only modify the clothing area.`;
+
+    if (isMakeoverMode) {
+        promptText += " IMPORTANT: The user wants a complete makeover. REMOVE any existing pants, trousers, or bottom garments the person is wearing and show bare legs if the new garment is a dress or skirt. CHANGE the shoes to be fashionable and matching the new outfit.";
+    }
+
     const inputPayload = {
-          prompt: `A photo of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. MANDATORY: Preserve the person's identity, facial features, and hairstyle from the first image EXACTLY. Do not alter the face, skin tone, or hair. Only modify the clothing area.`,
+          prompt: promptText,
           image_input: [personDataURI, clothDataURI],
           aspect_ratio: "match_input_image",
           output_format: effectivePlusMode ? "png" : "jpg",

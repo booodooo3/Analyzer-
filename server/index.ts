@@ -219,9 +219,10 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
             });
         }
 
-        const { personImage, clothImage, type, garmentDescription, isPlusMode } = req.body;
-        
-        console.log("📥 Request Body keys:", Object.keys(req.body));
+        const body = req.body;
+        const { personImage, clothImage, garmentDescription, isPlusMode, type, isMakeoverMode } = body;
+
+        console.log("📥 Received Request Body Keys:", Object.keys(body));
         
         // Robust parsing of isPlusMode
         let isPlusModeBool = false;
@@ -231,7 +232,8 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
             isPlusModeBool = (isPlusMode === 'true');
         }
 
-        console.log(" Parsed isPlusMode:", isPlusModeBool);
+        console.log("👉 isPlusMode raw:", isPlusMode, "Parsed:", isPlusModeBool);
+        console.log("👉 isMakeoverMode:", isMakeoverMode);
 
         if (!personImage || !clothImage) {
             return res.status(400).json({ error: "Both person and cloth images are required." });
@@ -299,8 +301,14 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
         const personDataURI = personBase64.startsWith('data:') ? personBase64 : `data:image/png;base64,${personBase64}`;
         const clothDataURI = clothBase64.startsWith('data:') ? clothBase64 : `data:image/png;base64,${clothBase64}`;
 
+        let promptText = `A photo of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. MANDATORY: Preserve the person's identity, facial features, and hairstyle from the first image EXACTLY. Do not alter the face, skin tone, or hair. Only modify the clothing area.`;
+
+        if (isMakeoverMode) {
+            promptText += " IMPORTANT: The user wants a complete makeover. REMOVE any existing pants, trousers, or bottom garments the person is wearing and show bare legs if the new garment is a dress or skirt. CHANGE the shoes to be fashionable and matching the new outfit.";
+        }
+
         const inputPayload = {
-            prompt: `A photo of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. MANDATORY: Preserve the person's identity, facial features, and hairstyle from the first image EXACTLY. Do not alter the face, skin tone, or hair. Only modify the clothing area.`,
+            prompt: promptText,
             image_input: [personDataURI, clothDataURI],
             aspect_ratio: "match_input_image",
             output_format: isPlusModeBool ? "png" : "jpg",

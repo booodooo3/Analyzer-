@@ -232,6 +232,7 @@ const App: React.FC = () => {
   };
 
   const [isPlusMode, setIsPlusMode] = useState(false);
+  const [isMakeoverMode, setIsMakeoverMode] = useState(false);
 
   const handleTryOn = async () => {
     console.log("🔘 handleTryOn called. isPlusMode:", isPlusMode);
@@ -246,7 +247,7 @@ const App: React.FC = () => {
       if (!token) {
         throw new Error('Please sign in to continue');
       }
-      const resultData = await performVirtualTryOn(personImage, clothImage, garmentType, token, garmentDescription, isPlusMode);
+      const resultData = await performVirtualTryOn(personImage, clothImage, garmentType, token, garmentDescription, isPlusMode, isMakeoverMode);
       setResults(resultData);
       
       const styleAnalysis = await analyzeStyle(resultData.front);
@@ -474,10 +475,19 @@ const App: React.FC = () => {
                          {(Object.keys(t.step2.types) as GarmentType[]).map((type) => (
                            <button
                              key={type}
-                             onClick={() => setGarmentType(type)}
+                             onClick={() => {
+                               if (garmentType === type) {
+                                   setIsMakeoverMode(!isMakeoverMode);
+                               } else {
+                                   setGarmentType(type);
+                                   setIsMakeoverMode(false);
+                               }
+                             }}
                              className={`w-full aspect-square flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300 gap-3 group ${
                                garmentType === type 
-                               ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.4)] scale-105 z-10' 
+                               ? (isMakeoverMode 
+                                    ? 'bg-white text-black border-yellow-400 border-4 shadow-[0_0_15px_rgba(253,224,71,0.6)] scale-105 z-10' 
+                                    : 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.4)] scale-105 z-10')
                                : 'bg-[#0a0a0a] border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:bg-zinc-900'
                              }`}
                            >

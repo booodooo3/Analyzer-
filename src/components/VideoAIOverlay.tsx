@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { X, Upload, Languages, Download, RotateCcw } from 'lucide-react';
 import { ImageUploader } from './ImageUploader';
 import { Button } from './Button';
 import { ImageData } from '../types';
@@ -19,6 +20,16 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [cameraEffect, setCameraEffect] = useState('Static');
   const [aiFilter, setAiFilter] = useState('No Filter');
   const [helpCategory, setHelpCategory] = useState<'camera' | 'style' | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setImages([null, null, null, null]);
+      setDescription('');
+      setVideoUrl(null);
+      setError(null);
+      setIsConverting(false);
+    }
+  }, [isOpen]);
 
   const updateImage = (index: number, data: ImageData) => {
     setImages(prev => {

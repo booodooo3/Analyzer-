@@ -280,53 +280,24 @@ const App: React.FC = () => {
       const blob = await response.blob();
       const fileName = `stylestoo-${name}.png`;
 
-      // Try Web Share API first (Mobile friendly)
-      if (navigator.share) {
-        const file = new File([blob], fileName, { type: 'image/png' });
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({
-              files: [file],
-              title: 'Generated Look',
-              text: 'Check out my generated look!'
-            });
-            return;
-          } catch (err) {
-            // User cancelled or share failed, continue to fallback
-            console.log('Share failed or cancelled', err);
-          }
-        }
-      }
-
-      // Desktop / Fallback
-      const picker = (window as any).showSaveFilePicker;
-      if (picker) {
-        const handle = await picker({
-          suggestedName: fileName,
-          types: [
-            {
-              description: 'PNG Image',
-              accept: { 'image/png': ['.png'] }
-            }
-          ]
-        });
-        const writable = await handle.createWritable();
-        await writable.write(blob);
-        await writable.close();
-        return;
-      }
-
-      // Classic Download Link Fallback
-      const url = URL.createObjectURL(blob);
+      // Direct Download (Force download on all devices)
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = fileName;
-      document.body.appendChild(link); // Required for some browsers
+      document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(url);
     } catch (e) {
       console.error('Download failed', e);
+      // Fallback
+      const link = document.createElement('a');
+      link.href = base64;
+      link.download = `stylestoo-${name}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 

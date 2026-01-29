@@ -218,7 +218,7 @@ export default async (req, context) => {
 
     // Select Model
     const modelOwner = "google";
-    let modelName = "nano-banana-pro";
+    let modelName = "nano-banana";
     if (effectivePlusMode) {
         modelName = "nano-banana";
     }

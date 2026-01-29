@@ -269,13 +269,13 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
         // Standard Mode uses "Pro" (Gemini 3 Pro Image)
         // Plus Mode uses "Nano Banana" (Gemini 2.5 Flash Image)
         const modelOwner = "google";
-        let modelName = "nano-banana-pro"; // Default
+        let modelName = "nano-banana"; // Default
 
         if (isPlusModeBool) {
             modelName = "nano-banana";
             console.log("➕ PLUS MODE DETECTED: Switching to google/nano-banana");
         } else {
-            console.log("🍌 STANDARD MODE: Using google/nano-banana-pro");
+            console.log("🍌 STANDARD MODE: Using google/nano-banana");
         }
         
         console.log(`🚀 Starting Replicate prediction (${modelOwner}/${modelName})...`);

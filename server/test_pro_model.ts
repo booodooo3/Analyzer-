@@ -9,7 +9,7 @@ const replicate = new Replicate({
 });
 
 async function testProModel() {
-    console.log("🚀 Testing google/nano-banana-pro...");
+    console.log("🚀 Testing google/nano-banana...");
     
     // Using reliable public images
     const pUrl = "https://raw.githubusercontent.com/gradio-app/gradio/main/test/test_files/bus.png"; 
@@ -18,7 +18,7 @@ async function testProModel() {
     try {
         console.log("Sending request...");
         const output = await replicate.run(
-            "google/nano-banana-pro",
+            "google/nano-banana",
             {
               input: {
                 prompt: "A photo of a person wearing a red shirt",

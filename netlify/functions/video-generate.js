@@ -89,32 +89,9 @@ export default async (req, context) => {
             let input = {
                 prompt: enhancedPrompt,
                 duration: duration || 10,
+                image: image,
+                fps: 24
             };
-
-            if (model === 'kling') {
-                modelOwner = "kwaivgi";
-                modelName = "kling-v2.1"; 
-                
-                // Kling v2.1 specific inputs
-                input.start_image = image; // Kling uses 'start_image'
-                input.mode = "standard";   // Default to standard
-                input.aspect_ratio = "16:9";
-
-                // Kling v2.1 does not officially list 'audio' in standard image-to-video, 
-                // but we pass it if the user provided it, in case a newer version supports it.
-                // If the API rejects it, we might need to remove it.
-                // For now, we'll keep it conditional.
-                if (audio) {
-                     // Note: Verify if the specific version supports audio input.
-                     // If not, this might be ignored or cause an error.
-                     // input.audio = audio; 
-                }
-            } else {
-                // Default / Seedance
-                // Assuming Seedance uses 'image'
-                input.image = image;
-                input.fps = 24;
-            }
 
             // Get latest version of the model
             let version;

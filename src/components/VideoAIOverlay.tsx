@@ -20,8 +20,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [cameraEffect, setCameraEffect] = useState('Static');
   const [aiFilter, setAiFilter] = useState('No Filter');
   const [helpCategory, setHelpCategory] = useState<'camera' | 'style' | null>(null);
-  const [selectedModel, setSelectedModel] = useState<'kling' | 'seedance'>('seedance');
-  const [audioFile, setAudioFile] = useState<File | null>(null);
   const [duration, setDuration] = useState(10);
 
   useEffect(() => {
@@ -31,22 +29,9 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       setVideoUrl(null);
       setError(null);
       setIsConverting(false);
-      setSelectedModel('seedance');
-      setAudioFile(null);
       setDuration(10);
     }
   }, [isOpen]);
-
-  const handleAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.type.startsWith('audio/')) {
-        setAudioFile(file);
-      } else {
-        setError('Please upload a valid audio file');
-      }
-    }
-  };
 
   const updateImage = (index: number, data: ImageData) => {
     setImages(prev => {
@@ -133,15 +118,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
       const processedImage = await processImage(primaryImage.base64);
 
-      let audioBase64 = null;
-      if (audioFile && selectedModel === 'kling') {
-        const reader = new FileReader();
-        audioBase64 = await new Promise((resolve) => {
-          reader.onload = (e) => resolve(e.target?.result);
-          reader.readAsDataURL(audioFile);
-        });
-      }
-
       // 2. Call API to deduct credits and start generation
       const response = await fetch('/api/video-generate', {
         method: 'POST',
@@ -154,8 +130,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
           description,
           cameraEffect,
           aiFilter,
-          model: selectedModel,
-          audio: audioBase64,
           duration: duration
         })
       });
@@ -243,29 +217,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                     <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">
                       {videoUrl ? 'Generated Video' : 'Upload Images'}
                     </label>
-                    {/* Model Selection */}
-                    <div className="flex bg-zinc-900/80 p-1 rounded-lg border border-zinc-700/50">
-                        <button
-                            onClick={() => setSelectedModel('seedance')}
-                            className={`px-3 py-1.5 rounded-md text-[10px] font-bold transition-all duration-300 ${
-                                selectedModel === 'seedance'
-                                    ? 'bg-zinc-800 text-white shadow-sm border border-zinc-600'
-                                    : 'text-zinc-500 hover:text-zinc-300'
-                            }`}
-                        >
-                            Seedance 1.5
-                        </button>
-                        <button
-                            onClick={() => setSelectedModel('kling')}
-                            className={`px-3 py-1.5 rounded-md text-[10px] font-bold transition-all duration-300 ${
-                                selectedModel === 'kling'
-                                    ? 'bg-zinc-800 text-white shadow-sm border border-zinc-600'
-                                    : 'text-zinc-500 hover:text-zinc-300'
-                            }`}
-                        >
-                            Kling v2.1
-                        </button>
-                    </div>
                   </div>
                   
                   {videoUrl ? (
@@ -362,66 +313,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       </select>
                   </div>
 
-                {/* Audio Uploader - Only for Kling */}
-                {selectedModel === 'kling' && (
-                    <div className="space-y-2 animate-in fade-in slide-in-from-top-4 duration-300">
-                        <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
-                            Audio Source
-                            <span className="text-[10px] bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 rounded border border-yellow-500/30">KLING ONLY</span>
-                        </label>
-                        <div className="flex items-center gap-3 bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl transition-all hover:border-zinc-700 group">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${audioFile ? 'bg-purple-500/20 text-purple-400' : 'bg-zinc-800 text-zinc-500 group-hover:bg-zinc-700'}`}>
-                                <Mic size={20} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                {audioFile ? (
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-medium text-white truncate">{audioFile.name}</span>
-                                        <span className="text-xs text-zinc-500">{(audioFile.size / 1024 / 1024).toFixed(2)} MB</span>
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-medium text-zinc-400 group-hover:text-zinc-300">Upload Audio</span>
-                                        <span className="text-xs text-zinc-600">MP3, WAV (Optional)</span>
-                                    </div>
-                                )}
-                            </div>
-                            {audioFile ? (
-                                <button 
-                                    onClick={() => setAudioFile(null)}
-                                    className="p-2 hover:bg-red-500/20 text-zinc-500 hover:text-red-400 rounded-lg transition-colors"
-                                >
-                                    <Trash2 size={16} />
-                                </button>
-                            ) : (
-                                <label className="cursor-pointer p-2 hover:bg-zinc-800 text-zinc-500 hover:text-white rounded-lg transition-colors">
-                                    <Upload size={16} />
-                                    <input 
-                                        type="file" 
-                                        accept="audio/*" 
-                                        className="hidden" 
-                                        onChange={handleAudioUpload}
-                                    />
-                                </label>
-                            )}
-                        </div>
-                    </div>
-                )}
-
                 {/* AI Style Filter */}
-                  {selectedModel === 'seedance' ? (
-                      <div className="space-y-2 relative group cursor-not-allowed">
-                          <div className="flex justify-between items-end">
-                            <label className="text-sm font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
-                                AI Style Filter
-                            </label>
-                          </div>
-                          <div className="relative bg-black/50 border border-zinc-800/50 rounded-xl p-3 flex items-center justify-between">
-                            <span className="text-zinc-600 font-medium">Locked (Seedance)</span>
-                            <Lock size={16} className="text-zinc-600" />
-                          </div>
-                      </div>
-                  ) : (
                       <div className="space-y-2 animate-in fade-in duration-300">
                           <div className="flex justify-between items-end">
                               <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
@@ -452,7 +344,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                               </div>
                           </div>
                       </div>
-                  )}
               </div>
 
               <Button 

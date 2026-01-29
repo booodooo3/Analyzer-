@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Upload, Languages, Download, RotateCcw, Mic, Trash2 } from 'lucide-react';
+import { X, Upload, Languages, Download, RotateCcw, Mic, Trash2, Lock } from 'lucide-react';
 import { ImageUploader } from './ImageUploader';
 import { Button } from './Button';
 import { ImageData } from '../types';

@@ -72,7 +72,8 @@ export default async (req, context) => {
         status: "starting",
         message: "Video generation started successfully",
         deducted: 5,
-        model: "bytedance/seedance-1.5-pro"
+        model: "bytedance/seedance-1.5-pro",
+        duration: "8s"
     }), { status: 200, headers });
 
   } catch (error) {

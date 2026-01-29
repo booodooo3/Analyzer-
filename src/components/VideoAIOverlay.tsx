@@ -89,7 +89,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         body: JSON.stringify({
           image: processedImage,
           description,
-          model: 'bytedance/seedance-1.5-pro'
+          model: 'bytedance/seedance-1.5-pro',
+          duration: 8 // Request 8 seconds video
         })
       });
 

@@ -243,12 +243,28 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                     <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">
                       {videoUrl ? 'Generated Video' : 'Upload Images'}
                     </label>
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg border-2 transition-all duration-300 ${
-                        activeImageCount >= 2 
-                        ? 'bg-yellow-500/10 border-yellow-400 text-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.6)]' 
-                        : 'bg-zinc-800 border-zinc-700 text-zinc-600'
-                    }`} title={activeImageCount >= 2 ? "Composition/Dubbing Mode Active" : "Upload 2+ images for Composition Mode"}>
-                        D
+                    {/* Model Selection */}
+                    <div className="flex bg-zinc-900/80 p-1 rounded-lg border border-zinc-700/50">
+                        <button
+                            onClick={() => setSelectedModel('seedance')}
+                            className={`px-3 py-1.5 rounded-md text-[10px] font-bold transition-all duration-300 ${
+                                selectedModel === 'seedance'
+                                    ? 'bg-zinc-800 text-white shadow-sm border border-zinc-600'
+                                    : 'text-zinc-500 hover:text-zinc-300'
+                            }`}
+                        >
+                            Seedance 1.5
+                        </button>
+                        <button
+                            onClick={() => setSelectedModel('kling')}
+                            className={`px-3 py-1.5 rounded-md text-[10px] font-bold transition-all duration-300 ${
+                                selectedModel === 'kling'
+                                    ? 'bg-zinc-800 text-white shadow-sm border border-zinc-600'
+                                    : 'text-zinc-500 hover:text-zinc-300'
+                            }`}
+                        >
+                            Kling v2.1
+                        </button>
                     </div>
                   </div>
                   

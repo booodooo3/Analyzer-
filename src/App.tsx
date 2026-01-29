@@ -331,6 +331,11 @@ const App: React.FC = () => {
                   isPlusMode={isPlusMode}
                   onTogglePlus={() => {
                     setIsPlusMode(!isPlusMode);
+                    if (appState === AppState.RESULT) {
+                      setResults(null);
+                      setAnalysis(null);
+                      setAppState(AppState.IDLE);
+                    }
                   }}
                   onCheckout={goToCheckout}
                   onOpenVideoAI={() => setIsVideoAIOpen(true)}

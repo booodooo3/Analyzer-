@@ -470,7 +470,9 @@ const App: React.FC = () => {
 
                   {/* Garment Type Grid Selector */}
                   <div className="space-y-3 pt-4">
-                       <h4 className="text-sm font-bold text-white uppercase tracking-widest">{t.step2.typeLabel}</h4>
+                       <h4 className="text-sm font-bold text-white uppercase tracking-widest">
+                         {t.step2.typeLabel} <span className="text-[10px] text-yellow-400 normal-case ml-2 font-medium opacity-90">(Double click for makeover/remove pants)</span>
+                       </h4>
                        <div className="grid grid-cols-4 gap-3">
                          {(Object.keys(t.step2.types) as GarmentType[]).map((type) => (
                            <button

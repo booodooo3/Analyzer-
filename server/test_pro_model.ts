@@ -25,7 +25,8 @@ async function testProModel() {
                 image_input: [pUrl, cUrl],
                 aspect_ratio: "match_input_image",
                 output_format: "png",
-                safety_filter_level: "block_only_high"
+                safety_filter_level: "block_only_high",
+                num_inference_steps: 25
               }
             }
         );

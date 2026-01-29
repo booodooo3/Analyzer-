@@ -235,7 +235,8 @@ export default async (req, context) => {
           aspect_ratio: "match_input_image",
           output_format: effectivePlusMode ? "png" : "jpg",
           resolution: effectivePlusMode ? "2K" : "1K",
-          safety_filter_level: "block_only_high"
+          safety_filter_level: "block_only_high",
+          num_inference_steps: 25
     };
 
     // If Plus Mode, we generate 3 distinct views

@@ -238,13 +238,30 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                         </div>
                         <div className="flex flex-col gap-2 min-w-[120px]">
                             <Button 
-                                onClick={() => {
-                                    const a = document.createElement('a');
-                                    a.href = videoUrl;
-                                    a.download = 'generated-video.mp4';
-                                    document.body.appendChild(a);
-                                    a.click();
-                                    document.body.removeChild(a);
+                                onClick={async () => {
+                                    if (!videoUrl) return;
+                                    try {
+                                        const response = await fetch(videoUrl);
+                                        const blob = await response.blob();
+                                        const url = window.URL.createObjectURL(blob);
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = 'generated-video.mp4';
+                                        document.body.appendChild(a);
+                                        a.click();
+                                        window.URL.revokeObjectURL(url);
+                                        document.body.removeChild(a);
+                                    } catch (e) {
+                                        console.error('Download failed:', e);
+                                        // Fallback to direct link if fetch fails
+                                        const a = document.createElement('a');
+                                        a.href = videoUrl;
+                                        a.download = 'generated-video.mp4';
+                                        a.target = '_blank';
+                                        document.body.appendChild(a);
+                                        a.click();
+                                        document.body.removeChild(a);
+                                    }
                                 }}
                                 className="w-full bg-white hover:bg-zinc-200 text-black text-xs py-1.5 h-auto gap-2 transition-all duration-300 font-bold shadow-lg"
                             >

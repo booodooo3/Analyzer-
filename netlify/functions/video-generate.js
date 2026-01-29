@@ -1,83 +1,117 @@
 import { createClerkClient } from "@clerk/clerk-sdk-node";
+import Replicate from "replicate";
 
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
 
 export default async (req, context) => {
-  // Handle CORS
-  const headers = {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-  };
+    const headers = {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+    };
 
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers });
-  }
-
-  if (req.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405, headers });
-  }
-
-  try {
-    const body = await req.json();
-    const { image, description, model } = body;
-
-    console.log("📥 Video Generation Request:", { model, descriptionLength: description?.length });
-
-    // 1. Verify Auth & Credits
-    let userId;
-    let currentCredits;
-    
-    try {
-        const authHeader = req.headers.get("Authorization");
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            throw new Error("Missing Authorization header");
-        }
-        const token = authHeader.split(" ")[1];
-        const verified = await clerkClient.verifyToken(token);
-        userId = verified.sub;
-        
-        const user = await clerkClient.users.getUser(userId);
-        currentCredits = typeof user.publicMetadata.credits === 'number' ? user.publicMetadata.credits : 3;
-        
-        console.log(`👤 User ${userId} requests video generation. Credits: ${currentCredits}`);
-        
-        // Cost for Video AI is 5 credits
-        const cost = 5;
-
-        if (currentCredits < cost) {
-            return new Response(JSON.stringify({ error: `Insufficient credits! You need ${cost} credits for video generation.` }), { status: 403, headers });
-        }
-        
-        // Deduct Credit
-        await clerkClient.users.updateUserMetadata(userId, {
-            publicMetadata: {
-                credits: currentCredits - cost
-            }
-        });
-        console.log(`✅ Deducted ${cost} credits. New balance: ${currentCredits - cost}`);
-
-    } catch (e) {
-        console.error("Auth/Credit Check Failed:", e);
-        return new Response(JSON.stringify({ error: "Unauthorized: Please login first." }), { status: 401, headers });
+    if (req.method === "OPTIONS") {
+        return new Response(null, { status: 204, headers });
     }
 
-    // 2. Mock Video Generation
-    // Since we don't have the actual bytedance/seedance-1.5-pro integration details or key,
-    // we will acknowledge the request and simulate success after credit deduction.
-    // In a real scenario, we would call Replicate or another API here.
-    
-    // For now, return success
-    return new Response(JSON.stringify({
-        status: "starting",
-        message: "Video generation started successfully",
-        deducted: 5,
-        model: "bytedance/seedance-1.5-pro",
-        duration: "8s"
-    }), { status: 200, headers });
+    // GET Request: Check Prediction Status
+    const url = new URL(req.url);
+    const predictionId = url.searchParams.get("id");
 
-  } catch (error) {
-    console.error("❌ Error processing video request:", error);
-    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers });
-  }
+    if (req.method === "GET" && predictionId) {
+        try {
+            const prediction = await replicate.predictions.get(predictionId);
+            
+            if (prediction.status === "succeeded") {
+                let outputUrl = prediction.output;
+                // Handle array output (common in video models)
+                if (Array.isArray(outputUrl)) {
+                    outputUrl = outputUrl[0];
+                }
+                return new Response(JSON.stringify({ 
+                    status: "succeeded", 
+                    output: outputUrl 
+                }), { headers });
+            } else if (prediction.status === "failed" || prediction.status === "canceled") {
+                return new Response(JSON.stringify({ 
+                    status: "failed", 
+                    error: prediction.error 
+                }), { headers });
+            } else {
+                return new Response(JSON.stringify({ status: "processing" }), { headers });
+            }
+        } catch (error) {
+            return new Response(JSON.stringify({ error: error.message }), { status: 500, headers });
+        }
+    }
+
+    // POST Request: Start Generation
+    if (req.method === "POST") {
+        try {
+            const authHeader = req.headers.get("Authorization");
+            const token = authHeader?.split(" ")[1];
+
+            if (!token) {
+                return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+            }
+
+            // 1. Verify User & Credits
+            const verified = await clerkClient.verifyToken(token);
+            const userId = verified.sub;
+            const user = await clerkClient.users.getUser(userId);
+            
+            const currentCredits = typeof user.publicMetadata.credits === 'number' ? user.publicMetadata.credits : 3;
+            const cost = 5;
+
+            if (currentCredits < cost) {
+                return new Response(JSON.stringify({ error: `Insufficient credits! You need ${cost} credits for video generation.` }), { status: 403, headers });
+            }
+
+            const { image, description, duration } = await req.json();
+
+            // 2. Start Replicate Prediction
+            // Get latest version of the model
+            // Note: If "bytedance/seedance-1.5-pro" is not public/accessible via API without version, 
+            // we might need to look it up. Assuming standard Replicate usage:
+            let version;
+            try {
+                const model = await replicate.models.get("bytedance", "seedance-1.5-pro");
+                version = model.latest_version.id;
+            } catch (e) {
+                console.error("Model fetch error:", e);
+                // Fallback or error if model not found
+                return new Response(JSON.stringify({ error: "Model bytedance/seedance-1.5-pro not found or accessible." }), { status: 500, headers });
+            }
+
+            const prediction = await replicate.predictions.create({
+                version: version,
+                input: {
+                    image: image, // Expecting data URI or URL
+                    prompt: description,
+                    duration: duration || 8,
+                    fps: 24
+                }
+            });
+
+            // 3. Deduct Credit ONLY if prediction started successfully
+            await clerkClient.users.updateUserMetadata(userId, {
+                publicMetadata: { credits: currentCredits - cost }
+            });
+
+            return new Response(JSON.stringify({
+                status: "starting",
+                message: "Video generation started",
+                id: prediction.id,
+                deducted: cost,
+                model: "bytedance/seedance-1.5-pro"
+            }), { status: 200, headers });
+
+        } catch (error) {
+            console.error("Error:", error);
+            return new Response(JSON.stringify({ error: error.message || "Internal Server Error" }), { status: 500, headers });
+        }
+    }
+
+    return new Response("Method Not Allowed", { status: 405, headers });
 };

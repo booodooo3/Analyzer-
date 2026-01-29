@@ -14,6 +14,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [description, setDescription] = useState('');
   const [isConverting, setIsConverting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -100,15 +101,35 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       }
 
       const data = await response.json();
-      console.log('Video generation started:', data);
-      
-      // Simulate completion
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      const predictionId = data.id;
+
+      // Poll for status
+      const pollStatus = async () => {
+        try {
+          const statusRes = await fetch(`/api/video-generate?id=${predictionId}`);
+          const statusData = await statusRes.json();
+
+          if (statusData.status === 'succeeded') {
+            setVideoUrl(statusData.output);
+            setIsConverting(false);
+          } else if (statusData.status === 'failed') {
+            setError(statusData.error || 'Video generation failed');
+            setIsConverting(false);
+          } else {
+            // Still processing, poll again
+            setTimeout(pollStatus, 3000);
+          }
+        } catch (e) {
+          setError('Failed to check status');
+          setIsConverting(false);
+        }
+      };
+
+      pollStatus();
+
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'An error occurred');
-    } finally {
       setIsConverting(false);
     }
   };
@@ -143,13 +164,25 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
             )}
             
             <div className="space-y-2">
-                <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Upload Image</label>
-                <ImageUploader 
-                    description="Upload image to convert to video"
-                    currentImage={image?.base64}
-                    onImageSelected={setImage}
-                    className="aspect-video"
-                />
+                <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">
+                  {videoUrl ? 'Generated Video' : 'Upload Image'}
+                </label>
+                {videoUrl ? (
+                  <video 
+                    src={videoUrl} 
+                    controls 
+                    className="w-full rounded-xl aspect-video bg-black"
+                    autoPlay
+                    loop
+                  />
+                ) : (
+                  <ImageUploader 
+                      description="Upload image to convert to video"
+                      currentImage={image?.base64}
+                      onImageSelected={setImage}
+                      className="aspect-video"
+                  />
+                )}
             </div>
 
             <div className="space-y-2">

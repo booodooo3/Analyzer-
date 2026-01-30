@@ -21,6 +21,18 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [aiFilter, setAiFilter] = useState('No Filter');
   const [helpCategory, setHelpCategory] = useState<'camera' | 'style' | null>(null);
   const [duration, setDuration] = useState(10);
+  const [processingTime, setProcessingTime] = useState(0);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isConverting) {
+      setProcessingTime(0);
+      interval = setInterval(() => {
+        setProcessingTime(prev => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isConverting]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -173,6 +185,12 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
     }
   };
 
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
   return (
     <>
       <HelpModal 
@@ -269,6 +287,62 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                 <RotateCcw size={14} />
                                 Try Again
                             </Button>
+                        </div>
+                    </div>
+                  ) : isConverting ? (
+                    <div className="w-full rounded-xl aspect-video bg-zinc-950 relative overflow-hidden border border-white/5 group">
+                        {/* Background Image (Input) */}
+                        {images[0]?.base64 && (
+                            <div 
+                                className="absolute inset-0 bg-cover bg-center opacity-30 blur-sm transition-opacity duration-1000"
+                                style={{ backgroundImage: `url(${images[0].base64})` }}
+                            />
+                        )}
+                        
+                        {/* Dot Pattern Overlay */}
+                        <div className="absolute inset-0" 
+                             style={{ 
+                                 backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)', 
+                                 backgroundSize: '20px 20px',
+                                 maskImage: 'linear-gradient(to bottom, black, transparent)'
+                             }} 
+                        />
+
+                        {/* Content */}
+                        <div className="absolute inset-0 flex flex-col justify-end p-8">
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
+                                    <span className="text-zinc-400 text-xs font-mono tracking-widest uppercase">Processing Video</span>
+                                </div>
+                                
+                                <div className="flex items-center gap-4 text-2xl font-bold tracking-tight">
+                                    <span className="text-zinc-600">In the queue</span>
+                                    <div className="flex gap-1">
+                                        {[...Array(6)].map((_, i) => (
+                                            <span key={i} className="text-zinc-700 animate-pulse" style={{ animationDelay: `${i * 100}ms` }}>›</span>
+                                        ))}
+                                    </div>
+                                    <span className="text-white bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-500">Generation</span>
+                                    <div className="flex gap-1">
+                                        {[...Array(6)].map((_, i) => (
+                                            <span key={i} className="text-zinc-500 animate-pulse" style={{ animationDelay: `${i * 100 + 600}ms` }}>›</span>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-4 pt-2 border-t border-white/10">
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Time Elapsed</span>
+                                        <span className="text-xl font-mono text-white/90">{formatTime(processingTime)}</span>
+                                    </div>
+                                    <div className="h-8 w-px bg-white/10" />
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Est. Time</span>
+                                        <span className="text-sm font-mono text-zinc-400">~2-3 Mins</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                   ) : (

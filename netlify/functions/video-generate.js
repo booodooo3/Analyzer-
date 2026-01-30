@@ -68,7 +68,7 @@ export default async (req, context) => {
                 return new Response(JSON.stringify({ error: `Insufficient credits! You need ${cost} credits for video generation.` }), { status: 403, headers });
             }
 
-            const { image, description, duration, cameraEffect, aiFilter, model, audio } = await req.json();
+            const { image, description, duration, cameraEffect, aiFilter, model } = await req.json();
 
             // Construct Enhanced Prompt
             let enhancedPrompt = description;
@@ -90,8 +90,7 @@ export default async (req, context) => {
                 prompt: enhancedPrompt,
                 duration: duration || 10,
                 image: image,
-                fps: 24,
-                audio: audio // Include audio for lipsync
+                fps: 24
             };
 
             // Get latest version of the model

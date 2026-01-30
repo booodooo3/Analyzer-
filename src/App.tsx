@@ -316,7 +316,7 @@ const App: React.FC = () => {
             <div className="w-4 h-4 border-2 border-black rotate-45" />
           </div>
           <span className="text-xl font-bold tracking-tighter uppercase mr-2 ml-2">
-            {t.appName} <span className="text-zinc-500">AI</span>
+            {t.appName}
           </span>
         </div>
         

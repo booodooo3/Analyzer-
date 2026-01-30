@@ -248,7 +248,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                 loop
                             />
                         </div>
-                        <div className="flex flex-col gap-2 min-w-[120px]">
+                        <div className="flex flex-col gap-3 min-w-[180px]">
                             <Button 
                                 onClick={async () => {
                                     if (!videoUrl) return;
@@ -275,17 +275,17 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                         document.body.removeChild(a);
                                     }
                                 }}
-                                className="w-full bg-white hover:bg-zinc-200 text-black text-xs py-1.5 h-auto gap-2 transition-all duration-300 font-bold shadow-lg"
+                                className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 text-white text-sm py-3 h-auto gap-2 transition-all duration-300 font-bold shadow-xl uppercase tracking-wider rounded-xl"
                             >
-                                <Download size={14} />
-                                Download
+                                <Download size={16} className="text-white" />
+                                DOWNLOAD
                             </Button>
                             <Button 
                                 onClick={() => setVideoUrl(null)}
-                                className="w-full bg-white hover:bg-zinc-200 text-black text-xs py-1.5 h-auto gap-2 transition-all duration-300 font-bold shadow-lg"
+                                className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 text-white text-sm py-3 h-auto gap-2 transition-all duration-300 font-bold shadow-xl uppercase tracking-wider rounded-xl"
                             >
-                                <RotateCcw size={14} />
-                                Try Again
+                                <RotateCcw size={16} className="text-white" />
+                                TRY ON AGAIN
                             </Button>
                         </div>
                     </div>

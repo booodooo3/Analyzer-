@@ -97,7 +97,7 @@ const App: React.FC = () => {
   const { getToken } = useAuth();
 
   const t = {
-    appName: 'Stylestoo',
+    appName: 'Analyzer-Ai',
     nav: { login: 'Login' },
     header: {
       title: 'AI Fashion Experience',
@@ -502,7 +502,7 @@ const App: React.FC = () => {
                                   React.cloneElement(garmentIcons[type] as React.ReactElement, { className: "w-6 h-6" })
                                )}
                              </div>
-                             <span className={`text-[10px] font-bold text-center leading-tight w-full ${garmentType === type ? 'text-black' : 'text-zinc-500 group-hover:text-zinc-400'}`}>
+                             <span className={`text-[10px] font-bold text-center leading-tight w-full h-[2.4em] flex items-center justify-center ${garmentType === type ? 'text-black' : 'text-zinc-500 group-hover:text-zinc-400'}`}>
                                {t.step2.types[type]}
                              </span>
                            </button>

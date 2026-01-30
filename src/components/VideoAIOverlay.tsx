@@ -275,16 +275,14 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                         document.body.removeChild(a);
                                     }
                                 }}
-                                className="w-full bg-transparent border border-white/20 hover:bg-white/10 text-white text-[10px] py-1.5 h-auto gap-2 transition-all duration-300 font-medium tracking-widest uppercase rounded-sm"
+                                className="w-full bg-black hover:bg-zinc-900 border border-white text-white text-[10px] py-1.5 h-auto gap-2 transition-all duration-300 font-bold tracking-widest uppercase rounded-none"
                             >
-                                <Download size={12} className="text-white" />
                                 DOWNLOAD
                             </Button>
                             <Button 
                                 onClick={() => setVideoUrl(null)}
-                                className="w-full bg-transparent border border-white/20 hover:bg-white/10 text-white text-[10px] py-1.5 h-auto gap-2 transition-all duration-300 font-medium tracking-widest uppercase rounded-sm"
+                                className="w-full bg-black hover:bg-zinc-900 border border-white text-white text-[10px] py-1.5 h-auto gap-2 transition-all duration-300 font-bold tracking-widest uppercase rounded-none"
                             >
-                                <RotateCcw size={12} className="text-white" />
                                 TRY ON AGAIN
                             </Button>
                         </div>

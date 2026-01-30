@@ -85,12 +85,13 @@ export default async (req, context) => {
 
             // Determine Model Version
             let modelOwner = "bytedance";
-            let modelName = "seedance-1.5-pro";
+            let modelName = "seedance-1.5-pro"; // Latest dev update: 23/12/2025 - Supports complex instructions & lipsync
             let input = {
                 prompt: enhancedPrompt,
                 duration: duration || 10,
                 image: image,
-                fps: 24
+                fps: 24,
+                audio: audio // Include audio for lipsync
             };
 
             // Get latest version of the model

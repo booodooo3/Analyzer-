@@ -21,6 +21,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [aiFilter, setAiFilter] = useState('No Filter');
   const [helpCategory, setHelpCategory] = useState<'camera' | 'style' | null>(null);
   const [duration, setDuration] = useState(10);
+  const [audio, setAudio] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) {
@@ -30,6 +31,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       setError(null);
       setIsConverting(false);
       setDuration(10);
+      setAudio(null);
     }
   }, [isOpen]);
 
@@ -72,6 +74,21 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   }, [isOpen]);
 
   if (!isOpen) return null;
+
+  const handleAudioFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        setError("Audio file size must be less than 10MB");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAudio(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleConvert = async () => {
     const primaryImage = images.find(img => img !== null);
@@ -130,7 +147,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
           description,
           cameraEffect,
           aiFilter,
-          duration: duration
+          duration: duration,
+          audio
         })
       });
 
@@ -295,6 +313,41 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       placeholder="Describe the motion and scene (e.g. 'A futuristic city with flying cars')..."
                       className="w-full h-24 bg-zinc-900/50 border border-zinc-700/50 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20 resize-none"
                   />
+              </div>
+
+              <div className="space-y-2">
+                  <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Audio (Optional - Lipsync)</label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="file"
+                      accept="audio/*"
+                      onChange={handleAudioFileChange}
+                      className="hidden"
+                      id="audio-upload"
+                    />
+                    <label
+                      htmlFor="audio-upload"
+                      className="flex-1 bg-zinc-900/50 border border-zinc-700/50 rounded-xl p-3 flex items-center gap-3 cursor-pointer hover:bg-zinc-800/50 transition-colors"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400">
+                        <Mic size={14} />
+                      </div>
+                      <span className="text-sm text-zinc-400 flex-1 truncate">
+                        {audio ? "Audio file selected" : "Upload audio for lipsync..."}
+                      </span>
+                      {audio && (
+                        <div className="w-2 h-2 rounded-full bg-green-400 shadow-[0_0_5px_rgba(74,222,128,0.5)]" />
+                      )}
+                    </label>
+                    {audio && (
+                      <button
+                        onClick={() => setAudio(null)}
+                        className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    )}
+                  </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

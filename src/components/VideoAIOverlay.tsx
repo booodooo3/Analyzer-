@@ -248,7 +248,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                 loop
                             />
                         </div>
-                        <div className="flex flex-col gap-2 min-w-[160px]">
+                        <div className="flex flex-col gap-2 min-w-[140px]">
                             <Button 
                                 onClick={async () => {
                                     if (!videoUrl) return;
@@ -275,16 +275,16 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                         document.body.removeChild(a);
                                     }
                                 }}
-                                className="w-full bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/5 text-white/90 text-xs py-2 h-auto gap-2 transition-all duration-300 font-bold shadow-lg uppercase tracking-widest rounded-lg"
+                                className="w-full bg-transparent border border-white/20 hover:bg-white/10 text-white text-[10px] py-1.5 h-auto gap-2 transition-all duration-300 font-medium tracking-widest uppercase rounded-sm"
                             >
-                                <Download size={14} className="text-white/80" />
+                                <Download size={12} className="text-white" />
                                 DOWNLOAD
                             </Button>
                             <Button 
                                 onClick={() => setVideoUrl(null)}
-                                className="w-full bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/5 text-white/90 text-xs py-2 h-auto gap-2 transition-all duration-300 font-bold shadow-lg uppercase tracking-widest rounded-lg"
+                                className="w-full bg-transparent border border-white/20 hover:bg-white/10 text-white text-[10px] py-1.5 h-auto gap-2 transition-all duration-300 font-medium tracking-widest uppercase rounded-sm"
                             >
-                                <RotateCcw size={14} className="text-white/80" />
+                                <RotateCcw size={12} className="text-white" />
                                 TRY ON AGAIN
                             </Button>
                         </div>

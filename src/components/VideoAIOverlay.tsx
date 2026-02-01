@@ -421,7 +421,11 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                   onClick={handleConvert}
                   disabled={activeImageCount === 0 || isConverting}
                   isLoading={isConverting}
-                  className="w-full bg-gradient-to-r from-zinc-700 to-zinc-600 hover:from-zinc-600 hover:to-zinc-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-white/5 transition-all duration-300"
+                  className={`w-full font-bold py-4 rounded-xl transition-all duration-300 ${
+                    isConverting 
+                      ? 'bg-zinc-900 border border-green-500/50 text-green-400 shadow-[0_0_30px_rgba(34,197,94,0.2)]' 
+                      : 'bg-gradient-to-r from-zinc-700 to-zinc-600 hover:from-zinc-600 hover:to-zinc-500 text-white shadow-lg shadow-white/5'
+                  }`}
               >
                   {isConverting ? 'Generating Video...' : 'Generate Video (5 Credits)'}
               </Button>

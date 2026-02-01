@@ -85,7 +85,16 @@ export default async (req, context) => {
 
             // Determine Model Version
             let modelOwner = "bytedance";
-            let modelName = "seedance-1.5-pro"; // Latest dev update: 23/12/2025 - Supports complex instructions & lipsync
+            let modelName = "seedance-1.5-pro";
+
+            if (model === 'bytedance/seedance-1-pro-fast') {
+                modelOwner = "bytedance";
+                modelName = "seedance-1-pro-fast";
+            } else if (model === 'bytedance/seedance-1.5-pro') {
+                modelOwner = "bytedance";
+                modelName = "seedance-1.5-pro";
+            }
+
             let input = {
                 prompt: enhancedPrompt,
                 duration: duration || 10,

@@ -21,6 +21,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [aiFilter, setAiFilter] = useState('No Filter');
   const [helpCategory, setHelpCategory] = useState<'camera' | 'style' | null>(null);
   const [duration, setDuration] = useState(10);
+  const [selectedModel, setSelectedModel] = useState('bytedance/seedance-1.5-pro');
   const [processingTime, setProcessingTime] = useState(0);
 
   useEffect(() => {
@@ -142,7 +143,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
           description,
           cameraEffect,
           aiFilter,
-          duration: duration
+          duration: duration,
+          model: selectedModel
         })
       });
 
@@ -360,7 +362,17 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
               </div>
 
               <div className="space-y-2">
-                  <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Video Description</label>
+                  <div className="flex justify-between items-center">
+                      <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Video Description</label>
+                      <select 
+                          value={selectedModel}
+                          onChange={(e) => setSelectedModel(e.target.value)}
+                          className="bg-black border border-zinc-800 rounded-lg px-3 py-1 text-xs text-zinc-400 focus:outline-none focus:ring-1 focus:ring-white/20"
+                      >
+                          <option value="bytedance/seedance-1.5-pro">Seedance 1.5 Pro</option>
+                          <option value="bytedance/seedance-1-pro-fast">Seedance 1 Pro Fast</option>
+                      </select>
+                  </div>
                   <textarea 
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}

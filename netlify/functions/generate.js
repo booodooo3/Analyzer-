@@ -230,7 +230,7 @@ export default async (req, context) => {
     const modelData = await replicate.models.get(modelOwner, modelName);
     const versionId = modelData.latest_version.id;
 
-    let promptText = `A photo of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. MANDATORY: Preserve the person's identity, facial features, and hairstyle from the first image EXACTLY. Do not alter the face, skin tone, or hair. Only modify the clothing area.`;
+    let promptText = `A photo of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. The face, eyes, nose, lips, and hair are reference-locked. They must be a 1:1 match with the input photo. Preserve the original person's face and identity with 100% accuracy, perform the swap only on the garment regions.`;
 
     if (isMakeoverMode) {
         promptText += " IMPORTANT: The user wants a complete makeover. REMOVE any existing pants, trousers, or bottom garments the person is wearing and show bare legs if the new garment is a dress or skirt. CHANGE the shoes to be fashionable and matching the new outfit.";
@@ -251,9 +251,9 @@ export default async (req, context) => {
          console.log("🚀 Starting Plus Mode Prediction (3 views)...");
          
          const prompts = [
-            { type: 'front', text: `Front view of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. MANDATORY: Preserve the person's identity, facial features, and hairstyle from the first image EXACTLY. Do not alter the face, skin tone, or hair. Only modify the clothing area.` },
-            { type: 'side', text: `Side profile view of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. MANDATORY: Preserve the person's identity, facial features, and hairstyle from the first image EXACTLY. Do not alter the face, skin tone, or hair. Only modify the clothing area.` },
-           { type: 'full', text: `Full body, head-to-toe shot of a person wearing ${desc}. The full body must be visible from head to feet, including legs and shoes, not cropped. The person is wearing the garment shown in the second image. High quality, realistic. MANDATORY: Preserve the person's identity, facial features, and hairstyle from the first image EXACTLY. Do not alter the face, skin tone, or hair. Only modify the clothing area.` }
+            { type: 'front', text: `Front view of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. The face, eyes, nose, lips, and hair are reference-locked. They must be a 1:1 match with the input photo. Preserve the original person's face and identity with 100% accuracy, perform the swap only on the garment regions.` },
+            { type: 'side', text: `Side profile view of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. The face, eyes, nose, lips, and hair are reference-locked. They must be a 1:1 match with the input photo. Preserve the original person's face and identity with 100% accuracy, perform the swap only on the garment regions.` },
+           { type: 'full', text: `Full body, head-to-toe shot of a person wearing ${desc}. The full body must be visible from head to feet, including legs and shoes, not cropped. The person is wearing the garment shown in the second image. High quality, realistic. The face, eyes, nose, lips, and hair are reference-locked. They must be a 1:1 match with the input photo. Preserve the original person's face and identity with 100% accuracy, perform the swap only on the garment regions.` }
          ];
 
          // Create 3 predictions in parallel

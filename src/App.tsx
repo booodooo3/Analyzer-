@@ -523,16 +523,16 @@ const App: React.FC = () => {
                     </div>
                     
                     {/* Makeup & Lipstick Panel */}
-                    <div className="w-full lg:w-48 flex flex-col gap-4 shrink-0 bg-[#050505] p-4 rounded-2xl border border-zinc-900">
+                    <div className="w-full lg:w-48 flex flex-col gap-2 shrink-0 bg-[#050505] p-3 rounded-2xl border border-zinc-900 overflow-y-auto custom-scrollbar">
                         {/* Makeup Section */}
-                        <div className="space-y-2 flex-1">
-                            <h4 className="text-xs font-bold text-green-500 uppercase tracking-widest">Makeup</h4>
-                            <div className="grid grid-cols-2 lg:grid-cols-1 gap-2">
+                        <div className="space-y-1.5 shrink-0">
+                            <h4 className="text-[10px] font-bold text-green-500 uppercase tracking-widest sticky top-0 bg-[#050505] pb-1 z-10">Makeup</h4>
+                            <div className="grid grid-cols-2 lg:grid-cols-1 gap-1.5">
                                 {['Default', 'With Makeup', 'No Makeup', 'Evening Makeup', 'Daytime Makeup'].map((opt) => (
                                     <button
                                         key={opt}
                                         onClick={() => setMakeup(opt)}
-                                        className={`w-full py-2 px-3 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all
+                                        className={`w-full py-1.5 px-2 rounded-md border text-[9px] font-bold uppercase tracking-wider transition-all
                                             ${makeup === opt 
                                                 ? 'bg-white text-black border-white' 
                                                 : 'bg-[#0a0a0a] border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:bg-zinc-900'
@@ -545,14 +545,14 @@ const App: React.FC = () => {
                         </div>
 
                          {/* Lipstick Section */}
-                        <div className="space-y-2 flex-1">
-                            <h4 className="text-xs font-bold text-green-500 uppercase tracking-widest">Lipstick</h4>
-                             <div className="grid grid-cols-2 lg:grid-cols-1 gap-2">
+                        <div className="space-y-1.5 shrink-0 pt-2">
+                            <h4 className="text-[10px] font-bold text-green-500 uppercase tracking-widest sticky top-0 bg-[#050505] pb-1 z-10">Lipstick</h4>
+                             <div className="grid grid-cols-2 lg:grid-cols-1 gap-1.5">
                                 {['Default', 'Red Lips', 'Pink Lips', 'Lip Gloss'].map((opt) => (
                                     <button
                                         key={opt}
                                         onClick={() => setLipstick(opt)}
-                                        className={`w-full py-2 px-3 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all
+                                        className={`w-full py-1.5 px-2 rounded-md border text-[9px] font-bold uppercase tracking-wider transition-all
                                             ${lipstick === opt 
                                                 ? 'bg-white text-black border-white' 
                                                 : 'bg-[#0a0a0a] border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:bg-zinc-900'

@@ -136,36 +136,83 @@ const App: React.FC = () => {
     return () => clearInterval(cleanupInterval);
   }, []);
 
-  const playlistContent = generatedResults.map((item) => (
-    <div key={item.id} className="relative group animate-in slide-in-from-right duration-500">
-      <div className="w-full aspect-[3/4] bg-black rounded-xl overflow-hidden border-2 border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.3)] relative">
-        <img 
-          src={item.results.front} 
-          className="w-full h-full object-cover"
-          alt="Generated Result"
-        />
-        {/* Overlay Info */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100">
-            <div className="absolute bottom-2 left-2 right-2">
-              <div className="flex justify-between items-end">
-                  <span className="text-[10px] font-mono text-green-400">Generated</span>
-                  <span className="text-[10px] font-mono text-zinc-400">
-                    {Math.ceil((300000 - (Date.now() - item.timestamp)) / 60000)}m left
-                  </span>
-              </div>
-            </div>
-        </div>
-      </div>
+  const playlistContent = generatedResults.flatMap((item) => {
+    const timeLeft = Math.ceil((300000 - (Date.now() - item.timestamp)) / 60000);
+    const commonClasses = "relative group animate-in slide-in-from-right duration-500";
+    const imageContainerClasses = "w-full aspect-[3/4] bg-black rounded-xl overflow-hidden border-2 border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.3)] relative";
+
+    if (item.isPlusMode && item.results.side && item.results.full) {
+      // Plus Mode: Return 3 items (Front, Side, Full)
+      const views = [
+        { src: item.results.front, suffix: 'front', label: 'Front View' },
+        { src: item.results.side, suffix: 'side', label: 'Side View' },
+        { src: item.results.full, suffix: 'full', label: 'Full Body' }
+      ];
       
-      <button
-        onClick={() => downloadSingleImage(item.results.front, `generated-${item.id}`)}
-        className="mt-2 w-full bg-zinc-900 border border-zinc-700 hover:border-white text-white text-[10px] py-1.5 rounded-lg transition-all uppercase tracking-wider font-bold flex items-center justify-center gap-2"
-      >
-        <Download className="w-3 h-3" />
-        Download
-      </button>
-    </div>
-  ));
+      return views.map(view => (
+        <div key={`${item.id}-${view.suffix}`} className={commonClasses}>
+           {/* Image Container */}
+           <div className={imageContainerClasses}>
+             <img src={view.src} className="w-full h-full object-cover" alt={view.label} />
+             {/* Overlay */}
+             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100">
+                <div className="absolute bottom-2 left-2 right-2">
+                  <div className="flex justify-between items-end">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-mono text-green-400">Generated</span>
+                        <span className="text-[8px] font-mono text-zinc-400">{view.label}</span>
+                      </div>
+                      <span className="text-[10px] font-mono text-zinc-400">
+                        {timeLeft}m left
+                      </span>
+                  </div>
+                </div>
+             </div>
+           </div>
+           
+           <button
+             onClick={() => downloadSingleImage(view.src!, `generated-${item.id}-${view.suffix}`)}
+             className="mt-2 w-full bg-zinc-900 border border-zinc-700 hover:border-white text-white text-[10px] py-1.5 rounded-lg transition-all uppercase tracking-wider font-bold flex items-center justify-center gap-2"
+           >
+             <Download className="w-3 h-3" />
+             Download
+           </button>
+        </div>
+      ));
+    } else {
+      // Standard Mode: Return 1 item
+      return (
+        <div key={item.id} className={commonClasses}>
+          <div className={imageContainerClasses}>
+            <img 
+              src={item.results.front} 
+              className="w-full h-full object-cover"
+              alt="Generated Result"
+            />
+            {/* Overlay Info */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100">
+                <div className="absolute bottom-2 left-2 right-2">
+                  <div className="flex justify-between items-end">
+                      <span className="text-[10px] font-mono text-green-400">Generated</span>
+                      <span className="text-[10px] font-mono text-zinc-400">
+                        {timeLeft}m left
+                      </span>
+                  </div>
+                </div>
+            </div>
+          </div>
+          
+          <button
+            onClick={() => downloadSingleImage(item.results.front, `generated-${item.id}`)}
+            className="mt-2 w-full bg-zinc-900 border border-zinc-700 hover:border-white text-white text-[10px] py-1.5 rounded-lg transition-all uppercase tracking-wider font-bold flex items-center justify-center gap-2"
+          >
+            <Download className="w-3 h-3" />
+            Download
+          </button>
+        </div>
+      );
+    }
+  });
 
   const t = {
     appName: 'Analyzer-Ai',

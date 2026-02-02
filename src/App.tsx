@@ -104,6 +104,10 @@ const App: React.FC = () => {
   const [currentPath, setCurrentPath] = useState(window.location.pathname || "/");
   const { getToken } = useAuth();
 
+  // New State for Makeup and Lipstick
+  const [makeup, setMakeup] = useState<string>('default');
+  const [lipstick, setLipstick] = useState<string>('default');
+
   const [generatedResults, setGeneratedResults] = useState<GeneratedResult[]>([]);
 
   useEffect(() => {
@@ -507,11 +511,60 @@ const App: React.FC = () => {
               <div className="space-y-6">
                 <div className="space-y-4">
                   <h3 className="text-xl font-bold">{t.step1.label}</h3>
-                  <ImageUploader 
-                    description={t.step1.desc}
-                    onImageSelected={setPersonImage}
-                    currentImage={personImage?.base64}
-                  />
+                  <div className="flex flex-col lg:flex-row gap-4 h-[500px] lg:h-96">
+                    <div className="flex-1 h-full min-h-0">
+                      <ImageUploader 
+                        className="h-full w-full"
+                        objectFit="contain"
+                        description={t.step1.desc}
+                        onImageSelected={setPersonImage}
+                        currentImage={personImage?.base64}
+                      />
+                    </div>
+                    
+                    {/* Makeup & Lipstick Panel */}
+                    <div className="w-full lg:w-48 flex flex-col gap-4 shrink-0 bg-[#050505] p-4 rounded-2xl border border-zinc-900">
+                        {/* Makeup Section */}
+                        <div className="space-y-2 flex-1">
+                            <h4 className="text-xs font-bold text-green-500 uppercase tracking-widest">Makeup</h4>
+                            <div className="grid grid-cols-2 lg:grid-cols-1 gap-2">
+                                {['Default', 'With Makeup', 'No Makeup', 'Evening Makeup', 'Daytime Makeup'].map((opt) => (
+                                    <button
+                                        key={opt}
+                                        onClick={() => setMakeup(opt)}
+                                        className={`w-full py-2 px-3 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all
+                                            ${makeup === opt 
+                                                ? 'bg-white text-black border-white' 
+                                                : 'bg-[#0a0a0a] border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:bg-zinc-900'
+                                            }`}
+                                    >
+                                        {opt}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                         {/* Lipstick Section */}
+                        <div className="space-y-2 flex-1">
+                            <h4 className="text-xs font-bold text-green-500 uppercase tracking-widest">Lipstick</h4>
+                             <div className="grid grid-cols-2 lg:grid-cols-1 gap-2">
+                                {['Default', 'Red Lips', 'Pink Lips', 'Lip Gloss'].map((opt) => (
+                                    <button
+                                        key={opt}
+                                        onClick={() => setLipstick(opt)}
+                                        className={`w-full py-2 px-3 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all
+                                            ${lipstick === opt 
+                                                ? 'bg-white text-black border-white' 
+                                                : 'bg-[#0a0a0a] border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:bg-zinc-900'
+                                            }`}
+                                    >
+                                        {opt}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Garment Description Input */}

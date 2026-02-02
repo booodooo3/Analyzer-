@@ -24,6 +24,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [selectedModel, setSelectedModel] = useState('bytedance/seedance-1.5-pro');
   const [processingTime, setProcessingTime] = useState(0);
   const [generatedVideos, setGeneratedVideos] = useState<{ id: string, url: string, timestamp: number }[]>([]);
+  const [isDownloading, setIsDownloading] = useState<string | null>(null);
 
   useEffect(() => {
     // Load generated videos from local storage
@@ -244,8 +245,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
-  const [isDownloading, setIsDownloading] = useState<string | null>(null);
 
   const playlistContent = generatedVideos.map((video) => (
     <div key={video.id} className="relative group animate-in slide-in-from-right duration-500">

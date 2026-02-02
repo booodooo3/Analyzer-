@@ -237,6 +237,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const [isDownloading, setIsDownloading] = useState<string | null>(null);
+
   const playlistContent = generatedVideos.map((video) => (
     <div key={video.id} className="relative group animate-in slide-in-from-right duration-500">
       <div className="w-full aspect-video bg-black rounded-xl overflow-hidden border-2 border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.3)] relative">
@@ -266,6 +268,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       
       <button
         onClick={async () => {
+          setIsDownloading(video.id);
           try {
               const response = await fetch(video.url);
               const blob = await response.blob();
@@ -278,12 +281,26 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
               window.URL.revokeObjectURL(url);
               document.body.removeChild(a);
           } catch (e) {
+              // Fallback to direct opening if blob fetch fails
               window.open(video.url, '_blank');
+          } finally {
+            setIsDownloading(null);
           }
         }}
-        className="mt-2 w-full bg-zinc-900 border border-zinc-700 hover:border-white text-white text-[10px] py-1.5 rounded-lg transition-all uppercase tracking-wider font-bold"
+        disabled={isDownloading === video.id}
+        className="mt-2 w-full bg-zinc-900 border border-zinc-700 hover:border-white text-white text-[10px] py-1.5 rounded-lg transition-all uppercase tracking-wider font-bold flex items-center justify-center gap-2"
       >
-        Download
+        {isDownloading === video.id ? (
+          <>
+            <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            Downloading...
+          </>
+        ) : (
+          <>
+            <Download className="w-3 h-3" />
+            Download
+          </>
+        )}
       </button>
     </div>
   ));

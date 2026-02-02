@@ -182,6 +182,38 @@ const App: React.FC = () => {
            </button>
         </div>
       ));
+    } else {
+      // Standard Mode: Return 1 item
+      return (
+        <div key={item.id} className={commonClasses}>
+          <div className={imageContainerClasses}>
+            <img 
+              src={item.results.front} 
+              className="w-full h-full object-cover"
+              alt="Generated Result"
+            />
+            {/* Overlay Info */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100">
+                <div className="absolute bottom-2 left-2 right-2">
+                  <div className="flex justify-between items-end">
+                      <span className="text-[10px] font-mono text-green-400">RESULT</span>
+                      <span className="text-[10px] font-mono text-zinc-400">
+                        {timeLeft}m left
+                      </span>
+                  </div>
+                </div>
+            </div>
+          </div>
+          
+          <button
+            onClick={() => downloadSingleImage(item.results.front, `generated-${item.id}`)}
+            className="mt-2 w-full bg-zinc-900 border border-zinc-700 hover:border-white text-white text-[10px] py-1.5 rounded-lg transition-all uppercase tracking-wider font-bold flex items-center justify-center gap-2"
+          >
+            <Download className="w-3 h-3" />
+            Download
+          </button>
+        </div>
+      );
     }
   });
 

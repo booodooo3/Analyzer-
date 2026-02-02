@@ -340,12 +340,12 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                   </div>
                   
                   {videoUrl ? (
-                    <div className="flex gap-4 items-start">
-                        <div className="flex-1">
+                    <div className="flex gap-4 items-start justify-center">
+                        <div className="flex-1 flex justify-center bg-black/20 rounded-xl p-2">
                             <video 
                                 src={videoUrl} 
                                 controls 
-                                className="w-full rounded-xl aspect-video bg-black shadow-lg"
+                                className="max-w-full max-h-[500px] rounded-lg shadow-lg"
                                 autoPlay
                                 loop
                             />

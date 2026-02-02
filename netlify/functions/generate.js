@@ -134,7 +134,7 @@ export default async (req, context) => {
 
   try {
     const body = await req.json();
-    const { personImage, clothImage, garmentDescription, isPlusMode, type, isMakeoverMode } = body;
+    const { personImage, clothImage, garmentDescription, isPlusMode, type, isMakeoverMode, makeup, lipstick } = body;
 
     // Robust parsing of isPlusMode
     let isPlusModeBool = false;
@@ -234,6 +234,14 @@ export default async (req, context) => {
 
     if (isMakeoverMode) {
         promptText += " IMPORTANT: The user wants a complete makeover. REMOVE any existing pants, trousers, or bottom garments the person is wearing and show bare legs if the new garment is a dress or skirt. CHANGE the shoes to be fashionable and matching the new outfit.";
+    }
+
+    if (makeup && makeup !== 'default' && makeup !== 'Default') {
+        promptText += ` Apply ${makeup} style to the person's face.`;
+    }
+
+    if (lipstick && lipstick !== 'default' && lipstick !== 'Default') {
+        promptText += ` Apply ${lipstick} to the person's lips.`;
     }
 
     const inputPayload = {

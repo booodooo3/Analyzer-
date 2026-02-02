@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Upload, Languages, Download, RotateCcw, Mic, Trash2, Lock } from 'lucide-react';
+import { useAuth } from "@clerk/clerk-react";
 import { ImageUploader } from './ImageUploader';
 import { Button } from './Button';
 import { ImageData } from '../types';
@@ -26,10 +27,18 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [generatedVideos, setGeneratedVideos] = useState<{ id: string, url: string, timestamp: number }[]>([]);
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
 
+  const { userId } = useAuth();
+
   useEffect(() => {
+    if (!userId) {
+        setGeneratedVideos([]);
+        return;
+    }
+    const storageKey = `generatedVideos_${userId}`;
+
     // Load generated videos from local storage
     try {
-      const saved = localStorage.getItem('generatedVideos');
+      const saved = localStorage.getItem(storageKey);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
@@ -39,14 +48,14 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
           setGeneratedVideos(valid);
           
           if (valid.length !== parsed.length) {
-            localStorage.setItem('generatedVideos', JSON.stringify(valid));
+            localStorage.setItem(storageKey, JSON.stringify(valid));
           }
         }
       }
     } catch (e) {
       console.error("Failed to parse generated videos from local storage", e);
       // Optional: Clear invalid data
-      localStorage.removeItem('generatedVideos');
+      localStorage.removeItem(storageKey);
     }
 
     // Set up interval to clean up old videos
@@ -55,14 +64,14 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         const now = Date.now();
         const valid = prev.filter(v => now - v.timestamp < 5 * 60 * 1000);
         if (valid.length !== prev.length) {
-          localStorage.setItem('generatedVideos', JSON.stringify(valid));
+          localStorage.setItem(storageKey, JSON.stringify(valid));
         }
         return valid;
       });
     }, 10000); // Check every 10 seconds
 
     return () => clearInterval(cleanupInterval);
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -215,7 +224,9 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
             
             setGeneratedVideos(prev => {
               const updated = [newVideo, ...prev];
-              localStorage.setItem('generatedVideos', JSON.stringify(updated));
+              if (userId) {
+                localStorage.setItem(`generatedVideos_${userId}`, JSON.stringify(updated));
+              }
               return updated;
             });
           } else if (statusData.status === 'failed') {
@@ -288,8 +299,15 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
               window.URL.revokeObjectURL(url);
               document.body.removeChild(a);
           } catch (e) {
-              // Fallback to direct opening if blob fetch fails
-              window.open(video.url, '_blank');
+              console.error("Download failed", e);
+              // Fallback to direct opening using anchor tag
+              const a = document.createElement('a');
+              a.href = video.url;
+              a.download = `generated-${video.id}.mp4`;
+              a.target = '_blank';
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
           } finally {
             setIsDownloading(null);
           }

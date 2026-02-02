@@ -102,7 +102,7 @@ const App: React.FC = () => {
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [garmentDescription, setGarmentDescription] = useState("");
   const [currentPath, setCurrentPath] = useState(window.location.pathname || "/");
-  const { getToken } = useAuth();
+  const { getToken, userId } = useAuth();
 
   // New State for Makeup and Lipstick
   const [makeup, setMakeup] = useState<string>('default');
@@ -111,9 +111,16 @@ const App: React.FC = () => {
   const [generatedResults, setGeneratedResults] = useState<GeneratedResult[]>([]);
 
   useEffect(() => {
+    if (!userId) {
+      setGeneratedResults([]);
+      return;
+    }
+
+    const storageKey = `generatedResults_${userId}`;
+
     // Load generated results from local storage
     try {
-      const saved = localStorage.getItem('generatedResults');
+      const saved = localStorage.getItem(storageKey);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
@@ -123,13 +130,13 @@ const App: React.FC = () => {
           setGeneratedResults(valid);
           
           if (valid.length !== parsed.length) {
-            localStorage.setItem('generatedResults', JSON.stringify(valid));
+            localStorage.setItem(storageKey, JSON.stringify(valid));
           }
         }
       }
     } catch (e) {
       console.error("Failed to parse generated results", e);
-      localStorage.removeItem('generatedResults');
+      localStorage.removeItem(storageKey);
     }
 
     // Set up interval to clean up old results
@@ -138,14 +145,14 @@ const App: React.FC = () => {
         const now = Date.now();
         const valid = prev.filter(v => now - v.timestamp < 5 * 60 * 1000);
         if (valid.length !== prev.length) {
-          localStorage.setItem('generatedResults', JSON.stringify(valid));
+          localStorage.setItem(storageKey, JSON.stringify(valid));
         }
         return valid;
       });
     }, 10000); // Check every 10 seconds
 
     return () => clearInterval(cleanupInterval);
-  }, []);
+  }, [userId]);
 
   const playlistContent = generatedResults.flatMap((item) => {
     const timeLeft = Math.ceil((300000 - (Date.now() - item.timestamp)) / 60000);
@@ -388,7 +395,9 @@ const App: React.FC = () => {
       
       setGeneratedResults(prev => {
         const updated = [newResult, ...prev];
-        localStorage.setItem('generatedResults', JSON.stringify(updated));
+        if (userId) {
+           localStorage.setItem(`generatedResults_${userId}`, JSON.stringify(updated));
+        }
         return updated;
       });
       

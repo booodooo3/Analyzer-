@@ -23,6 +23,37 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [duration, setDuration] = useState(10);
   const [selectedModel, setSelectedModel] = useState('bytedance/seedance-1.5-pro');
   const [processingTime, setProcessingTime] = useState(0);
+  const [generatedVideos, setGeneratedVideos] = useState<{ id: string, url: string, timestamp: number }[]>([]);
+
+  useEffect(() => {
+    // Load generated videos from local storage
+    const saved = localStorage.getItem('generatedVideos');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      const now = Date.now();
+      // Filter out videos older than 5 minutes
+      const valid = parsed.filter((v: any) => now - v.timestamp < 5 * 60 * 1000);
+      setGeneratedVideos(valid);
+      
+      if (valid.length !== parsed.length) {
+        localStorage.setItem('generatedVideos', JSON.stringify(valid));
+      }
+    }
+
+    // Set up interval to clean up old videos
+    const cleanupInterval = setInterval(() => {
+      setGeneratedVideos(prev => {
+        const now = Date.now();
+        const valid = prev.filter(v => now - v.timestamp < 5 * 60 * 1000);
+        if (valid.length !== prev.length) {
+          localStorage.setItem('generatedVideos', JSON.stringify(valid));
+        }
+        return valid;
+      });
+    }, 10000); // Check every 10 seconds
+
+    return () => clearInterval(cleanupInterval);
+  }, []);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -165,6 +196,19 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
           if (statusData.status === 'succeeded') {
             setVideoUrl(statusData.output);
             setIsConverting(false);
+            
+            // Add to generated videos list
+            const newVideo = {
+              id: predictionId,
+              url: statusData.output,
+              timestamp: Date.now()
+            };
+            
+            setGeneratedVideos(prev => {
+              const updated = [newVideo, ...prev];
+              localStorage.setItem('generatedVideos', JSON.stringify(updated));
+              return updated;
+            });
           } else if (statusData.status === 'failed') {
             setError(statusData.error || 'Video generation failed');
             setIsConverting(false);
@@ -205,6 +249,62 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         {/* Backdrop */}
         <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={onClose} />
         
+        {/* Playlist Sidebar */}
+        {generatedVideos.length > 0 && (
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-[60]">
+            {generatedVideos.map((video) => (
+              <div key={video.id} className="relative group animate-in slide-in-from-right duration-500">
+                <div className="w-48 aspect-video bg-black rounded-xl overflow-hidden border-2 border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.3)] relative">
+                  <video 
+                    src={video.url} 
+                    className="w-full h-full object-cover"
+                    muted
+                    loop
+                    onMouseOver={e => e.currentTarget.play()}
+                    onMouseOut={e => {
+                      e.currentTarget.pause();
+                      e.currentTarget.currentTime = 0;
+                    }}
+                  />
+                  {/* Overlay Info */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100">
+                     <div className="absolute bottom-2 left-2 right-2">
+                        <div className="flex justify-between items-end">
+                           <span className="text-[10px] font-mono text-green-400">Generated</span>
+                           <span className="text-[10px] font-mono text-zinc-400">
+                             {Math.ceil((300000 - (Date.now() - video.timestamp)) / 60000)}m left
+                           </span>
+                        </div>
+                     </div>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={async () => {
+                    try {
+                        const response = await fetch(video.url);
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `generated-${video.id}.mp4`;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                    } catch (e) {
+                        window.open(video.url, '_blank');
+                    }
+                  }}
+                  className="mt-2 w-full bg-zinc-900 border border-zinc-700 hover:border-white text-white text-[10px] py-1.5 rounded-lg transition-all uppercase tracking-wider font-bold"
+                >
+                  Download
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Panel */}
         <div className="relative glass-effect w-full max-w-2xl p-8 rounded-[40px] border border-white/10 shadow-2xl space-y-8 overflow-hidden animate-in zoom-in-95 duration-500 bg-zinc-900/50">
           <div className="flex justify-between items-center border-b border-white/10 pb-4">
@@ -340,6 +440,13 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                     <div className="flex flex-col">
                                         <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Est. Time</span>
                                         <span className="text-sm font-mono text-zinc-400">~2-3 Mins</span>
+                                    </div>
+                                    <div className="flex-1 flex justify-end">
+                                        <div className="flex flex-col items-end text-[10px] font-bold tracking-wider animate-pulse">
+                                            <span className="text-green-500">PLAYLIST ONLY</span>
+                                            <span className="text-green-500">5 MIN</span>
+                                            <span className="text-green-500">BEFORE DELETION</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

@@ -346,14 +346,14 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                         </div>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-4">
                         {[0, 1].map((index) => (
                             <ImageUploader 
                                 key={index}
-                                description={`Image ${index + 1}`}
+                                description=""
                                 currentImage={images[index]?.base64}
                                 onImageSelected={(data) => updateImage(index, data)}
-                                className="aspect-video w-full h-24"
+                                className="aspect-video w-full bg-zinc-950/50"
                                 objectFit="contain"
                             />
                         ))}

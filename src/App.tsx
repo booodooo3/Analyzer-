@@ -366,7 +366,7 @@ const App: React.FC = () => {
       if (!token) {
         throw new Error('Please sign in to continue');
       }
-      const resultData = await performVirtualTryOn(personImage, clothImage, garmentType, token, garmentDescription, isPlusMode, isMakeoverMode);
+      const resultData = await performVirtualTryOn(personImage, clothImage, garmentType, token, garmentDescription, isPlusMode, isMakeoverMode, makeup, lipstick);
       setResults(resultData);
 
       // Add to generated results playlist
@@ -567,20 +567,6 @@ const App: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Garment Description Input */}
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-zinc-400 uppercase tracking-widest block">
-                    {t.step2.garmentDescLabel}
-                  </label>
-                  <input 
-                    type="text" 
-                    value={garmentDescription}
-                    onChange={(e) => setGarmentDescription(e.target.value)}
-                    placeholder={t.step2.garmentDescPlaceholder}
-                    className="w-full bg-zinc-900/50 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-white/50 transition-colors"
-                  />
-                </div>
-                
                 {/* Person Photo Guidelines */}
                 <div className="glass-effect rounded-2xl p-6 border-white/5 bg-white/[0.02]">
                   <div className="flex items-center gap-2 mb-4 text-zinc-300">
@@ -696,6 +682,20 @@ const App: React.FC = () => {
                   </div>
                 </div>
                 
+                {/* Garment Description Input */}
+                <div className="space-y-2 max-w-xl mx-auto w-full pt-4">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block text-center">
+                    {t.step2.garmentDescLabel}
+                  </label>
+                  <input 
+                    type="text" 
+                    value={garmentDescription}
+                    onChange={(e) => setGarmentDescription(e.target.value)}
+                    placeholder={t.step2.garmentDescPlaceholder}
+                    className="w-full bg-zinc-900/50 border border-zinc-700 rounded-xl px-4 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white/50 transition-colors text-center"
+                  />
+                </div>
+
                 {/* Clothing Guidelines Panel */}
                 <div className="glass-effect rounded-2xl p-6 border-white/5 bg-white/[0.02]">
                   <div className="flex items-center gap-2 mb-4 text-zinc-300">

@@ -158,10 +158,7 @@ const App: React.FC = () => {
              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100">
                 <div className="absolute bottom-2 left-2 right-2">
                   <div className="flex justify-between items-end">
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-mono text-green-400">Generated</span>
-                        <span className="text-[8px] font-mono text-zinc-400">{view.label}</span>
-                      </div>
+                      <span className="text-[10px] font-mono text-green-400">{view.label.toUpperCase()}</span>
                       <span className="text-[10px] font-mono text-zinc-400">
                         {timeLeft}m left
                       </span>

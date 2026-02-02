@@ -62,7 +62,7 @@ export default async (req, context) => {
             const user = await clerkClient.users.getUser(userId);
             
             const currentCredits = typeof user.publicMetadata.credits === 'number' ? user.publicMetadata.credits : 3;
-            const cost = 5;
+            const cost = 4;
 
             if (currentCredits < cost) {
                 return new Response(JSON.stringify({ error: `Insufficient credits! You need ${cost} credits for video generation.` }), { status: 403, headers });

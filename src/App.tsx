@@ -147,10 +147,13 @@ const App: React.FC = () => {
 
     if (item.isPlusMode && item.results.side && item.results.full) {
       // Plus Mode: Return 3 items (Front, Side, Full)
-      const views = [
-        { src: item.results.front, suffix: 'front', label: 'Front View' },
-        { src: item.results.side, suffix: 'side', label: 'Side View' },
-        { src: item.results.full, suffix: 'full', label: 'Full Body' }
+      const views = item.isPlusMode ? [
+        { src: item.results.front, suffix: 'front', label: 'FRONT VIEW' },
+        { src: item.results.side, suffix: 'side', label: 'SIDE VIEW' },
+        { src: item.results.full, suffix: 'full', label: 'FULL BODY' }
+      ] : [
+        { src: item.results.front, suffix: 'front', label: 'RESULT 1' },
+        ...(item.results.side ? [{ src: item.results.side, suffix: 'side', label: 'RESULT 2' }] : [])
       ];
       
       return views.map(view => (
@@ -162,7 +165,7 @@ const App: React.FC = () => {
              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100">
                 <div className="absolute bottom-2 left-2 right-2">
                   <div className="flex justify-between items-end">
-                      <span className="text-[10px] font-mono text-green-400">{view.label.toUpperCase()}</span>
+                      <span className="text-[10px] font-mono text-green-400">{view.label}</span>
                       <span className="text-[10px] font-mono text-zinc-400">
                         {timeLeft}m left
                       </span>
@@ -180,38 +183,6 @@ const App: React.FC = () => {
            </button>
         </div>
       ));
-    } else {
-      // Standard Mode: Return 1 item
-      return (
-        <div key={item.id} className={commonClasses}>
-          <div className={imageContainerClasses}>
-            <img 
-              src={item.results.front} 
-              className="w-full h-full object-cover"
-              alt="Generated Result"
-            />
-            {/* Overlay Info */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100">
-                <div className="absolute bottom-2 left-2 right-2">
-                  <div className="flex justify-between items-end">
-                      <span className="text-[10px] font-mono text-green-400">Generated</span>
-                      <span className="text-[10px] font-mono text-zinc-400">
-                        {timeLeft}m left
-                      </span>
-                  </div>
-                </div>
-            </div>
-          </div>
-          
-          <button
-            onClick={() => downloadSingleImage(item.results.front, `generated-${item.id}`)}
-            className="mt-2 w-full bg-zinc-900 border border-zinc-700 hover:border-white text-white text-[10px] py-1.5 rounded-lg transition-all uppercase tracking-wider font-bold flex items-center justify-center gap-2"
-          >
-            <Download className="w-3 h-3" />
-            Download
-          </button>
-        </div>
-      );
     }
   });
 
@@ -780,13 +751,14 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            <div className={`grid grid-cols-1 ${isPlusMode ? "md:grid-cols-3" : "md:grid-cols-1 max-w-md mx-auto"} gap-8 w-full`}>
+            <div className={`grid grid-cols-1 ${isPlusMode ? "md:grid-cols-3" : "md:grid-cols-2 max-w-2xl mx-auto"} gap-8 w-full`}>
               {(isPlusMode ? [
                 { img: results?.front, label: t.results.front, id: 'front-view' },
                 { img: results?.side, label: t.results.side, id: 'side-view' },
                 { img: results?.full, label: t.results.full, id: 'full-body' }
               ] : [
-                { img: results?.front, label: t.results.single, id: 'result-view' }
+                { img: results?.front, label: "Result 1", id: 'result-view-1' },
+                ...(results?.side ? [{ img: results?.side, label: "Result 2", id: 'result-view-2' }] : [])
               ]).map((view, i) => (
                 <div key={i} className="space-y-4 group w-full">
                   <p className="text-xs uppercase tracking-widest text-zinc-500 font-bold text-center">{view.label}</p>

@@ -7,6 +7,14 @@ import { Button } from './components/Button';
 import { VideoAIOverlay } from './components/VideoAIOverlay';
 import { performVirtualTryOn, analyzeStyle } from './services/apiService';
 import { ImageData, AppState, GarmentType } from './types';
+import { Download } from 'lucide-react';
+
+interface GeneratedResult {
+  id: string;
+  results: ResultImages;
+  timestamp: number;
+  isPlusMode: boolean;
+}
 
 interface ResultImages {
   front: string;
@@ -95,6 +103,69 @@ const App: React.FC = () => {
   const [garmentDescription, setGarmentDescription] = useState("");
   const [currentPath, setCurrentPath] = useState(window.location.pathname || "/");
   const { getToken } = useAuth();
+
+  const [generatedResults, setGeneratedResults] = useState<GeneratedResult[]>([]);
+
+  useEffect(() => {
+    // Load generated results from local storage
+    const saved = localStorage.getItem('generatedResults');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      const now = Date.now();
+      // Filter out results older than 5 minutes
+      const valid = parsed.filter((v: GeneratedResult) => now - v.timestamp < 5 * 60 * 1000);
+      setGeneratedResults(valid);
+      
+      if (valid.length !== parsed.length) {
+        localStorage.setItem('generatedResults', JSON.stringify(valid));
+      }
+    }
+
+    // Set up interval to clean up old results
+    const cleanupInterval = setInterval(() => {
+      setGeneratedResults(prev => {
+        const now = Date.now();
+        const valid = prev.filter(v => now - v.timestamp < 5 * 60 * 1000);
+        if (valid.length !== prev.length) {
+          localStorage.setItem('generatedResults', JSON.stringify(valid));
+        }
+        return valid;
+      });
+    }, 10000); // Check every 10 seconds
+
+    return () => clearInterval(cleanupInterval);
+  }, []);
+
+  const playlistContent = generatedResults.map((item) => (
+    <div key={item.id} className="relative group animate-in slide-in-from-right duration-500">
+      <div className="w-full aspect-[3/4] bg-black rounded-xl overflow-hidden border-2 border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.3)] relative">
+        <img 
+          src={item.results.front} 
+          className="w-full h-full object-cover"
+          alt="Generated Result"
+        />
+        {/* Overlay Info */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100">
+            <div className="absolute bottom-2 left-2 right-2">
+              <div className="flex justify-between items-end">
+                  <span className="text-[10px] font-mono text-green-400">Generated</span>
+                  <span className="text-[10px] font-mono text-zinc-400">
+                    {Math.ceil((300000 - (Date.now() - item.timestamp)) / 60000)}m left
+                  </span>
+              </div>
+            </div>
+        </div>
+      </div>
+      
+      <button
+        onClick={() => downloadSingleImage(item.results.front, `generated-${item.id}`)}
+        className="mt-2 w-full bg-zinc-900 border border-zinc-700 hover:border-white text-white text-[10px] py-1.5 rounded-lg transition-all uppercase tracking-wider font-bold flex items-center justify-center gap-2"
+      >
+        <Download className="w-3 h-3" />
+        Download
+      </button>
+    </div>
+  ));
 
   const t = {
     appName: 'Analyzer-Ai',
@@ -249,6 +320,20 @@ const App: React.FC = () => {
       }
       const resultData = await performVirtualTryOn(personImage, clothImage, garmentType, token, garmentDescription, isPlusMode, isMakeoverMode);
       setResults(resultData);
+
+      // Add to generated results playlist
+      const newResult: GeneratedResult = {
+        id: Date.now().toString(),
+        results: resultData,
+        timestamp: Date.now(),
+        isPlusMode: isPlusMode
+      };
+      
+      setGeneratedResults(prev => {
+        const updated = [newResult, ...prev];
+        localStorage.setItem('generatedResults', JSON.stringify(updated));
+        return updated;
+      });
       
       const styleAnalysis = await analyzeStyle(resultData.front);
       setAnalysis(styleAnalysis);
@@ -347,12 +432,15 @@ const App: React.FC = () => {
         </div>
       </nav>
 
-      <main className={isCheckout ? "flex-1 w-full px-6 py-12 flex items-center justify-center" : "flex-1 max-w-6xl mx-auto w-full px-6 py-12"}>
+      <main className={isCheckout ? "flex-1 w-full px-6 py-12 flex items-center justify-center" : "flex-1 max-w-[1400px] mx-auto w-full px-6 py-12"}>
         {isCheckout ? (
           <div className="w-full max-w-[500px]">
             <PayPalPayment />
           </div>
-        ) : appState === AppState.IDLE || appState === AppState.ERROR ? (
+        ) : (
+          <div className="flex flex-col lg:flex-row gap-8 items-start w-full">
+            <div className="flex-1 w-full min-w-0">
+            {appState === AppState.IDLE || appState === AppState.ERROR ? (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <header className="relative mb-12 flex flex-col items-center select-none">
               <h1 className="text-5xl md:text-7xl lg:text-8xl leading-[0.95] font-[900] tracking-tighter bg-gradient-to-b from-[#ffffff] via-[#e5e5e5] to-[#737373] bg-clip-text text-transparent z-10 mb-6 drop-shadow-2xl text-center">
@@ -682,6 +770,33 @@ const App: React.FC = () => {
                  <p className="text-[10px] text-zinc-500 italic opacity-50">Powered by Stylestoo AI Engine</p>
               </div>
             </div>
+          </div>
+                )}
+
+                {generatedResults.length > 0 && (
+                    <div className="lg:hidden mt-16 pt-8 border-t border-white/10">
+                        <div className="flex flex-col items-center gap-1 mb-6">
+                            <span className="text-xs font-bold text-green-500 animate-pulse tracking-widest uppercase">Playlist Only</span>
+                            <span className="text-[10px] text-zinc-500 uppercase tracking-wider">5 Min Before Deletion</span>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            {playlistContent}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {generatedResults.length > 0 && (
+                <div className="hidden lg:flex flex-col gap-4 w-72 sticky top-28 shrink-0">
+                    <div className="flex flex-col items-end mb-2 p-4 bg-zinc-900/50 rounded-xl border border-white/5 backdrop-blur-sm">
+                         <span className="text-xs font-bold text-green-500 animate-pulse tracking-widest uppercase">Playlist Only</span>
+                         <span className="text-[10px] text-zinc-500 uppercase tracking-wider mt-1">5 Min Before Deletion</span>
+                    </div>
+                    <div className="space-y-6 max-h-[calc(100vh-12rem)] overflow-y-auto pr-2 custom-scrollbar">
+                        {playlistContent}
+                    </div>
+                </div>
+            )}
           </div>
         )}
       </main>

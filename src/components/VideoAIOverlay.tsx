@@ -237,6 +237,57 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const playlistContent = generatedVideos.map((video) => (
+    <div key={video.id} className="relative group animate-in slide-in-from-right duration-500">
+      <div className="w-full aspect-video bg-black rounded-xl overflow-hidden border-2 border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.3)] relative">
+        <video 
+          src={video.url} 
+          className="w-full h-full object-cover"
+          muted
+          loop
+          onMouseOver={e => e.currentTarget.play()}
+          onMouseOut={e => {
+            e.currentTarget.pause();
+            e.currentTarget.currentTime = 0;
+          }}
+        />
+        {/* Overlay Info */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100">
+            <div className="absolute bottom-2 left-2 right-2">
+              <div className="flex justify-between items-end">
+                  <span className="text-[10px] font-mono text-green-400">Generated</span>
+                  <span className="text-[10px] font-mono text-zinc-400">
+                    {Math.ceil((300000 - (Date.now() - video.timestamp)) / 60000)}m left
+                  </span>
+              </div>
+            </div>
+        </div>
+      </div>
+      
+      <button
+        onClick={async () => {
+          try {
+              const response = await fetch(video.url);
+              const blob = await response.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `generated-${video.id}.mp4`;
+              document.body.appendChild(a);
+              a.click();
+              window.URL.revokeObjectURL(url);
+              document.body.removeChild(a);
+          } catch (e) {
+              window.open(video.url, '_blank');
+          }
+        }}
+        className="mt-2 w-full bg-zinc-900 border border-zinc-700 hover:border-white text-white text-[10px] py-1.5 rounded-lg transition-all uppercase tracking-wider font-bold"
+      >
+        Download
+      </button>
+    </div>
+  ));
+
   return (
     <>
       <HelpModal 
@@ -245,68 +296,14 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         category={helpCategory || 'camera'} 
       />
       
-      <div className="fixed inset-0 z-[50] flex items-center justify-center p-6 animate-in fade-in duration-300">
+      <div className="fixed inset-0 z-[50] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300 overflow-y-auto">
         {/* Backdrop */}
         <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={onClose} />
         
-        {/* Playlist Sidebar */}
-        {generatedVideos.length > 0 && (
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-[60]">
-            {generatedVideos.map((video) => (
-              <div key={video.id} className="relative group animate-in slide-in-from-right duration-500">
-                <div className="w-48 aspect-video bg-black rounded-xl overflow-hidden border-2 border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.3)] relative">
-                  <video 
-                    src={video.url} 
-                    className="w-full h-full object-cover"
-                    muted
-                    loop
-                    onMouseOver={e => e.currentTarget.play()}
-                    onMouseOut={e => {
-                      e.currentTarget.pause();
-                      e.currentTarget.currentTime = 0;
-                    }}
-                  />
-                  {/* Overlay Info */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100">
-                     <div className="absolute bottom-2 left-2 right-2">
-                        <div className="flex justify-between items-end">
-                           <span className="text-[10px] font-mono text-green-400">Generated</span>
-                           <span className="text-[10px] font-mono text-zinc-400">
-                             {Math.ceil((300000 - (Date.now() - video.timestamp)) / 60000)}m left
-                           </span>
-                        </div>
-                     </div>
-                  </div>
-                </div>
-                
-                <button
-                  onClick={async () => {
-                    try {
-                        const response = await fetch(video.url);
-                        const blob = await response.blob();
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `generated-${video.id}.mp4`;
-                        document.body.appendChild(a);
-                        a.click();
-                        window.URL.revokeObjectURL(url);
-                        document.body.removeChild(a);
-                    } catch (e) {
-                        window.open(video.url, '_blank');
-                    }
-                  }}
-                  className="mt-2 w-full bg-zinc-900 border border-zinc-700 hover:border-white text-white text-[10px] py-1.5 rounded-lg transition-all uppercase tracking-wider font-bold"
-                >
-                  Download
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="relative z-10 flex flex-col lg:flex-row items-start justify-center gap-6 w-full max-w-7xl my-auto">
 
         {/* Panel */}
-        <div className="relative glass-effect w-full max-w-2xl p-8 rounded-[40px] border border-white/10 shadow-2xl space-y-8 overflow-hidden animate-in zoom-in-95 duration-500 bg-zinc-900/50">
+        <div className="relative glass-effect w-full max-w-2xl p-8 rounded-[40px] border border-white/10 shadow-2xl space-y-8 overflow-hidden animate-in zoom-in-95 duration-500 bg-zinc-900/50 order-1 lg:order-1">
           <div className="flex justify-between items-center border-b border-white/10 pb-4">
               <h2 className="text-2xl font-bold tracking-tight text-white flex flex-col gap-0.5">
                   <div className="flex items-center gap-2">
@@ -547,9 +544,25 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
               >
                   {isConverting ? 'Generating Video...' : 'Generate Video (5 Credits)'}
               </Button>
+
+              {/* Mobile Playlist */}
+              {generatedVideos.length > 0 && (
+                <div className="lg:hidden mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {playlistContent}
+                </div>
+              )}
           </div>
         </div>
+
+        {/* Desktop Playlist Sidebar */}
+        {generatedVideos.length > 0 && (
+          <div className="hidden lg:flex flex-col gap-4 w-64 sticky top-4 order-2 h-fit">
+            {playlistContent}
+          </div>
+        )}
+
       </div>
+    </div>
     </>
   );
 };

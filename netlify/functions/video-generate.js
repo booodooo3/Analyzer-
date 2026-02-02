@@ -75,7 +75,11 @@ export default async (req, context) => {
             
             // Append Camera Effect
             if (cameraEffect && cameraEffect !== 'Static') {
-                enhancedPrompt += `, ${cameraEffect} camera movement`;
+                if (cameraEffect === 'The Camera Follows The Subject Moving') {
+                    enhancedPrompt += `, the camera follows the subject moving`;
+                } else {
+                    enhancedPrompt += `, ${cameraEffect} camera movement`;
+                }
             }
 
             // Append AI Filter Style

@@ -60,7 +60,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
     'Static', 'Zoom In', 'Zoom Out', 'Pan Left', 'Pan Right', 'Pan Up', 'Pan Down',
     'Slow Motion', 'Hyperlapse / Timelapse', 'Freeze Frame', 'Reverse', 'Roll',
     'Dolly / Tracking', 'Orbit / Arc', 'Crane / Boom / Pedestal', 'Handheld / Shake',
-    'Rack Focus', 'Dolly Zoom'
+    'Rack Focus', 'Dolly Zoom', 'The Camera Follows The Subject Moving'
   ];
 
   const AI_FILTERS = [

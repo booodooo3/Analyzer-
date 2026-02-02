@@ -152,8 +152,7 @@ const App: React.FC = () => {
         { src: item.results.side, suffix: 'side', label: 'SIDE VIEW' },
         { src: item.results.full, suffix: 'full', label: 'FULL BODY' }
       ] : [
-        { src: item.results.front, suffix: 'front', label: 'RESULT 1' },
-        ...(item.results.side ? [{ src: item.results.side, suffix: 'side', label: 'RESULT 2' }] : [])
+        { src: item.results.front, suffix: 'front', label: 'RESULT' }
       ];
       
       return views.map(view => (
@@ -751,14 +750,13 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            <div className={`grid grid-cols-1 ${isPlusMode ? "md:grid-cols-3" : "md:grid-cols-2 max-w-2xl mx-auto"} gap-8 w-full`}>
+            <div className={`grid grid-cols-1 ${isPlusMode ? "md:grid-cols-3" : "md:grid-cols-1 max-w-md mx-auto"} gap-8 w-full`}>
               {(isPlusMode ? [
                 { img: results?.front, label: t.results.front, id: 'front-view' },
                 { img: results?.side, label: t.results.side, id: 'side-view' },
                 { img: results?.full, label: t.results.full, id: 'full-body' }
               ] : [
-                { img: results?.front, label: "Result 1", id: 'result-view-1' },
-                ...(results?.side ? [{ img: results?.side, label: "Result 2", id: 'result-view-2' }] : [])
+                { img: results?.front, label: t.results.single, id: 'result-view' }
               ]).map((view, i) => (
                 <div key={i} className="space-y-4 group w-full">
                   <p className="text-xs uppercase tracking-widest text-zinc-500 font-bold text-center">{view.label}</p>

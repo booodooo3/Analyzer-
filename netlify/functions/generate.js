@@ -89,19 +89,6 @@ export default async (req, context) => {
                   }), { headers });
               }
               
-              // Standard Mode (2 images)
-              if (ids.length === 2) {
-                  return new Response(JSON.stringify({
-                      status: "succeeded",
-                      output: {
-                          front: getUrl(predictions[0]),
-                          side: getUrl(predictions[1]),
-                          analysis: "Generated successfully",
-                          remaining: 99
-                      }
-                  }), { headers });
-              }
-
               // Fallback
               return new Response(JSON.stringify({
                   status: "succeeded",
@@ -196,7 +183,7 @@ export default async (req, context) => {
         console.log(`👤 User ${userId} requests generation. Credits: ${currentCredits}`);
         
         // Cost Calculation
-        const cost = effectivePlusMode ? 3 : 1;
+        const cost = effectivePlusMode ? 3 : 0.5;
 
         if (currentCredits < cost) {
             return new Response(JSON.stringify({ error: `Insufficient credits! You need ${cost} credits.` }), { status: 403, headers });
@@ -236,7 +223,7 @@ export default async (req, context) => {
     const desc = typeHint ? `${baseDesc}. The garment is a ${typeHint}` : baseDesc;
 
     // Deduct Credit
-    const cost = effectivePlusMode ? 3 : 1;
+    const cost = effectivePlusMode ? 3 : 0.5;
     await clerkClient.users.updateUserMetadata(userId, {
         publicMetadata: {
             credits: currentCredits - cost
@@ -312,25 +299,19 @@ export default async (req, context) => {
         }), { status: 202, headers });
     }
 
-    // Standard Mode (2 Images)
-    console.log("🚀 Starting Standard Mode Prediction (2 views)...");
-    
-    // Create 2 predictions in parallel
-    const predictions = await Promise.all([1, 2].map(() => 
-       createPredictionWithRetry(replicate, {
-           version: versionId,
-           input: inputPayload
-       })
-    ));
+    // Standard Mode (Single Image)
+    const prediction = await createPredictionWithRetry(replicate, {
+      version: versionId,
+      input: inputPayload
+    });
 
-    const predictionIds = predictions.map(p => p.id).join('|');
-    console.log("✅ Standard Mode Predictions created:", predictionIds);
+    console.log("✅ Prediction created:", prediction.id);
 
+    // Return the prediction ID immediately
     return new Response(JSON.stringify({ 
-       id: predictionIds, 
-       status: "starting",
-       cost: cost
-   }), { status: 202, headers });
+        id: prediction.id, 
+        status: prediction.status 
+    }), { status: 202, headers });
 
   } catch (error) {
     console.error("❌ Error starting prediction:", error);

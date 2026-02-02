@@ -112,17 +112,24 @@ const App: React.FC = () => {
 
   useEffect(() => {
     // Load generated results from local storage
-    const saved = localStorage.getItem('generatedResults');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      const now = Date.now();
-      // Filter out results older than 5 minutes
-      const valid = parsed.filter((v: GeneratedResult) => now - v.timestamp < 5 * 60 * 1000);
-      setGeneratedResults(valid);
-      
-      if (valid.length !== parsed.length) {
-        localStorage.setItem('generatedResults', JSON.stringify(valid));
+    try {
+      const saved = localStorage.getItem('generatedResults');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const now = Date.now();
+          // Filter out results older than 5 minutes
+          const valid = parsed.filter((v: GeneratedResult) => now - v.timestamp < 5 * 60 * 1000);
+          setGeneratedResults(valid);
+          
+          if (valid.length !== parsed.length) {
+            localStorage.setItem('generatedResults', JSON.stringify(valid));
+          }
+        }
       }
+    } catch (e) {
+      console.error("Failed to parse generated results", e);
+      localStorage.removeItem('generatedResults');
     }
 
     // Set up interval to clean up old results

@@ -27,17 +27,25 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
   useEffect(() => {
     // Load generated videos from local storage
-    const saved = localStorage.getItem('generatedVideos');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      const now = Date.now();
-      // Filter out videos older than 5 minutes
-      const valid = parsed.filter((v: any) => now - v.timestamp < 5 * 60 * 1000);
-      setGeneratedVideos(valid);
-      
-      if (valid.length !== parsed.length) {
-        localStorage.setItem('generatedVideos', JSON.stringify(valid));
+    try {
+      const saved = localStorage.getItem('generatedVideos');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const now = Date.now();
+          // Filter out videos older than 5 minutes
+          const valid = parsed.filter((v: any) => now - v.timestamp < 5 * 60 * 1000);
+          setGeneratedVideos(valid);
+          
+          if (valid.length !== parsed.length) {
+            localStorage.setItem('generatedVideos', JSON.stringify(valid));
+          }
+        }
       }
+    } catch (e) {
+      console.error("Failed to parse generated videos from local storage", e);
+      // Optional: Clear invalid data
+      localStorage.removeItem('generatedVideos');
     }
 
     // Set up interval to clean up old videos

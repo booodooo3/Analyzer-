@@ -566,7 +566,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       : 'bg-gradient-to-r from-zinc-700 to-zinc-600 hover:from-zinc-600 hover:to-zinc-500 text-white shadow-lg shadow-white/5'
                   }`}
               >
-                  {isConverting ? 'Generating Video...' : 'Generate Video (5 Credits)'}
+                  {isConverting ? 'Generating Video...' : 'Generate Video (4 Credits)'}
               </Button>
 
               {/* Mobile Playlist */}

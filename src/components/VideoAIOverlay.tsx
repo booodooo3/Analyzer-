@@ -557,7 +557,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                   />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-2">
                       <div className="flex justify-between items-end">
                         <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Camera Effect</label>
@@ -571,37 +571,13 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       <select 
                           value={cameraEffect}
                           onChange={(e) => setCameraEffect(e.target.value)}
-                          className="w-full bg-black border border-zinc-800 rounded-xl p-3 text-zinc-400 focus:outline-none focus:ring-1 focus:ring-white focus:border-white focus:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300"
+                          className="w-full bg-black border border-zinc-800 rounded-xl p-3 text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 focus:shadow-[0_0_15px_rgba(34,197,94,0.15)] transition-all duration-300"
                       >
                           {CAMERA_EFFECTS.map(effect => (
-                              <option key={effect} value={effect}>{effect}</option>
+                              <option key={effect} value={effect} className="text-green-500 bg-zinc-900">{effect}</option>
                           ))}
                       </select>
                   </div>
-
-                {/* AI Style Filter */}
-                      <div className="space-y-2">
-                          <div className="flex justify-between items-end">
-                            <label className="text-sm font-bold text-green-500 uppercase tracking-wider flex items-center gap-2">
-                                AI Style Filter
-                            </label>
-                            <button
-                                onClick={() => setHelpCategory('style')}
-                                className="text-[9px] px-2 py-1 rounded-full bg-green-900/30 hover:bg-green-900/50 text-green-400 border border-green-500/30 transition-colors tracking-wide uppercase"
-                            >
-                                Styles Info
-                            </button>
-                          </div>
-                          <select 
-                            value={aiFilter}
-                            onChange={(e) => setAiFilter(e.target.value)}
-                            className="w-full bg-black border border-green-500/50 rounded-xl p-3 text-green-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 focus:shadow-[0_0_15px_rgba(34,197,94,0.2)] transition-all duration-300"
-                          >
-                            {AI_FILTERS.map(filter => (
-                                <option key={filter} value={filter} className="text-green-400 bg-zinc-900">{filter}</option>
-                            ))}
-                          </select>
-                      </div>
               </div>
 
               <Button 

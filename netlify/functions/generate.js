@@ -272,7 +272,7 @@ export default async (req, context) => {
     if (effectivePlusMode) {
          console.log("🚀 Starting Plus Mode Prediction (3 views)...");
          
-         const prompts = [
+في         const prompts = [
             { type: 'front', text: `Half-body portrait of a person wearing ${desc}. FRAMING: From the top of the head down to the mid-thighs only. The camera is CLOSE to the subject. DO NOT show the lower legs or feet. The bottom of the image MUST end at the thighs. This is a ZOOMED-IN view, significantly closer than a full body shot. High quality, realistic. Preserve the original person's face and identity with 100% accuracy, perform the swap only on the garment regions. The face, eyes, nose, lips, and hair are reference-locked. They must be a 1:1 match with the input photo.` },
             { type: 'side', text: `Side profile view of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. Preserve the original person's face and identity with 100% accuracy, perform the swap only on the garment regions. The face, eyes, nose, lips, and hair are reference-locked. They must be a 1:1 match with the input photo.` },
            { type: 'full', text: `Full body, head-to-toe shot of a person wearing ${desc}. The full body must be visible from head to feet, including legs and shoes, not cropped. The person is wearing the garment shown in the second image. High quality, realistic. Preserve the original person's face and identity with 100% accuracy, perform the swap only on the garment regions. The face, eyes, nose, lips, and hair are reference-locked. They must be a 1:1 match with the input photo.` }

@@ -519,7 +519,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                           <option value="bytedance/seedance-1-pro-fast" className="text-green-500 font-bold">Seedance 1 Pro Fast</option>
                       </select>
                   </div>
-ارفع التحديث الى                  {(selectedModel === 'bytedance/seedance-1.5-pro' || selectedModel === 'bytedance/seedance-1-pro-fast') && (
+                  {(selectedModel === 'bytedance/seedance-1.5-pro' || selectedModel === 'bytedance/seedance-1-pro-fast') && (
                       <div className="flex justify-end gap-3 mt-1 mb-2">
                           <label className="flex items-center gap-1.5 cursor-pointer group">
                               <input 

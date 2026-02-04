@@ -1,0 +1,7 @@
+{
+  "name": "  Stylestoo Ai - Virtual Try-On 1.02",
+  "description": "A high-end AI-powered fashion platform that allows users to virtually try on clothes using Gemini's advanced image editing capabilities.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

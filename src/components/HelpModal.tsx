@@ -1,0 +1,510 @@
+import React, { useState } from 'react';
+import { X, Languages } from 'lucide-react';
+
+interface HelpModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  category?: 'camera' | 'style';
+}
+
+type ContentItem = {
+  title: string;
+  desc: string;
+  usage: string;
+};
+
+type Section = {
+  title: string;
+  colorClass: string;
+  borderColorClass: string;
+  items: ContentItem[];
+};
+
+const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, category = 'camera' }) => {
+  const [language, setLanguage] = useState<'ar' | 'en'>('en');
+
+  if (!isOpen) return null;
+
+  const cameraContent: Record<'ar' | 'en', Section[]> = {
+    ar: [
+      {
+        title: "1. الحركات الأساسية (Basic Movements)",
+        colorClass: "text-blue-400",
+        borderColorClass: "border-blue-500/20",
+        items: [
+          {
+            title: "Static (ثابت)",
+            desc: "الشرح: الكاميرا لا تتحرك أبداً.",
+            usage: "الاستخدام: للمشاهد الهادئة، التركيز على الحوار، أو عندما يكون هناك الكثير من الحركة داخل المشهد نفسه ولا تريد تشتيت المشاهد."
+          },
+          {
+            title: "Zoom In (تقريب)",
+            desc: "الشرح: العدسة تقترب تدريجياً من الهدف.",
+            usage: "الاستخدام: للتركيز على تفصيل معين، إظهار رد فعل عاطفي على وجه شخصية، أو زيادة التوتر."
+          },
+          {
+            title: "Zoom Out (تبعيد)",
+            desc: "الشرح: العدسة تبتعد تدريجياً لتكشف مساحة أكبر.",
+            usage: "الاستخدام: لكشف المكان المحيط (Context)، إظهار الوحدة (شخص صغير في مكان كبير)، أو إنهاء المشهد."
+          },
+          {
+            title: "Pan Left / Pan Right (تحريك أفقي يمين/يسار)",
+            desc: "الشرح: الكاميرا تدور حول محورها يميناً أو يساراً (مثل تحريك رأسك للنظر للجانب).",
+            usage: "الاستخدام: لمتابعة شخصية تمشي، أو استعراض منظر طبيعي عريض."
+          },
+          {
+            title: "Pan Up / Pan Down (تحريك رأسي \"إمالة\")",
+            desc: "الشرح: الكاميرا تدور للأعلى أو للأسفل (تسمى سينمائياً Tilt).",
+            usage: "الاستخدام: لإظهار طول مبنى شاهق، أو النظر لشخصية من القدم إلى الرأس (لإظهار القوة أو الملابس)."
+          }
+        ]
+      },
+      {
+        title: "2. التلاعب بالزمن (Time Effects)",
+        colorClass: "text-purple-400",
+        borderColorClass: "border-purple-500/20",
+        items: [
+          {
+            title: "Slow Motion (تصوير بطيء)",
+            desc: "الشرح: إبطاء سرعة الفيديو.",
+            usage: "الاستخدام: لإظهار تفاصيل الحركة السريعة (مثل انفجار أو ركض)، أو لإضفاء طابع درامي ورومانسي."
+          },
+          {
+            title: "Hyperlapse / Timelapse (مرور الزمن السريع)",
+            desc: "الشرح: تسريع الفيديو بشكل كبير. (Timelapse للكاميرا الثابتة، Hyperlapse للكاميرا المتحركة).",
+            usage: "الاستخدام: لإظهار مرور الوقت (شروق الشمس وغروبها)، حركة المرور في المدينة، أو انتقال سريع من مكان لآخر."
+          },
+          {
+            title: "Freeze Frame (تجميد الإطار)",
+            desc: "الشرح: الصورة تتوقف تماماً وتصبح ثابتة للحظات.",
+            usage: "الاستخدام: للتعريف بشخصية (مع ظهور أسمه)، أو التأكيد على نهاية صادمة لمشهد."
+          },
+          {
+            title: "Reverse (عكس)",
+            desc: "الشرح: تشغيل الفيديو من النهاية للبداية.",
+            usage: "الاستخدام: لخدع سحرية، أو استرجاع الزمن، أو تأثيرات فنية غريبة."
+          }
+        ]
+      },
+      {
+        title: "3. حركات سينمائية متقدمة (Cinematic Moves)",
+        colorClass: "text-green-400",
+        borderColorClass: "border-green-500/20",
+        items: [
+          {
+            title: "Roll (دوران/دحرجة)",
+            desc: "الشرح: الكاميرا تدور حول محور العدسة (يميل الأفق).",
+            usage: "الاستخدام: لخلق شعور بعدم الاتزان، الدوار، الفوضى، أو في مشاهد الأكشن الديناميكية."
+          },
+          {
+            title: "Dolly / Tracking (تتبع/تحرك فعلي)",
+            desc: "الشرح: الكاميرا نفسها تتحرك جسدياً (على عجلات أو سكة) للأمام/الخلف (Dolly) أو للجانب (Tracking). تختلف عن الـ Zoom لأن الخلفية تتغير أبعادها بشكل طبيعي.",
+            usage: "الاستخدام: لتبع شخصية تمشي بجانبها، أو الدخول في عمق المشهد بواقعية."
+          },
+          {
+            title: "Orbit / Arc (دوران حول الهدف)",
+            desc: "الشرح: الكاميرا تدور في دائرة حول الشخص أو الشيء الموجود في المنتصف.",
+            usage: "الاستخدام: مشهد بطولي، رومانسي، أو لفحص منتج من جميع الجهات."
+          },
+          {
+            title: "Crane / Boom / Pedestal (رافعة/عامود)",
+            desc: "الشرح: الكاميرا ترتفع جسدياً للأعلى أو تنخفض للأسفل (وليس مجرد تدوير العدسة).",
+            usage: "الاستخدام: لقطات تأسيسية (Establishing shots) تكشف المدينة من الأعلى، أو النزول لمستوى الجمهور."
+          }
+        ]
+      },
+      {
+        title: "4. تأثيرات خاصة (Special Stylistic Effects)",
+        colorClass: "text-orange-400",
+        borderColorClass: "border-orange-500/20",
+        items: [
+          {
+            title: "Handheld / Shake (محمول باليد/اهتزاز)",
+            desc: "الشرح: الكاميرا تهتز قليلاً وكأن شخصاً يحملها بيده.",
+            usage: "الاستخدام: لإعطاء طابع واقعي (وثائقي)، أو خلق توتر وخوف (في مشاهد الرعب والأكشن)."
+          },
+          {
+            title: "Rack Focus (نقل التركيز)",
+            desc: "الشرح: تغيير التركيز (Focus) من جسم قريب إلى جسم بعيد (أو العكس) مع تغبيش الآخر.",
+            usage: "الاستخدام: لتوجيه عين المشاهد، مثلاً: شخص يتحدث ثم ينتقل التركيز لشخص آخر يستمع خلفه."
+          },
+          {
+            title: "Dolly Zoom (تأثير فيرتيغو/الدوار)",
+            desc: "الشرح: حركة معقدة ومشهورة جداً، يتم فيها التحرك بالكاميرا للخلف مع عمل Zoom In في نفس الوقت (أو العكس). النتيجة أن الشخص يبقى بحجمه لكن الخلفية تتسع أو تضيق بشكل مخيف.",
+            usage: "الاستخدام: لحظة إدراك صادمة، رعب نفسي، أو شعور بالدوار."
+          }
+        ]
+      }
+    ],
+    en: [
+      {
+        title: "1. Basic Movements",
+        colorClass: "text-blue-400",
+        borderColorClass: "border-blue-500/20",
+        items: [
+          {
+            title: "Static",
+            desc: "Explanation: The camera never moves.",
+            usage: "Usage: For calm scenes, focusing on dialogue, or when there is a lot of movement within the scene itself."
+          },
+          {
+            title: "Zoom In",
+            desc: "Explanation: The lens gradually gets closer to the subject.",
+            usage: "Usage: To focus on a specific detail, show an emotional reaction, or increase tension."
+          },
+          {
+            title: "Zoom Out",
+            desc: "Explanation: The lens gradually moves away to reveal more space.",
+            usage: "Usage: To reveal context, show loneliness, or end a scene."
+          },
+          {
+            title: "Pan Left / Pan Right",
+            desc: "Explanation: The camera rotates horizontally left or right.",
+            usage: "Usage: To follow a walking character, or showcase a wide landscape."
+          },
+          {
+            title: "Pan Up / Pan Down",
+            desc: "Explanation: The camera rotates vertically up or down (Tilt).",
+            usage: "Usage: To show the height of a tall building, or scan a character from head to toe."
+          }
+        ]
+      },
+      {
+        title: "2. Time Effects",
+        colorClass: "text-purple-400",
+        borderColorClass: "border-purple-500/20",
+        items: [
+          {
+            title: "Slow Motion",
+            desc: "Explanation: Slowing down video speed.",
+            usage: "Usage: To show fast movement details, or add a dramatic/romantic feel."
+          },
+          {
+            title: "Hyperlapse / Timelapse",
+            desc: "Explanation: Speeding up video significantly.",
+            usage: "Usage: To show passage of time (sunrise/sunset), city traffic, or fast travel."
+          },
+          {
+            title: "Freeze Frame",
+            desc: "Explanation: The image stops completely and freezes for moments.",
+            usage: "Usage: To introduce a character, or emphasize a shocking scene ending."
+          },
+          {
+            title: "Reverse",
+            desc: "Explanation: Playing video from end to start.",
+            usage: "Usage: For magic tricks, reversing time, or strange artistic effects."
+          }
+        ]
+      },
+      {
+        title: "3. Cinematic Moves",
+        colorClass: "text-green-400",
+        borderColorClass: "border-green-500/20",
+        items: [
+          {
+            title: "Roll",
+            desc: "Explanation: The camera rotates around the lens axis.",
+            usage: "Usage: To create a feeling of imbalance, dizziness, chaos, or dynamic action."
+          },
+          {
+            title: "Dolly / Tracking",
+            desc: "Explanation: The camera itself physically moves forward/backward or sideways.",
+            usage: "Usage: To follow a walking character, or enter deep into the scene realistically."
+          },
+          {
+            title: "Orbit / Arc",
+            desc: "Explanation: The camera rotates in a circle around the subject.",
+            usage: "Usage: Heroic scene, romantic moment, or inspecting a product from all sides."
+          },
+          {
+            title: "Crane / Boom / Pedestal",
+            desc: "Explanation: The camera physically rises up or down.",
+            usage: "Usage: Establishing shots revealing the city, or coming down to audience level."
+          }
+        ]
+      },
+      {
+        title: "4. Special Stylistic Effects",
+        colorClass: "text-orange-400",
+        borderColorClass: "border-orange-500/20",
+        items: [
+          {
+            title: "Handheld / Shake",
+            desc: "Explanation: The camera shakes slightly as if held by hand.",
+            usage: "Usage: To give a realistic (documentary) feel, or create tension/fear."
+          },
+          {
+            title: "Rack Focus",
+            desc: "Explanation: Changing focus from near to far object (or vice versa).",
+            usage: "Usage: To guide viewer's eye between characters or elements."
+          },
+          {
+            title: "Dolly Zoom",
+            desc: "Explanation: Moving camera back while zooming in (or vice versa).",
+            usage: "Usage: Shocking realization moment, psychological horror, or vertigo effect."
+          }
+        ]
+      }
+    ]
+  };
+
+  const styleContent: Record<'ar' | 'en', Section[]> = {
+    ar: [
+      {
+        title: "1. الأنماط العامة (General Styles)",
+        colorClass: "text-blue-400",
+        borderColorClass: "border-blue-500/20",
+        items: [
+          {
+            title: "No Filter (بدون فلتر)",
+            desc: "الشرح: يترك الصورة كما هي أو كما وصفتها في النص دون إجبارها على نمط فني معين.",
+            usage: "النتيجة: عادة متوازنة وطبيعية."
+          },
+          {
+            title: "Cinematic (سينمائي)",
+            desc: "الشرح: يجعل النتيجة تبدو كقطعة من فيلم هوليوودي.",
+            usage: "المظهر: إضاءة درامية، تباين عالٍ، ألوان واقعية لكن غنية، وتركيز عالٍ على الجودة والواقعية (Photorealistic)."
+          },
+          {
+            title: "Cyberpunk (سايبر بانك/مستقبلي)",
+            desc: "الشرح: نمط الخيال العلمي المستقبلي البائس (مثل فيلم Blade Runner).",
+            usage: "المظهر: مليء بأضواء النيون (الوردي والأزرق)، مدن مستقبلية، تكنولوجيا متقدمة، أجواء ليلية ممطرة، وروبوتات."
+          }
+        ]
+      },
+      {
+        title: "2. أنماط الرسوم المتحركة (Animation Styles)",
+        colorClass: "text-purple-400",
+        borderColorClass: "border-purple-500/20",
+        items: [
+          {
+            title: "Claymation (تحريك الصلصال)",
+            desc: "الشرح: يحاكي أفلام الـ \"Stop Motion\" المصنوعة يدوياً.",
+            usage: "المظهر: الأشياء تبدو وكأنها مصنوعة من الطين أو المعجون، مع إضاءة ناعمة وحركة قد تبدو متقطعة قليلاً لتقليد هذا الفن."
+          },
+          {
+            title: "3D Cartoon (Pixar Style) (كرتون ثلاثي الأبعاد)",
+            desc: "الشرح: يحاكي أسلوب أفلام ديزني وبيكسار الحديثة.",
+            usage: "المظهر: شخصيات لطيفة، عيون كبيرة ومعبرة، ألوان زاهية جداً، ملمس ناعم (Smooth)، وإضاءة مثالية."
+          },
+          {
+            title: "Anime (أنيمي)",
+            desc: "الشرح: أسلوب الرسوم المتحركة اليابانية.",
+            usage: "المظهر: رسم ثنائي الأبعاد (2D)، خطوط محددة، عيون مميزة، وتظليل بسيط (Cel-shaded)."
+          }
+        ]
+      },
+      {
+        title: "3. الأنماط الفنية (Artistic Styles)",
+        colorClass: "text-green-400",
+        borderColorClass: "border-green-500/20",
+        items: [
+          {
+            title: "Pixel Art (فن البكسل)",
+            desc: "الشرح: يحاكي ألعاب الفيديو القديمة في الثمانينات والتسعينات.",
+            usage: "المظهر: الصورة تتكون من مربعات صغيرة ظاهرة، ألوان محدودة، تعطي شعوراً بالنوستالجيا."
+          },
+          {
+            title: "Oil Painting (لوحة زيتية)",
+            desc: "الشرح: يحاكي الرسم الكلاسيكي بالفرشاة والألوان الزيتية.",
+            usage: "المظهر: ستظهر ضربات الفرشاة بوضوح، ألوان متداخلة، وملمس قماشي، كأنها لوحة لفان جوخ أو دافنشي."
+          },
+          {
+            title: "Pencil Sketch (رسم بالقلم الرصاص)",
+            desc: "الشرح: يحاكي التخطيط اليدوي السريع (Sketch).",
+            usage: "المظهر: عادة يكون أبيض وأسود، خطوط خشنة، تظليل باستخدام الخطوط المتقاطعة، ويبدو كأنه مرسوم على ورق."
+          },
+          {
+            title: "Origami (أوريغامي - فن طي الورق)",
+            desc: "الشرح: يحول كل شيء في المشهد وكأنه مصنوع من الورق المطوي.",
+            usage: "المظهر: أشكال هندسية حادة، زوايا واضحة، وملمس ورقي، دون تفاصيل ناعمة أو منحنيات."
+          }
+        ]
+      },
+      {
+        title: "4. الأنماط الثقافية (Cultural Styles)",
+        colorClass: "text-orange-400",
+        borderColorClass: "border-orange-500/20",
+        items: [
+          {
+            title: "Arabic Heritage (التراث العربي)",
+            desc: "الشرح: يركز على الطابع التاريخي والتقليدي للمنطقة العربية.",
+            usage: "المظهر: يستخدم ألواناً دافئة (صحراوية)، زخارف إسلامية أو عربية قديمة، مباني طينية أو تاريخية، وأزياء تقليدية قديمة."
+          },
+          {
+            title: "Modern Saudi (سعودي حديث)",
+            desc: "الشرح: يعكس الهوية السعودية المعاصرة التي تمزج بين الأصالة والتطور.",
+            usage: "المظهر: يظهر أشخاصاً بأزياء سعودية (ثوب شماغ / عباية) لكن في بيئات حديثة وعصرية، ناطحات سحاب، أو مشاريع مستقبلية."
+          }
+        ]
+      }
+    ],
+    en: [
+      {
+        title: "1. General Styles",
+        colorClass: "text-blue-400",
+        borderColorClass: "border-blue-500/20",
+        items: [
+          {
+            title: "No Filter",
+            desc: "Explanation: Keeps the image as is or as described in text without forcing a specific style.",
+            usage: "Result: Usually balanced and natural."
+          },
+          {
+            title: "Cinematic",
+            desc: "Explanation: Makes the result look like a Hollywood movie shot.",
+            usage: "Appearance: Dramatic lighting, high contrast, rich realistic colors, photorealistic quality."
+          },
+          {
+            title: "Cyberpunk",
+            desc: "Explanation: Dystopian futuristic sci-fi style (like Blade Runner).",
+            usage: "Appearance: Neon lights (pink/blue), futuristic cities, advanced tech, rainy night vibes, robots."
+          }
+        ]
+      },
+      {
+        title: "2. Animation Styles",
+        colorClass: "text-purple-400",
+        borderColorClass: "border-purple-500/20",
+        items: [
+          {
+            title: "Claymation",
+            desc: "Explanation: Mimics handmade stop-motion movies.",
+            usage: "Appearance: Objects look like clay/dough, soft lighting, slightly jerky movement to mimic the art form."
+          },
+          {
+            title: "3D Cartoon (Pixar Style)",
+            desc: "Explanation: Mimics modern Disney/Pixar movie style.",
+            usage: "Appearance: Cute characters, large expressive eyes, vivid colors, smooth texture, perfect lighting."
+          },
+          {
+            title: "Anime",
+            desc: "Explanation: Japanese animation style.",
+            usage: "Appearance: 2D drawing, defined lines, distinct eyes, cel-shaded."
+          }
+        ]
+      },
+      {
+        title: "3. Artistic Styles",
+        colorClass: "text-green-400",
+        borderColorClass: "border-green-500/20",
+        items: [
+          {
+            title: "Pixel Art",
+            desc: "Explanation: Mimics 80s/90s retro video games.",
+            usage: "Appearance: Visible small squares (pixels), limited color palette, nostalgic feel."
+          },
+          {
+            title: "Oil Painting",
+            desc: "Explanation: Mimics classic brush and oil paint art.",
+            usage: "Appearance: Visible brush strokes, blended colors, canvas texture, like Van Gogh or Da Vinci."
+          },
+          {
+            title: "Pencil Sketch",
+            desc: "Explanation: Mimics quick hand sketching.",
+            usage: "Appearance: Black and white, rough lines, cross-hatching shading, paper texture."
+          },
+          {
+            title: "Origami",
+            desc: "Explanation: Transforms everything to look like folded paper.",
+            usage: "Appearance: Sharp geometric shapes, clear angles, paper texture, no smooth curves."
+          }
+        ]
+      },
+      {
+        title: "4. Cultural Styles",
+        colorClass: "text-orange-400",
+        borderColorClass: "border-orange-500/20",
+        items: [
+          {
+            title: "Arabic Heritage",
+            desc: "Explanation: Focuses on historical/traditional Arab themes.",
+            usage: "Appearance: Warm desert colors, Islamic/old Arab patterns, mud/historical buildings, traditional attire."
+          },
+          {
+            title: "Modern Saudi",
+            desc: "Explanation: Reflects contemporary Saudi identity mixing authenticity with progress.",
+            usage: "Appearance: People in Saudi attire (Thobe/Abaya) in modern settings, skyscrapers, futuristic projects."
+          }
+        ]
+      }
+    ]
+  };
+
+  const currentContent = category === 'camera' ? cameraContent[language] : styleContent[language];
+  const isRTL = language === 'ar';
+  const modalTitle = category === 'camera' 
+    ? (language === 'en' ? 'Camera Effects Guide' : 'دليل تأثيرات الكاميرا')
+    : (language === 'en' ? 'AI Style Filters Guide' : 'دليل أنماط الذكاء الاصطناعي');
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div className="bg-zinc-900 border border-zinc-700 rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col shadow-2xl">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-zinc-800 bg-zinc-900/50">
+          <div className="flex items-center gap-4">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              {modalTitle}
+            </h2>
+            
+            {/* Language Toggle */}
+            <button
+              onClick={() => setLanguage(l => l === 'en' ? 'ar' : 'en')}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 hover:border-zinc-600 transition-all group"
+            >
+              <Languages className="w-4 h-4 text-zinc-400 group-hover:text-white" />
+              <span className="text-xs font-medium text-zinc-400 group-hover:text-white">
+                {language === 'en' ? 'العربية' : 'English'}
+              </span>
+            </button>
+          </div>
+
+          <button 
+            onClick={onClose}
+            className="p-2 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 hover:text-white"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+          {currentContent.map((section, idx) => (
+            <section key={idx} className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
+              <h3 className={`text-lg font-bold ${section.colorClass} border-b ${section.borderColorClass} pb-2`}>
+                {section.title}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {section.items.map((item, itemIdx) => (
+                  <EffectItem 
+                    key={itemIdx}
+                    title={item.title}
+                    desc={item.desc}
+                    usage={item.usage}
+                    isRTL={isRTL}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+        
+        {/* Footer */}
+        <div className="p-4 border-t border-zinc-800 bg-zinc-900/50 text-center text-zinc-500 text-xs">
+          Press 'ESC' or click outside to close
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const EffectItem = ({ title, desc, usage, isRTL }: { title: string, desc: string, usage: string, isRTL: boolean }) => (
+  <div className="bg-zinc-800/30 p-4 rounded-xl border border-zinc-700/30 hover:bg-zinc-800/50 transition-colors">
+    <h4 className={`font-bold text-white mb-2 ${isRTL ? 'font-arabic' : ''}`}>{title}</h4>
+    <p className={`text-zinc-400 text-sm mb-2 leading-relaxed ${isRTL ? 'font-arabic' : ''}`}>{desc}</p>
+    <p className={`text-zinc-500 text-xs leading-relaxed border-t border-zinc-700/50 pt-2 ${isRTL ? 'font-arabic' : ''}`}>{usage}</p>
+  </div>
+);
+
+export default HelpModal;

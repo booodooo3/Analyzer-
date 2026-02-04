@@ -23,6 +23,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [helpCategory, setHelpCategory] = useState<'camera' | 'style' | null>(null);
   const [duration, setDuration] = useState(10);
   const [selectedModel, setSelectedModel] = useState('bytedance/seedance-1.5-pro');
+  const [aspectRatio, setAspectRatio] = useState('9:16');
   const [processingTime, setProcessingTime] = useState(0);
   const [generatedVideos, setGeneratedVideos] = useState<{ id: string, url: string, timestamp: number }[]>([]);
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
@@ -193,6 +194,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
           cameraEffect,
           aiFilter,
           duration: duration,
+          aspectRatio,
           model: selectedModel
         })
       });
@@ -374,8 +376,25 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
               <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">
-                      {videoUrl ? 'Generated Video' : 'Upload Images'}
+                      {videoUrl ? 'Generated Video' : 'Upload Image'}
                     </label>
+                    {!videoUrl && !isConverting && (
+                        <div className="flex gap-2">
+                            {['9:16', '16:9', '1:1', '4:3'].map((ratio) => (
+                                <button
+                                    key={ratio}
+                                    onClick={() => setAspectRatio(ratio)}
+                                    className={`text-[10px] font-bold px-2 py-1 rounded transition-colors border ${
+                                        aspectRatio === ratio 
+                                            ? 'bg-green-500/10 text-green-500 border-green-500' 
+                                            : 'bg-zinc-900 text-zinc-500 border-zinc-800 hover:text-zinc-300'
+                                    }`}
+                                >
+                                    {ratio}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                   </div>
                   
                   {videoUrl ? (
@@ -492,17 +511,14 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                         </div>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 gap-4">
-                        {[0, 1].map((index) => (
-                            <ImageUploader 
-                                key={index}
-                                description=""
-                                currentImage={images[index]?.base64}
-                                onImageSelected={(data) => updateImage(index, data)}
-                                className="aspect-video w-full bg-zinc-950/50"
-                                objectFit="contain"
-                            />
-                        ))}
+                    <div className="w-full">
+                        <ImageUploader 
+                            description=""
+                            currentImage={images[0]?.base64}
+                            onImageSelected={(data) => updateImage(0, data)}
+                            className="aspect-video w-full bg-zinc-950/50"
+                            objectFit="contain"
+                        />
                     </div>
                   )}
               </div>

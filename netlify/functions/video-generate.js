@@ -63,7 +63,7 @@ export default async (req, context) => {
             
             const currentCredits = typeof user.publicMetadata.credits === 'number' ? user.publicMetadata.credits : 3;
             
-            const { image, description, duration, cameraEffect, aiFilter, model } = await req.json();
+            const { image, description, duration, cameraEffect, aiFilter, model, aspectRatio } = await req.json();
 
             // Calculate cost based on duration
             let cost = 4;
@@ -108,6 +108,7 @@ export default async (req, context) => {
                 prompt: enhancedPrompt,
                 duration: duration || 10,
                 image: image,
+                aspect_ratio: aspectRatio || "16:9",
                 fps: 24
             };
 

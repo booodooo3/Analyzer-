@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Upload, Languages, Download, RotateCcw, Mic, Trash2, Lock } from 'lucide-react';
+import { X, Upload, Languages, Download, RotateCcw, Mic, Trash2, Lock, Star } from 'lucide-react';
 import { useAuth } from "@clerk/clerk-react";
 import { ImageUploader } from './ImageUploader';
 import { Button } from './Button';
@@ -524,22 +524,34 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
               </div>
 
               <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                      <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Video Description</label>
-                      <select 
-                          value={selectedModel}
-                          onChange={(e) => {
-                            setSelectedModel(e.target.value);
-                            if (e.target.value === 'minimax/hailuo-2.3') {
-                                setDuration(10);
-                            }
-                          }}
-                          className="bg-black border border-zinc-800 rounded-lg px-3 py-1 text-xs text-zinc-400 focus:outline-none focus:ring-1 focus:ring-white/20"
-                      >
-                          <option value="bytedance/seedance-1.5-pro">Seedance 1.5 Pro</option>
-                          <option value="bytedance/seedance-1-pro-fast" className="text-green-500 font-bold">Seedance 1 Pro Fast</option>
-                          <option value="minimax/hailuo-2.3" className="text-blue-500 font-bold">Minimax Hailuo 2.3</option>
-                      </select>
+                  <div className="flex justify-between items-end">
+                      <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-1">Video Description</label>
+                      <div className="flex flex-col items-end gap-1">
+                          <span className="text-[10px] text-yellow-400 font-bold uppercase tracking-wider">Ai Model</span>
+                          <div className="flex items-center gap-2">
+                              {selectedModel === 'minimax/hailuo-2.3' && (
+                                  <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 animate-pulse" />
+                              )}
+                              <select 
+                                  value={selectedModel}
+                                  onChange={(e) => {
+                                    setSelectedModel(e.target.value);
+                                    if (e.target.value === 'minimax/hailuo-2.3') {
+                                        setDuration(10);
+                                    }
+                                  }}
+                                  className={`bg-black border rounded-lg px-3 py-1 text-xs focus:outline-none transition-all duration-300 ${
+                                      selectedModel 
+                                          ? 'text-green-400 border-green-500/50 shadow-[0_0_10px_rgba(34,197,94,0.2)] ring-1 ring-green-500/20' 
+                                          : 'text-zinc-400 border-zinc-800 focus:ring-1 focus:ring-white/20'
+                                  }`}
+                              >
+                                  <option value="bytedance/seedance-1.5-pro">Seedance 1.5 Pro</option>
+                                  <option value="bytedance/seedance-1-pro-fast" className="text-green-500 font-bold">Seedance 1 Pro Fast</option>
+                                  <option value="minimax/hailuo-2.3" className="text-blue-500 font-bold">Minimax Hailuo 2.3</option>
+                              </select>
+                          </div>
+                      </div>
                   </div>
                   {(selectedModel === 'bytedance/seedance-1.5-pro' || selectedModel === 'bytedance/seedance-1-pro-fast') && (
                       <div className="flex justify-end gap-3 mt-1 mb-2">

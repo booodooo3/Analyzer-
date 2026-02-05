@@ -528,11 +528,17 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Video Description</label>
                       <select 
                           value={selectedModel}
-                          onChange={(e) => setSelectedModel(e.target.value)}
+                          onChange={(e) => {
+                            setSelectedModel(e.target.value);
+                            if (e.target.value === 'minimax/hailuo-2.3') {
+                                setDuration(10);
+                            }
+                          }}
                           className="bg-black border border-zinc-800 rounded-lg px-3 py-1 text-xs text-zinc-400 focus:outline-none focus:ring-1 focus:ring-white/20"
                       >
                           <option value="bytedance/seedance-1.5-pro">Seedance 1.5 Pro</option>
                           <option value="bytedance/seedance-1-pro-fast" className="text-green-500 font-bold">Seedance 1 Pro Fast</option>
+                          <option value="minimax/hailuo-2.3" className="text-blue-500 font-bold">Minimax Hailuo 2.3</option>
                       </select>
                   </div>
                   {(selectedModel === 'bytedance/seedance-1.5-pro' || selectedModel === 'bytedance/seedance-1-pro-fast') && (

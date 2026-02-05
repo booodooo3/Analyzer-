@@ -102,6 +102,9 @@ export default async (req, context) => {
             } else if (model === 'bytedance/seedance-1.5-pro') {
                 modelOwner = "bytedance";
                 modelName = "seedance-1.5-pro";
+            } else if (model === 'minimax/hailuo-2.3') {
+                modelOwner = "minimax";
+                modelName = "hailuo-2.3";
             }
 
             let input = {
@@ -111,6 +114,16 @@ export default async (req, context) => {
                 aspect_ratio: aspectRatio || "16:9",
                 fps: 24
             };
+
+            if (modelOwner === "minimax") {
+                input = {
+                    prompt: enhancedPrompt,
+                    first_frame_image: image,
+                    duration: 10,
+                    resolution: "768p",
+                    prompt_optimizer: true
+                };
+            }
 
             // Get latest version of the model
             let version;

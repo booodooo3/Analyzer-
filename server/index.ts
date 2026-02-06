@@ -488,23 +488,21 @@ app.post('/api/send-contact', async (req: any, res: any) => {
             replyTo: email, // Allow replying to the user
             subject: `New Contact: ${subject || 'No Subject'}`,
             text: `
-اسم المرسل: ${name}
-البريد: ${email}
-الموضوع: ${subject}
+Name: ${name}
+Email: ${email}
+Subject: ${subject}
 
-الرسالة:
+Message:
 ${message}
             `,
             html: `
-<div dir="rtl" style="font-family: Arial, sans-serif;">
-    <h3>رسالة جديدة من نموذج التواصل</h3>
-    <p><strong>اسم المرسل:</strong> ${name}</p>
-    <p><strong>البريد:</strong> ${email}</p>
-    <p><strong>الموضوع:</strong> ${subject}</p>
-    <br>
-    <p><strong>الرسالة:</strong></p>
-    <p>${message.replace(/\n/g, '<br>')}</p>
-</div>
+<h3>New Contact Form Submission</h3>
+<p><strong>Name:</strong> ${name}</p>
+<p><strong>Email:</strong> ${email}</p>
+<p><strong>Subject:</strong> ${subject}</p>
+<br>
+<p><strong>Message:</strong></p>
+<p>${message.replace(/\n/g, '<br>')}</p>
             `,
         };
 

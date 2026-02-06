@@ -351,7 +351,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
           <div className="flex justify-between items-center border-b border-white/10 pb-4">
               <h2 className="text-2xl font-bold tracking-tight text-white flex flex-col gap-0.5">
                   <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                      <span className="w-2 h-2 rounded-full bg-yellow-100 animate-pulse shadow-[0_0_8px_rgba(254,240,138,0.8)]" />
                       Analyzer Ai
                   </div>
                   <span className="text-xs font-normal text-zinc-400 ml-4">Image To Video</span>

@@ -520,6 +520,20 @@ ${message}
     }
 });
 
+// 404 Handler for API routes
+app.use('/api/*', (req: any, res: any) => {
+    res.status(404).json({ status: "error", message: "API endpoint not found" });
+});
+
+// Global Error Handler
+app.use((err: any, req: any, res: any, next: any) => {
+    console.error("🔥 Global Error:", err);
+    res.status(err.status || 500).json({
+        status: "error",
+        message: err.message || "Internal Server Error"
+    });
+});
+
 app.listen(port, () => {
     console.log(`✅ Server running with HIGH QUALITY Engines on port ${port}`);
 });

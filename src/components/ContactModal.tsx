@@ -7,6 +7,36 @@ interface ContactModalProps {
 }
 
 const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const { name, email, subject, message } = formData;
+    
+    // Construct mailto link
+    const body = `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`;
+    const mailtoLink = `mailto:support@analyzer-a.org?subject=${encodeURIComponent(subject || 'Contact from Website')}&body=${encodeURIComponent(body)}`;
+    
+    // Open default mail client
+    window.location.href = mailtoLink;
+    
+    // Optional: Close modal or show success message
+    // onClose(); 
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -79,12 +109,16 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
             </button>
           </div>
 
-          <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
               <label className="sr-only">Full Name</label>
               <input 
                 type="text" 
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
                 placeholder="Full Name" 
+                required
                 className="w-full bg-zinc-800/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
               />
             </div>
@@ -93,7 +127,11 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
               <label className="sr-only">Email Address</label>
               <input 
                 type="email" 
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
                 placeholder="Email Address" 
+                required
                 className="w-full bg-zinc-800/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
               />
             </div>
@@ -102,7 +140,11 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
               <label className="sr-only">Subject</label>
               <input 
                 type="text" 
+                name="subject"
+                value={formData.subject}
+                onChange={handleChange}
                 placeholder="Subject" 
+                required
                 className="w-full bg-zinc-800/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
               />
             </div>
@@ -111,7 +153,11 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
               <label className="sr-only">Your Message</label>
               <textarea 
                 rows={4}
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
                 placeholder="Your Message" 
+                required
                 className="w-full bg-zinc-800/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all resize-none"
               />
             </div>

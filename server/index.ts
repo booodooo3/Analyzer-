@@ -6,15 +6,34 @@ import { ClerkExpressWithAuth, createClerkClient } from '@clerk/clerk-sdk-node';
 import { Client } from "@gradio/client";
 import Replicate from "replicate";
 import nodemailer from "nodemailer";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import multer from "multer";
+import fs from "fs";
+import path from "path";
+import axios from "axios";
 
-dotenv.config({ path: '../.env.local' });
+dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
-// Increase limit for large images
+// Enable CORS for all routes (or restrict to frontend origin)
+app.use(cors({
+    origin: '*', // Allow all origins for debugging
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json({ limit: '50mb' }));
-app.use(cors());
+
+// Request Logger
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+    next();
+});
+
+// Configure Multer for file upload
+const upload = multer({ dest: "uploads/" });
 
 // Check keys
 if (!process.env.CLERK_SECRET_KEY) {

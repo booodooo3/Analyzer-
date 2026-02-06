@@ -32,7 +32,8 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
     setErrorMessage('');
 
     try {
-      const response = await fetch('/api/send-contact', {
+      // Use full URL to bypass proxy issues
+      const response = await fetch('http://localhost:3001/api/send-contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -40,7 +41,10 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
 
       const contentType = response.headers.get("content-type");
       if (contentType && contentType.indexOf("application/json") === -1) {
-        throw new Error("Server error: received non-JSON response. Is the backend server running?");
+         // Log the actual response text for debugging
+         const text = await response.text();
+         console.error("Non-JSON Response:", text);
+         throw new Error("Server error: received non-JSON response. Please check console for details.");
       }
 
       const data = await response.json();

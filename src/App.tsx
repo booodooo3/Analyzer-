@@ -466,11 +466,11 @@ const App: React.FC = () => {
           <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
             <div className="w-4 h-4 border-2 border-black rotate-45" />
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col items-center justify-center">
             <span className="text-xl font-bold tracking-tighter uppercase mr-2 ml-2 leading-none">
               {t.appName}
             </span>
-            <span className={`text-sm font-bold tracking-widest uppercase mr-2 ml-2 transition-colors duration-300 ${userId ? 'text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]' : 'text-zinc-600'}`}>
+            <span className={`text-[10px] font-mono tracking-[0.2em] uppercase mr-2 ml-2 transition-all duration-300 ${userId ? 'text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.8)]' : 'text-zinc-600'}`}>
               Stylestoo
             </span>
           </div>

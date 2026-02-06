@@ -109,27 +109,6 @@ const App: React.FC = () => {
   const [lipstick, setLipstick] = useState<string>('default');
 
   const [generatedResults, setGeneratedResults] = useState<GeneratedResult[]>([]);
-  const [isMusicFinished, setIsMusicFinished] = useState(false);
-
-  useEffect(() => {
-    if (userId) {
-      const audio = new Audio('/977977535353765757.mp3');
-      audio.play().catch(e => console.error("Audio playback failed:", e));
-      
-      const handleEnded = () => {
-        setIsMusicFinished(true);
-      };
-
-      audio.addEventListener('ended', handleEnded);
-
-      return () => {
-        audio.pause();
-        audio.removeEventListener('ended', handleEnded);
-      };
-    } else {
-      setIsMusicFinished(false);
-    }
-  }, [userId]);
 
   useEffect(() => {
     if (!userId) {
@@ -491,7 +470,7 @@ const App: React.FC = () => {
             <span className="text-xl font-bold tracking-tighter uppercase mr-2 ml-2 leading-none">
               {t.appName}
             </span>
-            <span className={`text-[10px] font-mono tracking-[0.2em] uppercase mr-2 ml-2 transition-all duration-300 ${userId && isMusicFinished ? 'text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.8)]' : 'text-zinc-600'}`}>
+            <span className={`text-[10px] font-mono tracking-[0.2em] uppercase mr-2 ml-2 transition-all duration-300 ${userId ? 'text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.8)]' : 'text-zinc-600'}`}>
               Stylestoo
             </span>
           </div>

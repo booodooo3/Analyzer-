@@ -38,6 +38,11 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
         body: JSON.stringify(formData)
       });
 
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") === -1) {
+        throw new Error("Server error: received non-JSON response. Is the backend server running?");
+      }
+
       const data = await response.json();
 
       if (!response.ok) {

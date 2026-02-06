@@ -5,7 +5,6 @@ import PayPalPayment from './components/PayPalPayment';
 import { ImageUploader } from './components/ImageUploader';
 import { Button } from './components/Button';
 import { VideoAIOverlay } from './components/VideoAIOverlay';
-import ContactModal from './components/ContactModal';
 import { performVirtualTryOn, analyzeStyle } from './services/apiService';
 import { ImageData, AppState, GarmentType } from './types';
 import { Download } from 'lucide-react';
@@ -99,7 +98,6 @@ const App: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isClosetOpen, setIsClosetOpen] = useState(false);
   const [isVideoAIOpen, setIsVideoAIOpen] = useState(false);
-  const [isContactOpen, setIsContactOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [garmentDescription, setGarmentDescription] = useState("");
@@ -980,23 +978,13 @@ const App: React.FC = () => {
         getToken={getToken}
       />
 
-      <ContactModal 
-        isOpen={isContactOpen} 
-        onClose={() => setIsContactOpen(false)} 
-      />
-
       <footer className="p-12 border-t border-zinc-900 mt-auto bg-zinc-950">
         <div className="max-w-6xl mx-auto text-center space-y-2">
            <p className="text-zinc-600 text-sm">{t.footer}</p>
-          <p className="text-zinc-600 text-sm flex items-center justify-center gap-2">
-            <button 
-              onClick={() => setIsContactOpen(true)}
-              className="hover:text-white transition-colors"
-            >
-              support@analyzer-a.org
-            </button>
-            <span className="text-zinc-700">|</span>
-            <a href="https://analyzer-a.org" className="text-white hover:underline underline-offset-4" target="_blank" rel="noreferrer">
+          <p className="text-zinc-600 text-sm">
+            <span>support@analyzer-a.org</span>
+            <span className="mx-2 text-zinc-700">|</span>
+            <a href="https://analyzer-a.org" className="text-white" target="_blank" rel="noreferrer">
               analyzer-a.org
             </a>
           </p>

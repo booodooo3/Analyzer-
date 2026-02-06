@@ -251,7 +251,11 @@ export default async (req, context) => {
     }
 
     if (makeup && makeup !== 'default' && makeup !== 'Default') {
-        promptText += ` Apply ${makeup} style to the person's face.`;
+        if (makeup === 'No Makeup') {
+             promptText += " The person must have a completely natural face with NO makeup. REMOVE any existing makeup, lipstick, eyeshadow, or foundation. The face should look fresh, clean, and natural.";
+        } else {
+             promptText += ` Apply ${makeup} style to the person's face.`;
+        }
     }
 
     if (lipstick && lipstick !== 'default' && lipstick !== 'Default') {

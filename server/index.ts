@@ -488,31 +488,35 @@ app.post('/api/send-contact', async (req: any, res: any) => {
             replyTo: email, // Allow replying to the user
             subject: `New Contact: ${subject || 'No Subject'}`,
             text: `
-Name: ${name}
-Email: ${email}
-Subject: ${subject}
+اسم المرسل: ${name}
+البريد: ${email}
+الموضوع: ${subject}
 
-Message:
+الرسالة:
 ${message}
             `,
             html: `
-<h3>New Contact Form Submission</h3>
-<p><strong>Name:</strong> ${name}</p>
-<p><strong>Email:</strong> ${email}</p>
-<p><strong>Subject:</strong> ${subject}</p>
-<br>
-<p><strong>Message:</strong></p>
-<p>${message.replace(/\n/g, '<br>')}</p>
+<div dir="rtl" style="font-family: Arial, sans-serif;">
+    <h3>رسالة جديدة من نموذج التواصل</h3>
+    <p><strong>اسم المرسل:</strong> ${name}</p>
+    <p><strong>البريد:</strong> ${email}</p>
+    <p><strong>الموضوع:</strong> ${subject}</p>
+    <br>
+    <p><strong>الرسالة:</strong></p>
+    <p>${message.replace(/\n/g, '<br>')}</p>
+</div>
             `,
         };
 
         await transporter.sendMail(mailOptions);
         console.log(`📧 Email sent from ${email}`);
-        res.status(200).json({ message: "Email sent successfully" });
+        
+        // Return JSON as requested by user to avoid unexpected token errors
+        res.status(200).json({ status: "success", message: "تم الإرسال بنجاح!" });
 
     } catch (error: any) {
         console.error("🔥 Email Error:", error);
-        res.status(500).json({ error: "Failed to send email", details: error.message });
+        res.status(500).json({ status: "error", message: error.message || "Failed to send email" });
     }
 });
 

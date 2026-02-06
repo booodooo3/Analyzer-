@@ -45,8 +45,8 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to send message');
+      if (!response.ok || data.status === 'error') {
+        throw new Error(data.message || 'Failed to send message');
       }
 
       setStatus('success');

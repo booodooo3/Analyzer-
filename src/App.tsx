@@ -557,7 +557,7 @@ const App: React.FC = () => {
                                         onClick={() => setMakeup(opt)}
                                         className={`w-full py-1.5 px-2 rounded-md border text-[9px] font-bold uppercase tracking-wider transition-all
                                             ${makeup === opt 
-                                                ? 'bg-white text-black border-white' 
+                                                ? 'bg-black/50 text-yellow-400 border-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)] drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]' 
                                                 : 'bg-[#0a0a0a] border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:bg-zinc-900'
                                             }`}
                                     >
@@ -577,7 +577,7 @@ const App: React.FC = () => {
                                         onClick={() => setLipstick(opt)}
                                         className={`w-full py-1.5 px-2 rounded-md border text-[9px] font-bold uppercase tracking-wider transition-all
                                             ${lipstick === opt 
-                                                ? 'bg-white text-black border-white' 
+                                                ? 'bg-black/50 text-yellow-400 border-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)] drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]' 
                                                 : 'bg-[#0a0a0a] border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:bg-zinc-900'
                                             }`}
                                     >
@@ -682,12 +682,12 @@ const App: React.FC = () => {
                              className={`w-full aspect-square flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300 gap-3 group ${
                                garmentType === type 
                                ? (isMakeoverMode 
-                                    ? 'bg-white text-black border-green-400 border-4 shadow-[0_0_15px_rgba(74,222,128,0.6)] scale-105 z-10' 
-                                    : 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.4)] scale-105 z-10')
+                                    ? 'bg-black/80 text-yellow-400 border-yellow-400 border-4 shadow-[0_0_15px_rgba(250,204,21,0.6)] scale-105 z-10' 
+                                    : 'bg-black/50 text-yellow-400 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)] scale-105 z-10')
                                : 'bg-[#0a0a0a] border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:bg-zinc-900'
                              }`}
                            >
-                             <div className={`${garmentType === type ? 'text-black' : 'text-zinc-500 group-hover:text-zinc-300'} transition-colors`}>
+                             <div className={`${garmentType === type ? 'text-yellow-400 drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]' : 'text-zinc-500 group-hover:text-zinc-300'} transition-colors`}>
                                {type === 'other' ? (
                                   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
@@ -696,7 +696,7 @@ const App: React.FC = () => {
                                   React.cloneElement(garmentIcons[type] as React.ReactElement, { className: "w-6 h-6" })
                                )}
                              </div>
-                             <span className={`text-[10px] font-bold text-center leading-tight w-full h-[2.4em] flex items-center justify-center ${garmentType === type ? 'text-black' : 'text-zinc-500 group-hover:text-zinc-400'}`}>
+                             <span className={`text-[10px] font-bold text-center leading-tight w-full h-[2.4em] flex items-center justify-center ${garmentType === type ? 'text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.8)]' : 'text-zinc-500 group-hover:text-zinc-400'}`}>
                                {t.step2.types[type]}
                              </span>
                            </button>
@@ -949,7 +949,7 @@ const App: React.FC = () => {
                     onClick={() => handleSampleClick(sample)}
                     className={`aspect-[3/4] rounded-3xl overflow-hidden border-2 transition-all duration-300 relative group flex items-center justify-center bg-zinc-950 ${
                       clothImage?.url === sample.url
-                      ? 'border-white scale-95' 
+                      ? 'border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)] scale-95' 
                       : 'border-white/5 hover:border-white/40'
                     }`}
                   >

@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { ClerkExpressWithAuth, createClerkClient } from '@clerk/clerk-sdk-node';
 import { Client } from "@gradio/client";
 import Replicate from "replicate";
+import nodemailer from "nodemailer";
 
 dotenv.config({ path: '../.env.local' });
 
@@ -458,6 +459,60 @@ app.get('/api/generate', async (req: any, res: any) => {
         }
     } catch (error: any) {
         res.status(500).json({ error: error.message });
+    }
+});
+
+// Email Contact Endpoint
+app.post('/api/send-contact', async (req: any, res: any) => {
+    try {
+        const { name, email, subject, message } = req.body;
+
+        if (!process.env.EMAIL_PASSWORD) {
+            console.error("❌ ERROR: EMAIL_PASSWORD is missing in .env.local");
+            return res.status(500).json({ error: "Server configuration error (missing email password)" });
+        }
+
+        const transporter = nodemailer.createTransport({
+            host: "smtp.hostinger.com",
+            port: 465,
+            secure: true, // true for 465, false for other ports
+            auth: {
+                user: "support@analyzer-a.org",
+                pass: process.env.EMAIL_PASSWORD,
+            },
+        });
+
+        const mailOptions = {
+            from: '"Analyzer Support" <support@analyzer-a.org>',
+            to: "support@analyzer-a.org", // Send to yourself
+            replyTo: email, // Allow replying to the user
+            subject: `New Contact: ${subject || 'No Subject'}`,
+            text: `
+Name: ${name}
+Email: ${email}
+Subject: ${subject}
+
+Message:
+${message}
+            `,
+            html: `
+<h3>New Contact Form Submission</h3>
+<p><strong>Name:</strong> ${name}</p>
+<p><strong>Email:</strong> ${email}</p>
+<p><strong>Subject:</strong> ${subject}</p>
+<br>
+<p><strong>Message:</strong></p>
+<p>${message.replace(/\n/g, '<br>')}</p>
+            `,
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log(`📧 Email sent from ${email}`);
+        res.status(200).json({ message: "Email sent successfully" });
+
+    } catch (error: any) {
+        console.error("🔥 Email Error:", error);
+        res.status(500).json({ error: "Failed to send email", details: error.message });
     }
 });
 

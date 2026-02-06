@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, MapPin, Mail, Send } from 'lucide-react';
+import { X, MapPin, Mail, Send, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -13,6 +13,9 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
     subject: '',
     message: ''
   });
+  const [isSending, setIsSending] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -22,16 +25,40 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { name, email, subject, message } = formData;
-    
-    // Construct mailto link
-    const body = `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`;
-    const mailtoLink = `mailto:support@analyzer-a.org?subject=${encodeURIComponent(subject || 'Contact from Website')}&body=${encodeURIComponent(body)}`;
-    
-    // Open default mail client
-    window.location.href = mailtoLink;
+    setIsSending(true);
+    setStatus('idle');
+    setErrorMessage('');
+
+    try {
+      const response = await fetch('/api/send-contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send message');
+      }
+
+      setStatus('success');
+      setFormData({ name: '', email: '', subject: '', message: '' });
+      
+      // Auto close after success (optional, or just show success message)
+      setTimeout(() => {
+        setStatus('idle');
+      }, 5000);
+
+    } catch (error: any) {
+      console.error('Contact Error:', error);
+      setStatus('error');
+      setErrorMessage(error.message || 'Something went wrong. Please try again.');
+    } finally {
+      setIsSending(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -147,11 +174,37 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
 
             <button 
               type="submit" 
-              className="w-full p-4 bg-[#5f63f2] hover:bg-[#4a4ec7] text-white rounded-[10px] text-base font-bold cursor-pointer transition-colors flex items-center justify-center gap-2"
+              disabled={isSending || status === 'success'}
+              className={`w-full p-4 rounded-[10px] text-base font-bold cursor-pointer transition-colors flex items-center justify-center gap-2 ${
+                status === 'success' 
+                  ? 'bg-green-600 hover:bg-green-700' 
+                  : 'bg-[#5f63f2] hover:bg-[#4a4ec7]'
+              } text-white disabled:opacity-50 disabled:cursor-not-allowed`}
             >
-              Send Message
-              <Send className="w-4 h-4" />
+              {isSending ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Sending...
+                </>
+              ) : status === 'success' ? (
+                <>
+                  <CheckCircle className="w-5 h-5" />
+                  Message Sent!
+                </>
+              ) : (
+                <>
+                  Send Message
+                  <Send className="w-4 h-4" />
+                </>
+              )}
             </button>
+
+            {status === 'error' && (
+              <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2 text-red-400 text-sm animate-in fade-in slide-in-from-top-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
           </form>
         </div>
 

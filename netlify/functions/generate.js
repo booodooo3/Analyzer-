@@ -250,9 +250,12 @@ export default async (req, context) => {
         promptText += " IMPORTANT: The user wants a complete makeover. REMOVE any existing pants, trousers, or bottom garments the person is wearing and show bare legs if the new garment is a dress or skirt. CHANGE the shoes to be fashionable and matching the new outfit.";
     }
 
+    let negativePrompt = "shadows, dark spots, blemishes, blur, low quality, artifacts";
+
     if (makeup && makeup !== 'default' && makeup !== 'Default') {
         if (makeup === 'No Makeup') {
-             promptText += " The person must have a completely natural face with NO makeup. REMOVE any existing makeup, lipstick, eyeshadow, or foundation. The face should look fresh, clean, and natural.";
+             promptText += " The person must have a completely natural face with NO makeup. REMOVE any existing makeup, lipstick, eyeshadow, eyeliner, blush, and foundation. The face should look fresh, clean, and 100% natural bare skin.";
+             negativePrompt += ", makeup, cosmetics, lipstick, eyeshadow, mascara, foundation, blush, painted face, unnatural skin";
         } else {
              promptText += ` Apply ${makeup} style to the person's face.`;
         }
@@ -264,6 +267,7 @@ export default async (req, context) => {
 
     const inputPayload = {
           prompt: promptText,
+          negative_prompt: negativePrompt,
           image_input: [personDataURI, clothDataURI],
           aspect_ratio: "match_input_image",
           output_format: effectivePlusMode ? "png" : "jpg",

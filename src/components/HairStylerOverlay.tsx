@@ -124,12 +124,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
            </div>
            <div className="flex items-center gap-3 border-l border-zinc-800 pl-4">
                <div className="flex bg-zinc-900 rounded-lg p-1 border border-zinc-800">
-                  <button
-                    onClick={() => {}}
-                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all bg-yellow-500 text-black shadow-[0_0_10px_rgba(234,179,8,0.3)] font-bold cursor-default`}
-                  >
-                    Nano Banana Pro
-                  </button>
+
                    <button
                      onClick={() => {
                          setResultImage(null);

@@ -1000,12 +1000,14 @@ const App: React.FC = () => {
         <div className="max-w-6xl mx-auto text-center space-y-2">
            <p className="text-zinc-600 text-sm">{t.footer}</p>
           <p className="text-zinc-600 text-sm flex items-center justify-center gap-2">
-            <button 
-              onClick={() => setIsContactOpen(true)}
+            <a 
+              href="https://analyzer-a.org/contact/"
+              target="_blank"
+              rel="noreferrer"
               className="hover:text-white transition-colors"
             >
               support@analyzer-a.org
-            </button>
+            </a>
             <span className="text-zinc-700">|</span>
             <a href="https://analyzer-a.org" className="text-white hover:underline underline-offset-4" target="_blank" rel="noreferrer">
               analyzer-a.org

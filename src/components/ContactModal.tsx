@@ -41,10 +41,9 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
 
       const contentType = response.headers.get("content-type");
       if (contentType && contentType.indexOf("application/json") === -1) {
-         // Log the actual response text for debugging
          const text = await response.text();
          console.error("Non-JSON Response:", text);
-         throw new Error("Server error: received non-JSON response. Please check console for details.");
+         throw new Error(`Server error (${response.status}): received non-JSON response. Please ensure backend is running on port 3001.`);
       }
 
       const data = await response.json();

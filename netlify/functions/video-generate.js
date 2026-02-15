@@ -1,0 +1,248 @@
+import { createClerkClient } from "@clerk/clerk-sdk-node";
+import Replicate from "replicate";
+
+const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
+
+export default async (req, context) => {
+    const headers = {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+    };
+
+    if (req.method === "OPTIONS") {
+        return new Response(null, { status: 204, headers });
+    }
+
+    // GET Request: Check Prediction Status
+    const url = new URL(req.url);
+    const predictionId = url.searchParams.get("id");
+
+    if (req.method === "GET" && predictionId) {
+        try {
+            const prediction = await replicate.predictions.get(predictionId);
+            
+            if (prediction.status === "succeeded") {
+                let outputUrl = prediction.output;
+                // Handle array output (common in video models)
+                if (Array.isArray(outputUrl)) {
+                    outputUrl = outputUrl[0];
+                }
+                return new Response(JSON.stringify({ 
+                    status: "succeeded", 
+                    output: outputUrl,
+                    input: prediction.input // Include input to allow chaining check
+                }), { headers });
+            } else if (prediction.status === "failed" || prediction.status === "canceled") {
+                return new Response(JSON.stringify({ 
+                    status: "failed", 
+                    error: prediction.error 
+                }), { headers });
+            } else {
+                return new Response(JSON.stringify({ status: "processing" }), { headers });
+            }
+        } catch (error) {
+            return new Response(JSON.stringify({ error: error.message }), { status: 500, headers });
+        }
+    }
+
+    // POST Request: Start Generation
+    if (req.method === "POST") {
+        try {
+            const authHeader = req.headers.get("Authorization");
+            const token = authHeader?.split(" ")[1];
+
+            if (!token) {
+                return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+            }
+
+            // 1. Verify User & Credits
+            const verified = await clerkClient.verifyToken(token);
+            const userId = verified.sub;
+            const user = await clerkClient.users.getUser(userId);
+            
+            const currentCredits = typeof user.publicMetadata.credits === 'number' ? user.publicMetadata.credits : 3;
+            
+            const { image, image2, description, duration, cameraEffect, aiFilter, model, aspectRatio, audioFile, videoInput, characterOrientation } = await req.json();
+
+            // Calculate cost based on duration
+            let cost = 4;
+            if (duration === 5) {
+                cost = 2;
+            }
+            if (model === 'bytedance/omni-human' || model === 'kwaivgi/kling-lip-sync' || model === 'pixverse/lipsync') {
+                cost = 2;
+            }
+            if (model === 'kwaivgi/kling-v2.6-motion-control') {
+                cost = 3;
+            }
+
+            if (currentCredits < cost) {
+                return new Response(JSON.stringify({ error: `Insufficient credits! You need ${cost} credits for video generation.` }), { status: 403, headers });
+            }
+
+            // Construct Enhanced Prompt
+            let enhancedPrompt = description;
+            
+            // Append Camera Effect
+            if (cameraEffect && cameraEffect !== 'Static') {
+                if (cameraEffect === 'The Camera Follows The Subject Moving') {
+                    enhancedPrompt += `, the camera follows the subject moving`;
+                } else {
+                    enhancedPrompt += `, ${cameraEffect} camera movement`;
+                }
+            }
+
+            // Append AI Filter Style
+            if (aiFilter && aiFilter !== 'No Filter') {
+                enhancedPrompt += `, ${aiFilter} style`;
+            }
+
+            // Determine Model Version
+            let modelOwner = "bytedance";
+            let modelName = "seedance-1.5-pro";
+
+            if (model === 'bytedance/seedance-1-pro-fast') {
+                modelOwner = "bytedance";
+                modelName = "seedance-1-pro-fast";
+            } else if (model === 'bytedance/seedance-1.5-pro') {
+                modelOwner = "bytedance";
+                modelName = "seedance-1.5-pro";
+            } else if (model === 'minimax/hailuo-2.3') {
+                modelOwner = "minimax";
+                modelName = "hailuo-2.3";
+            } else if (model === 'kwaivgi/kling-v2.5-turbo-pro') {
+                modelOwner = "kwaivgi";
+                modelName = "kling-v2.5-turbo-pro";
+            } else if (model === 'kwaivgi/kling-v2.6-motion-control') {
+                modelOwner = "kwaivgi";
+                modelName = "kling-v2.6-motion-control";
+            } else if (model === 'sync/lipsync-2') {
+                modelOwner = "sync";
+                modelName = "lipsync-2";
+            } else if (model === 'bytedance/omni-human') {
+                modelOwner = "bytedance";
+                modelName = "omni-human";
+            } else if (model === 'kwaivgi/kling-lip-sync') {
+                modelOwner = "kwaivgi";
+                modelName = "kling-lip-sync";
+            } else if (model === 'pixverse/lipsync') {
+                modelOwner = "pixverse";
+                modelName = "lipsync";
+            }
+
+            let input = {
+                prompt: enhancedPrompt,
+                duration: duration || 10,
+                image: image,
+                aspect_ratio: aspectRatio || "16:9",
+                fps: 24
+            };
+
+            if (image2) {
+                input.last_frame_image = image2;
+            }
+
+            if (modelOwner === "minimax") {
+                input = {
+                    prompt: enhancedPrompt,
+                    first_frame_image: image,
+                    duration: 10,
+                    resolution: "768p",
+                    prompt_optimizer: true
+                };
+            } else if (model === 'kwaivgi/kling-lip-sync') {
+                input = {
+                    video_url: image, // Frontend sends video URL in the 'image' field
+                    audio_file: audioFile
+                };
+            } else if (model === 'pixverse/lipsync') {
+                input = {
+                    video: image,
+                    audio: audioFile
+                };
+            } else if (model === 'kwaivgi/kling-v2.6-motion-control') {
+                modelOwner = "kwaivgi";
+                modelName = "kling-v2.6-motion-control";
+                input = {
+                    image: image, // Character Image
+                    video: videoInput, // Character Actions Video
+                    prompt: enhancedPrompt || "",
+                    mode: "pro",
+                    duration: 15,
+                    character_orientation: characterOrientation || "video",
+                    keep_original_sound: true
+                };
+            } else if (modelOwner === "kwaivgi") {
+                input = {
+                    prompt: enhancedPrompt,
+                    start_image: image,
+                    duration: duration || 5,
+                    aspect_ratio: aspectRatio || "16:9"
+                };
+
+                // Check if user requested slow motion
+                const isSlowMotionRequested = enhancedPrompt.toLowerCase().includes('slow motion') || 
+                                              enhancedPrompt.toLowerCase().includes('slow-motion') ||
+                                              enhancedPrompt.toLowerCase().includes('slowmo');
+
+                if (!isSlowMotionRequested) {
+                    input.negative_prompt = "slow motion, frozen, static";
+                }
+
+                if (image2) {
+                    input.end_image = image2;
+                }
+            } else if (model === 'sync/lipsync-2') {
+                modelOwner = "sync";
+                modelName = "lipsync-2";
+                input = {
+                    video: image, // Reusing 'image' param for video URL
+                    audio: audioFile,
+                    sync_mode: "loop",
+                    active_speaker: true
+                };
+            } else if (model === 'bytedance/omni-human') {
+                input = {
+                    image: image,
+                    audio: audioFile
+                };
+            }
+
+            // Get latest version of the model
+            let version;
+            try {
+                const replicateModel = await replicate.models.get(modelOwner, modelName);
+                version = replicateModel.latest_version.id;
+            } catch (e) {
+                console.error("Model fetch error:", e);
+                return new Response(JSON.stringify({ error: `Model ${modelOwner}/${modelName} not found or accessible. Details: ${e.message}` }), { status: 500, headers });
+            }
+
+            const prediction = await replicate.predictions.create({
+                version: version,
+                input: input
+            });
+
+            // 3. Deduct Credit ONLY if prediction started successfully
+            await clerkClient.users.updateUserMetadata(userId, {
+                publicMetadata: { credits: currentCredits - cost }
+            });
+
+            return new Response(JSON.stringify({
+                status: "starting",
+                message: "Video generation started",
+                id: prediction.id,
+                deducted: cost,
+                model: `${modelOwner}/${modelName}`
+            }), { status: 200, headers });
+
+        } catch (error) {
+            console.error("Error:", error);
+            return new Response(JSON.stringify({ error: error.message || "Internal Server Error" }), { status: 500, headers });
+        }
+    }
+
+    return new Response("Method Not Allowed", { status: 405, headers });
+};

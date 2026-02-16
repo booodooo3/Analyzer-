@@ -136,12 +136,25 @@ export default async (req, context) => {
                 prompt: enhancedPrompt,
                 duration: duration || 10,
                 image: image,
-                aspect_ratio: aspectRatio || "16:9",
                 fps: 24
             };
 
+            // Only add aspect_ratio if not using an image (though for I2V it might be ignored, it's safer to keep unless causing issues)
+            if (!image) {
+                input.aspect_ratio = aspectRatio || "16:9";
+            } else {
+                // Some models might use aspect_ratio even with image, but let's be careful
+                // For seedance, aspect_ratio is ignored if image is used
+                input.aspect_ratio = aspectRatio || "16:9"; 
+            }
+
             if (image2) {
-                input.last_frame_image = image2;
+                // Ensure correct parameter name for Seedance models
+                if (modelOwner === "bytedance" && modelName.includes("seedance")) {
+                    input.last_frame_image = image2;
+                } else {
+                    input.last_frame_image = image2;
+                }
             }
 
             if (modelOwner === "minimax") {

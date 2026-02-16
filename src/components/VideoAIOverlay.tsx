@@ -679,10 +679,18 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                         </div>
                     </div>
                   ) : (
-                    <div className={`grid gap-4 ${supportsTwoImages ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                    <div className={`grid gap-4 ${supportsTwoImages ? 'grid-cols-2 relative' : 'grid-cols-1'}`}>
+                        {supportsTwoImages && (
+                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden sm:flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 border border-white/10 shadow-xl">
+                                <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                </svg>
+                             </div>
+                        )}
                         <div className="space-y-2">
                             {supportsTwoImages && (
-                                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider pl-1">
+                                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider pl-1 flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
                                     Start Frame (Image 1)
                                 </label>
                             )}
@@ -690,21 +698,22 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                 description=""
                                 currentImage={images[0]?.base64}
                                 onImageSelected={(data) => updateImage(0, data)}
-                                className="aspect-video w-full bg-zinc-950/50"
+                                className={`aspect-video w-full bg-zinc-950/50 ${supportsTwoImages ? 'border-green-500/20' : ''}`}
                                 objectFit="contain"
                             />
                         </div>
 
                         {supportsTwoImages && (
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider pl-1">
-                                    End Frame (Image 2)
+                                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider pl-1 flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                    Last Frame (Target)
                                 </label>
                                 <ImageUploader 
-                                    description=""
+                                    description="Optional target frame"
                                     currentImage={images[1]?.base64}
                                     onImageSelected={(data) => updateImage(1, data)}
-                                    className="aspect-video w-full bg-zinc-950/50"
+                                    className="aspect-video w-full bg-zinc-950/50 border-blue-500/20"
                                     objectFit="contain"
                                 />
                             </div>

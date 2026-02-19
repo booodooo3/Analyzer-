@@ -6,6 +6,7 @@ import { ImageUploader } from './components/ImageUploader';
 import { Button } from './components/Button';
 import { VideoAIOverlay } from './components/VideoAIOverlay';
 import { HairStylerOverlay } from './components/HairStylerOverlay';
+import { TextToImageOverlay } from './components/TextToImageOverlay';
 import ContactModal from './components/ContactModal';
 import { performVirtualTryOn, analyzeStyle } from './services/apiService';
 import { ImageData, AppState, GarmentType } from './types';
@@ -99,8 +100,9 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [isClosetOpen, setIsClosetOpen] = useState(false);
-  const [isVideoAIOpen, setIsVideoAIOpen] = useState(false);
   const [isHairStylerOpen, setIsHairStylerOpen] = useState(false);
+  const [isTextToImageOpen, setIsTextToImageOpen] = useState(false);
+  const [isVideoAIOpen, setIsVideoAIOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [isTermsOpen, setIsTermsOpen] = useState(false);
@@ -501,6 +503,7 @@ const App: React.FC = () => {
                   onCheckout={goToCheckout}
                   onOpenVideoAI={() => setIsVideoAIOpen(true)}
                   onOpenHairStyler={() => setIsHairStylerOpen(true)}
+                  onOpenTextToImage={() => setIsTextToImageOpen(true)}
                 />
                 <UserButton />
               </div>
@@ -989,6 +992,11 @@ const App: React.FC = () => {
       <HairStylerOverlay
         isOpen={isHairStylerOpen}
         onClose={() => setIsHairStylerOpen(false)}
+      />
+
+      <TextToImageOverlay
+        isOpen={isTextToImageOpen}
+        onClose={() => setIsTextToImageOpen(false)}
       />
 
       <ContactModal 

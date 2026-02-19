@@ -203,21 +203,85 @@ export const generateHairStyle = async (
         if (!statusResponse.ok) continue;
 
         const statusData = await statusResponse.json();
-        
-        if (statusData.status === 'succeeded') {
-             return statusData.output;
-        }
 
-        if (statusData.status === 'failed' || statusData.status === 'canceled') {
-            throw new Error(`Generation failed: ${statusData.error || 'Unknown error'}`);
+        if (statusData.status === 'succeeded') {
+            return statusData.output;
+        } else if (statusData.status === 'failed' || statusData.status === 'canceled') {
+            throw new Error(statusData.error || "Generation failed.");
         }
     }
-    
     throw new Error("Timeout waiting for generation.");
 
-  } catch (error: any) {
-    console.error("Hair Styler Error:", error);
-    throw new Error(error.message || 'An error occurred while connecting to the server');
+  } catch (err: any) {
+    console.error("Hair Styler Error:", err);
+    throw err;
+  }
+};
+
+export const generateTextToImage = async (
+  image: string | null,
+  prompt: string,
+  token: string
+) => {
+  try {
+    let resizedImage = null;
+    if (image) {
+        // resizeImage handles File | string. Assuming image is string (dataURL or URL)
+        resizedImage = await resizeImage(image);
+    }
+
+    const startResponse = await fetch('/api/text-to-image', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ 
+        image: resizedImage, 
+        prompt
+      }),
+    });
+
+    if (!startResponse.ok) {
+        const errorData = await startResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server Error: ${startResponse.status}`);
+    }
+
+    const startData = await startResponse.json();
+    const predictionId = startData.id;
+
+    if (!predictionId) {
+        throw new Error("No prediction ID returned from server.");
+    }
+
+    // Poll for status
+    const pollInterval = 3000;
+    const maxAttempts = 100;
+    let attempts = 0;
+
+    while (attempts < maxAttempts) {
+        attempts++;
+        await new Promise(r => setTimeout(r, pollInterval));
+
+        const statusResponse = await fetch(`/api/text-to-image?id=${encodeURIComponent(predictionId)}`, {
+             headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!statusResponse.ok) continue;
+
+        const statusData = await statusResponse.json();
+
+        if (statusData.status === 'succeeded') {
+            return statusData.output;
+        } else if (statusData.status === 'failed' || statusData.status === 'canceled') {
+            throw new Error(statusData.error || "Generation failed.");
+        }
+    }
+    throw new Error("Timeout waiting for generation.");
+
+  } catch (err: any) {
+    console.error("TextToImage Error:", err);
+    throw err;
   }
 };
 

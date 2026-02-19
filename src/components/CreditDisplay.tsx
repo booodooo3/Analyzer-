@@ -6,13 +6,15 @@ export default function CreditDisplay({
   onTogglePlus, 
   onCheckout,
   onOpenVideoAI,
-  onOpenHairStyler
+  onOpenHairStyler,
+  onOpenTextToImage
 }: { 
   isPlusMode?: boolean, 
   onTogglePlus?: () => void, 
   onCheckout?: () => void,
   onOpenVideoAI?: () => void,
-  onOpenHairStyler?: () => void
+  onOpenHairStyler?: () => void,
+  onOpenTextToImage?: () => void
 }) { 
   const { user, isLoaded } = useUser(); 
   
@@ -79,6 +81,23 @@ export default function CreditDisplay({
                   >
                     <span className="text-xs font-bold uppercase tracking-wider">
                       Hair Styler
+                    </span>
+                  </button>
+                  <span className="text-[9px] font-thin text-zinc-500 mt-0.5 tracking-wider">Press</span>
+                </div>
+              )}
+
+              {/* Text 2 Img Button */}
+              {onOpenTextToImage && (
+                <div className="flex flex-col items-center ml-2">
+                  <span className="text-[9px] font-thin text-transparent mb-0.5 tracking-wider select-none">Spacer</span>
+                  <button
+                    onClick={onOpenTextToImage}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-zinc-700 bg-black text-white shadow-[0_0_10px_rgba(255,255,255,0.1)] hover:border-zinc-500 transition-all duration-300"
+                    title="Open Text 2 Img"
+                  >
+                    <span className="text-xs font-bold uppercase tracking-wider">
+                      Tex 2 Img
                     </span>
                   </button>
                   <span className="text-[9px] font-thin text-zinc-500 mt-0.5 tracking-wider">Press</span>

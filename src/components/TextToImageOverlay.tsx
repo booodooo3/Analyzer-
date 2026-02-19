@@ -1,6 +1,6 @@
 
-import React, { useState, useRef } from 'react';
-import { X, Wand2, RotateCcw, Image as ImageIcon, Download, Loader2, Save } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Wand2, RotateCcw, Image as ImageIcon, Download, Loader2, Save, Trash2, Clock } from 'lucide-react';
 import { generateTextToImage } from '../services/apiService';
 import { useAuth } from "@clerk/clerk-react";
 
@@ -9,14 +9,30 @@ interface TextToImageOverlayProps {
   onClose: () => void;
 }
 
+interface GeneratedImage {
+    id: string;
+    url: string;
+    expiresAt: number;
+}
+
 export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, onClose }) => {
   const { getToken } = useAuth();
   const [userImage, setUserImage] = useState<string | null>(null);
-  const [resultImage, setResultImage] = useState<string | null>(null);
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [generations, setGenerations] = useState<GeneratedImage[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Timer to clean up expired images and trigger re-render
+  useEffect(() => {
+    const interval = setInterval(() => {
+        const now = Date.now();
+        setGenerations(prev => prev.filter(img => img.expiresAt > now));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -24,7 +40,6 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
       const reader = new FileReader();
       reader.onload = (event) => {
         setUserImage(event.target?.result as string);
-        setResultImage(null); // Clear previous result
       };
       reader.readAsDataURL(file);
     }
@@ -53,7 +68,13 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
             token
         );
         
-        setResultImage(result);
+        // Add to generations list
+        const newImage: GeneratedImage = {
+            id: Date.now().toString(),
+            url: result,
+            expiresAt: Date.now() + 5 * 60 * 1000 // 5 minutes from now
+        };
+        setGenerations(prev => [newImage, ...prev]);
 
     } catch (err: any) {
         setError(err.message || "Failed to generate image.");
@@ -62,11 +83,9 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
     }
   };
 
-  const handleSave = async () => {
-    if (!resultImage) return;
-    
+  const handleSave = async (imageUrl: string) => {
     try {
-        const response = await fetch(resultImage);
+        const response = await fetch(imageUrl);
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -78,9 +97,30 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
         document.body.removeChild(a);
     } catch (e) {
         console.error("Download failed:", e);
-        // Fallback for cross-origin
-        window.open(resultImage, '_blank');
+        window.open(imageUrl, '_blank');
     }
+  };
+
+  const handleReset = () => {
+    setUserImage(null);
+    setPrompt('');
+    setError(null);
+  };
+
+  const getBorderColor = (expiresAt: number) => {
+    const timeLeft = expiresAt - Date.now();
+    const minutesLeft = timeLeft / 1000 / 60;
+
+    if (minutesLeft > 3) return 'border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.4)]';
+    if (minutesLeft > 1) return 'border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.4)]';
+    return 'border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.4)] animate-pulse';
+  };
+
+  const formatTimeLeft = (expiresAt: number) => {
+      const timeLeft = Math.max(0, expiresAt - Date.now());
+      const minutes = Math.floor(timeLeft / 60000);
+      const seconds = Math.floor((timeLeft % 60000) / 1000);
+      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
   if (!isOpen) return null;
@@ -96,16 +136,25 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
           <h1 className="text-lg font-bold tracking-tight">Tex 2 Img <span className="text-zinc-500 font-normal text-sm ml-2">bytedance/seedream-4.5</span></h1>
         </div>
         
-        <button className="p-2 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 hover:text-white" onClick={onClose}>
-            <X className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-4">
+             <button
+                onClick={handleReset}
+                className="bg-zinc-900 border border-zinc-700 hover:border-white text-white text-xs px-3 py-1.5 rounded-lg transition-all uppercase tracking-wider font-bold flex items-center gap-2"
+             >
+                <RotateCcw className="w-3 h-3" />
+                Try Again
+             </button>
+            <button className="p-2 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 hover:text-white" onClick={onClose}>
+                <X className="w-4 h-4" />
+            </button>
+        </div>
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-y-auto lg:overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden">
         
         {/* Left Sidebar - Settings */}
-        <div className="w-full lg:w-[380px] flex-shrink-0 flex flex-col border-b lg:border-b-0 lg:border-r border-white/5 bg-[#080808] p-6 space-y-8 h-auto lg:h-full overflow-y-auto">
+        <div className="w-full lg:w-[320px] flex-shrink-0 flex flex-col border-r border-white/5 bg-[#080808] p-6 space-y-6 overflow-y-auto custom-scrollbar">
             
             {/* Prompt Input */}
             <div className="space-y-3">
@@ -152,20 +201,20 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
             </button>
         </div>
 
-        {/* Right Area - Image Upload & Result */}
-        <div className="flex-1 bg-[#050505] p-6 lg:p-10 flex flex-col items-center justify-center overflow-y-auto">
-             <div className="w-full max-w-5xl flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16">
+        {/* Center Area - Upload & Preview */}
+        <div className="flex-1 bg-[#050505] p-6 flex flex-col items-center justify-center overflow-y-auto">
+             <div className="w-full max-w-2xl flex flex-col items-center gap-8">
                 
                 {/* Upload Area */}
                 <div 
                     onClick={() => fileInputRef.current?.click()}
-                    className={`relative w-full lg:w-[45%] aspect-[3/4] lg:aspect-square rounded-2xl border-2 border-dashed transition-all cursor-pointer flex flex-col items-center justify-center gap-4 group overflow-hidden ${userImage ? 'border-zinc-800 bg-black' : 'border-zinc-800 hover:border-zinc-600 bg-zinc-900/20'}`}
+                    className={`relative w-full aspect-[4/3] rounded-2xl border-2 border-dashed transition-all cursor-pointer flex flex-col items-center justify-center gap-4 group overflow-hidden ${userImage ? 'border-zinc-800 bg-black' : 'border-zinc-800 hover:border-zinc-600 bg-zinc-900/20'}`}
                 >
                     {userImage ? (
                         <>
-                            <img src={userImage} className="w-full h-full object-cover opacity-50 group-hover:opacity-30 transition-opacity" alt="Upload" />
-                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <span className="bg-black/50 px-4 py-2 rounded-lg text-white text-sm font-medium backdrop-blur-sm">Change Image</span>
+                            <img src={userImage} className="w-full h-full object-contain" alt="Upload" />
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                                <span className="bg-black/80 px-4 py-2 rounded-lg text-white text-sm font-medium backdrop-blur-sm border border-white/10">Change Image</span>
                             </div>
                         </>
                     ) : (
@@ -185,45 +234,50 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
                         accept="image/*" 
                     />
                 </div>
-
-                {/* Arrow */}
-                <div className="text-zinc-700 rotate-90 lg:rotate-0">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                </div>
-
-                {/* Result Area */}
-                <div className="relative w-full lg:w-[45%] aspect-[3/4] lg:aspect-square rounded-2xl border border-zinc-800 bg-[#080808] flex flex-col items-center justify-center overflow-hidden shadow-2xl">
-                    {resultImage ? (
-                        <div className="relative w-full h-full group">
-                             {/* Glassy Effect Container */}
-                             <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/0 pointer-events-none z-10 border border-white/10 rounded-2xl" />
-                             
-                             <img src={resultImage} className="w-full h-full object-cover" alt="Result" />
-                             
-                             {/* Save As Button (Overlay) */}
-                             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <button 
-                                    onClick={handleSave}
-                                    className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20 px-6 py-2 rounded-full font-medium text-sm flex items-center gap-2 shadow-xl transition-all hover:scale-105"
-                                >
-                                    <Save className="w-4 h-4" />
-                                    Save As
-                                </button>
-                             </div>
-                        </div>
-                    ) : (
-                        <div className="text-zinc-600 flex flex-col items-center">
-                            <div className="w-16 h-16 rounded-full border border-zinc-800 flex items-center justify-center mb-4">
-                                <Wand2 className="w-6 h-6 opacity-20" />
-                            </div>
-                            <p className="text-sm">Result will appear here</p>
-                        </div>
-                    )}
-                </div>
-
              </div>
+        </div>
+
+        {/* Right Sidebar - Generated List */}
+        <div className="w-full lg:w-[350px] bg-[#080808] border-l border-white/5 flex flex-col">
+            <div className="p-4 border-b border-white/5">
+                <h3 className="font-bold text-sm flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-zinc-400" />
+                    Recent Generations
+                </h3>
+                <p className="text-[10px] text-zinc-500 mt-1">Images auto-delete after 5 minutes</p>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
+                {generations.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-zinc-600 gap-2">
+                        <ImageIcon className="w-8 h-8 opacity-20" />
+                        <p className="text-xs">No active generations</p>
+                    </div>
+                ) : (
+                    generations.map((gen) => (
+                        <div key={gen.id} className="animate-in slide-in-from-right-4 duration-500">
+                             <div className={`relative rounded-xl overflow-hidden border-2 transition-all ${getBorderColor(gen.expiresAt)} group`}>
+                                 <img src={gen.url} className="w-full h-auto object-cover" alt="Generated" />
+                                 
+                                 {/* Timer Badge */}
+                                 <div className="absolute top-2 right-2 bg-black/70 backdrop-blur-md px-2 py-1 rounded text-[10px] font-mono border border-white/10 flex items-center gap-1">
+                                     <Clock className="w-3 h-3" />
+                                     {formatTimeLeft(gen.expiresAt)}
+                                 </div>
+                             </div>
+
+                             {/* Download Button */}
+                             <button
+                                onClick={() => handleSave(gen.url)}
+                                className="w-full mt-2 bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white py-2 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors"
+                             >
+                                 <Download className="w-3 h-3" />
+                                 Download
+                             </button>
+                        </div>
+                    ))
+                )}
+            </div>
         </div>
 
       </div>

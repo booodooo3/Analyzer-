@@ -74,9 +74,7 @@ export default async (req, context) => {
             if (model === 'bytedance/omni-human' || model === 'kwaivgi/kling-lip-sync' || model === 'pixverse/lipsync') {
                 cost = 2;
             }
-            if (model === 'kwaivgi/kling-v2.6-motion-control') {
-                cost = 3;
-            }
+
 
             if (currentCredits < cost) {
                 return new Response(JSON.stringify({ error: `Insufficient credits! You need ${cost} credits for video generation.` }), { status: 403, headers });

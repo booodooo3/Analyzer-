@@ -5,7 +5,6 @@ import { ImageUploader } from './ImageUploader';
 import { Button } from './Button';
 import { ImageData } from '../types';
 import HelpModal from './HelpModal';
-import { generateVideoPromptFromImage } from '../../services/geminiService';
 
 interface VideoAIOverlayProps {
   isOpen: boolean;
@@ -34,7 +33,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [lipSyncAudio, setLipSyncAudio] = useState<{ base64: string, name: string } | null>(null);
   const [videoInput, setVideoInput] = useState<{ base64: string, name: string } | null>(null);
   const [characterOrientation, setCharacterOrientation] = useState<'video' | 'image'>('video');
-  const [isThinking, setIsThinking] = useState(false);
 
   const { userId } = useAuth();
 
@@ -185,57 +183,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
   if (!isOpen) return null;
 
-  // Helper to resize image
-  const processImage = async (input: string) => {
-    return new Promise<string>((resolve, reject) => {
-      const img = new Image();
-      img.src = input;
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-        const maxWidth = 1024;
-
-        if (width > maxWidth) {
-          height = (height * maxWidth) / width;
-          width = maxWidth;
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', 0.8));
-        } else {
-          resolve(input);
-        }
-      };
-      img.onerror = reject;
-    });
-  };
-
-  const handleDeepThinking = async () => {
-    const primaryImage = images.find(img => img !== null);
-    if (!primaryImage) {
-      setError("Please upload an image first for Deep Thinking.");
-      return;
-    }
-
-    setIsThinking(true);
-    setError(null);
-
-    try {
-      const processedImage = await processImage(primaryImage.base64);
-      const generatedPrompt = await generateVideoPromptFromImage(processedImage);
-      setDescription(generatedPrompt);
-    } catch (err: any) {
-      setError(err.message || "Failed to generate prompt from image.");
-    } finally {
-      setIsThinking(false);
-    }
-  };
-
   const handleConvert = async () => {
     const primaryImage = images.find(img => img !== null);
     if (!primaryImage) return;
@@ -248,6 +195,36 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       if (!token) {
         throw new Error('Please sign in to continue');
       }
+
+      // 1. Resize Image
+      const processImage = async (input: string) => {
+        return new Promise<string>((resolve, reject) => {
+          const img = new Image();
+          img.src = input;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            const maxWidth = 1024;
+
+            if (width > maxWidth) {
+              height = (height * maxWidth) / width;
+              width = maxWidth;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(img, 0, 0, width, height);
+              resolve(canvas.toDataURL('image/jpeg', 0.8));
+            } else {
+              resolve(input);
+            }
+          };
+          img.onerror = reject;
+        });
+      };
 
       const processedImage = await processImage(primaryImage.base64);
 
@@ -825,25 +802,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       placeholder="Describe the motion and scene (e.g. 'A futuristic city with flying cars')..."
                       className="w-full h-24 bg-zinc-900/50 border border-zinc-700/50 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20 resize-none"
                   />
-                  <div className="flex justify-start mt-2">
-                      <button
-                          onClick={handleDeepThinking}
-                          disabled={isThinking}
-                          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[11px] font-bold uppercase tracking-wider transition-all duration-300 ${
-                              isThinking 
-                              ? 'bg-indigo-500/5 border-indigo-500/10 text-indigo-500/50 cursor-not-allowed' 
-                              : 'bg-indigo-500/10 hover:bg-indigo-500/20 border-indigo-500/30 text-indigo-400 hover:text-indigo-300 shadow-[0_0_10px_rgba(99,102,241,0.1)]'
-                          }`}
-                          title="Analyze the image to generate a descriptive prompt automatically"
-                      >
-                          {isThinking ? (
-                              <span className="w-3.5 h-3.5 border-2 border-indigo-400/30 border-t-indigo-400 rounded-full animate-spin" />
-                          ) : (
-                              <Star className="w-3.5 h-3.5 fill-indigo-400" />
-                          )}
-                          {isThinking ? 'Thinking...' : 'Deep Thinking'}
-                      </button>
-                  </div>
               </div>
 
               <div className="grid grid-cols-1 gap-4">

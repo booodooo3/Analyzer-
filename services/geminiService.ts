@@ -72,30 +72,3 @@ export const analyzeStyle = async (imageBase64: string) => {
     }; 
   } 
 };
-
-// Deep Thinking: Analyze image and generate video prompt
-export const generateVideoPromptFromImage = async (imageBase64: string): Promise<string> => {
-  try {
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    // Use a more capable/latest model for deep analysis
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-
-    const prompt = "Analyze this image and write a highly detailed, descriptive prompt for an AI video generator to bring this image to life. Focus on the main subjects, setting, lighting, atmosphere, and describe potential subtle motions or actions that would look great in a video. The output should be a single, cohesive paragraph without any introductory text, ready to be used as a video generation prompt.";
-
-    // Extract exact mime type, fallback to jpeg
-    const mimeTypeMatch = imageBase64.match(/^data:(image\/\w+);base64,/);
-    const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/jpeg';
-    const base64Data = imageBase64.split(',')[1] || imageBase64;
-
-    const result = await model.generateContent([
-      prompt,
-      { inlineData: { data: base64Data, mimeType: mimeType } }
-    ]);
-
-    const response = await result.response;
-    return response.text().trim();
-  } catch (error: any) {
-    console.error("Generate Video Prompt Error:", error);
-    throw new Error(error?.message || "Failed to generate prompt from image.");
-  }
-};

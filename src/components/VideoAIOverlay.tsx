@@ -185,6 +185,36 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
   if (!isOpen) return null;
 
+  // Helper to resize image
+  const processImage = async (input: string) => {
+    return new Promise<string>((resolve, reject) => {
+      const img = new Image();
+      img.src = input;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        const maxWidth = 1024;
+
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', 0.8));
+        } else {
+          resolve(input);
+        }
+      };
+      img.onerror = reject;
+    });
+  };
+
   const handleDeepThinking = async () => {
     const primaryImage = images.find(img => img !== null);
     if (!primaryImage) {
@@ -196,7 +226,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
     setError(null);
 
     try {
-      const generatedPrompt = await generateVideoPromptFromImage(primaryImage.base64);
+      const processedImage = await processImage(primaryImage.base64);
+      const generatedPrompt = await generateVideoPromptFromImage(processedImage);
       setDescription(generatedPrompt);
     } catch (err: any) {
       setError(err.message || "Failed to generate prompt from image.");
@@ -217,36 +248,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       if (!token) {
         throw new Error('Please sign in to continue');
       }
-
-      // 1. Resize Image
-      const processImage = async (input: string) => {
-        return new Promise<string>((resolve, reject) => {
-          const img = new Image();
-          img.src = input;
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let width = img.width;
-            let height = img.height;
-            const maxWidth = 1024;
-
-            if (width > maxWidth) {
-              height = (height * maxWidth) / width;
-              width = maxWidth;
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            if (ctx) {
-              ctx.drawImage(img, 0, 0, width, height);
-              resolve(canvas.toDataURL('image/jpeg', 0.8));
-            } else {
-              resolve(input);
-            }
-          };
-          img.onerror = reject;
-        });
-      };
 
       const processedImage = await processImage(primaryImage.base64);
 

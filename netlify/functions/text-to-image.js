@@ -100,7 +100,6 @@ export default async (req, context) => {
         prompt: prompt || "A creative image",
         size: "4K",
         aspect_ratio: "match_input_image",
-        disable_safety_checker: true,
     };
 
     if (image) {

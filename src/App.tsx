@@ -273,7 +273,7 @@ const App: React.FC = () => {
         short_skirt: 'Short Skirt',
         pants: 'Pants',
         jacket: 'Jacket / Coat',
-        other: 'Other'
+        other: 'Full Outfit (Plus)'
       },
       guidelinesTitle: 'Best results checklist:',
       guidelines: [
@@ -686,7 +686,12 @@ const App: React.FC = () => {
                                    setIsMakeoverMode(!isMakeoverMode);
                                } else {
                                    setGarmentType(type);
-                                   setIsMakeoverMode(false);
+                                   // If 'other' is selected, automatically enable makeover mode for a full outfit try-on
+                                   if (type === 'other') {
+                                       setIsMakeoverMode(true);
+                                   } else {
+                                       setIsMakeoverMode(false);
+                                   }
                                }
                              }}
                              className={`w-full aspect-square flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300 gap-3 group ${

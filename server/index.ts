@@ -280,7 +280,7 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
             shirt: 'top',
             pants: 'pants',
             jacket: 'jacket or coat',
-            other: ''
+            other: 'full body outfit (top and bottom matching)'
         };
         const baseDesc = garmentDescription || "A cool outfit";
         const typeHint = typeHints[garmentType] || '';

@@ -209,14 +209,14 @@ export default async (req, context) => {
     const clothDataURI = ensureDataURI(clothImage);
     const garmentType = type || 'upper_body';
     const typeHints = {
-      long_dress: 'long dress (full length)',
-      short_dress: 'short dress (above the knees)',
-      long_skirt: 'long skirt (ankle length)',
-      short_skirt: 'short skirt (above the knees)',
-      shirt: 'top',
-      pants: 'pants',
-      jacket: 'jacket or coat',
-      other: ''
+        long_dress: 'long dress (full length)',
+        short_dress: 'short dress (above the knees)',
+        long_skirt: 'long skirt (ankle length)',
+        short_skirt: 'short skirt (above the knees)',
+        shirt: 'top',
+        pants: 'pants',
+        jacket: 'jacket or coat',
+        other: 'full body outfit (top and bottom matching)'
     };
     const baseDesc = garmentDescription || "A cool outfit";
     const typeHint = typeHints[garmentType] || '';

@@ -270,7 +270,7 @@ export default async (req, context) => {
           negative_prompt: negativePrompt,
           image_input: [personDataURI, clothDataURI],
           aspect_ratio: "match_input_image",
-          output_format: effectivePlusMode ? "JPG" : "jpg", // Force JPG as requested for plus mode
+          output_format: "jpg", // Force jpg as requested for plus mode
           resolution: effectivePlusMode ? "4K" : "1K", // Force 4K for plus mode (Capital K required by Replicate)
           safety_filter_level: "block_only_high",
           num_inference_steps: 25

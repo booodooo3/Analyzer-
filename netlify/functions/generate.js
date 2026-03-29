@@ -271,7 +271,7 @@ export default async (req, context) => {
           image_input: [personDataURI, clothDataURI],
           aspect_ratio: "match_input_image",
           output_format: "jpg", // Force jpg as requested for plus mode
-          resolution: effectivePlusMode ? "4k" : "1K", // Force 4k for plus mode
+          resolution: effectivePlusMode ? "4K" : "1K", // Force 4K for plus mode (Capital K required by Replicate)
           safety_filter_level: "block_only_high",
           num_inference_steps: 25
     };

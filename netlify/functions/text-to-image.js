@@ -57,7 +57,7 @@ export default async (req, context) => {
 
   try {
     const body = await req.json();
-    const { image, prompt } = body;
+    const { images, prompt } = body; // changed from image to images
 
     // 1. Verify Auth & Credits
     let userId;
@@ -103,16 +103,11 @@ export default async (req, context) => {
         disable_safety_checker: true,
     };
 
-    if (image) {
-        input.image_input = [image]; // Model expects array of files/URLs
+    if (images && images.length > 0) {
+        input.image_input = images; // Pass array of images directly
     } else {
-        // Fallback if no image provided but aspect_ratio is match_input_image?
-        // If no image, maybe we should change aspect_ratio to default?
-        // User requirement says "match input image", implying image upload is expected.
-        // If user doesn't upload image, we might want to default to something else or fail?
-        // For now, let's assume image is provided if UI enforces it.
-        // If not, we set aspect_ratio to "16:9" or similar to avoid error if model requires input for match_input_image.
-        input.aspect_ratio = "1:1"; // Fallback
+        // Fallback if no image provided
+        input.aspect_ratio = "1:1"; 
         delete input.image_input;
     }
 

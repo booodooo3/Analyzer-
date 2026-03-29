@@ -219,15 +219,15 @@ export const generateHairStyle = async (
 };
 
 export const generateTextToImage = async (
-  image: string | null,
+  images: string[],
   prompt: string,
   token: string
 ) => {
   try {
-    let resizedImage = null;
-    if (image) {
-        // resizeImage handles File | string. Assuming image is string (dataURL or URL)
-        resizedImage = await resizeImage(image);
+    let resizedImages = [];
+    if (images && images.length > 0) {
+        // Resize all provided images
+        resizedImages = await Promise.all(images.map(img => resizeImage(img)));
     }
 
     const startResponse = await fetch('/api/text-to-image', {
@@ -237,7 +237,7 @@ export const generateTextToImage = async (
         'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({ 
-        image: resizedImage, 
+        images: resizedImages, 
         prompt
       }),
     });

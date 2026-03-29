@@ -17,12 +17,13 @@ interface GeneratedImage {
 
 export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, onClose }) => {
   const { getToken } = useAuth();
-  const [userImage, setUserImage] = useState<string | null>(null);
+  const [userImages, setUserImages] = useState<(string | null)[]>([null, null]);
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generations, setGenerations] = useState<GeneratedImage[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef1 = useRef<HTMLInputElement>(null);
+  const fileInputRef2 = useRef<HTMLInputElement>(null);
 
   // Timer to clean up expired images and trigger re-render
   useEffect(() => {
@@ -34,20 +35,25 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
     return () => clearInterval(interval);
   }, []);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (index: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
-        setUserImage(event.target?.result as string);
+        setUserImages(prev => {
+          const newImages = [...prev];
+          newImages[index] = event.target?.result as string;
+          return newImages;
+        });
       };
       reader.readAsDataURL(file);
     }
   };
 
   const handleGenerate = async () => {
-    if (!userImage) {
-        setError("Please upload an image first.");
+    // Only require at least one image
+    if (!userImages[0] && !userImages[1]) {
+        setError("Please upload at least one image.");
         return;
     }
     if (!prompt) {
@@ -63,7 +69,7 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
         if (!token) throw new Error("Please login first.");
 
         const result = await generateTextToImage(
-            userImage,
+            userImages.filter(Boolean) as string[], // Pass array of images
             prompt,
             token
         );
@@ -102,9 +108,9 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
   };
 
   const handleReset = () => {
-    setUserImage(null);
-    setPrompt('');
-    setError(null);
+      setUserImages([null, null]);
+      setPrompt('');
+      setError(null);
   };
 
   const getBorderColor = (expiresAt: number) => {
@@ -180,9 +186,9 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
 
             <button
                 onClick={handleGenerate}
-                disabled={isGenerating || !userImage || !prompt}
+                disabled={isGenerating || (!userImages[0] && !userImages[1]) || !prompt}
                 className={`w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
-                    isGenerating || !userImage || !prompt
+                    isGenerating || (!userImages[0] && !userImages[1]) || !prompt
                     ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
                     : 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98]'
                 }`}
@@ -203,36 +209,69 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
 
         {/* Center Area - Upload & Preview */}
         <div className="flex-1 bg-[#050505] p-6 flex flex-col items-center justify-center overflow-y-auto">
-             <div className="w-full max-w-2xl flex flex-col items-center gap-8">
+             <div className="w-full max-w-3xl flex flex-col items-center gap-8">
                 
-                {/* Upload Area */}
-                <div 
-                    onClick={() => fileInputRef.current?.click()}
-                    className={`relative w-full aspect-[4/3] rounded-2xl border-2 border-dashed transition-all cursor-pointer flex flex-col items-center justify-center gap-4 group overflow-hidden ${userImage ? 'border-zinc-800 bg-black' : 'border-zinc-800 hover:border-zinc-600 bg-zinc-900/20'}`}
-                >
-                    {userImage ? (
-                        <>
-                            <img src={userImage} className="w-full h-full object-contain" alt="Upload" />
-                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-                                <span className="bg-black/80 px-4 py-2 rounded-lg text-white text-sm font-medium backdrop-blur-sm border border-white/10">Change Image</span>
+                {/* Upload Areas Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                    {/* Upload Area 1 */}
+                    <div 
+                        onClick={() => fileInputRef1.current?.click()}
+                        className={`relative w-full aspect-[4/3] rounded-2xl border-2 border-dashed transition-all cursor-pointer flex flex-col items-center justify-center gap-4 group overflow-hidden ${userImages[0] ? 'border-zinc-800 bg-black' : 'border-zinc-800 hover:border-zinc-600 bg-zinc-900/20'}`}
+                    >
+                        {userImages[0] ? (
+                            <>
+                                <img src={userImages[0]} className="w-full h-full object-contain" alt="Upload 1" />
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                                    <span className="bg-black/80 px-4 py-2 rounded-lg text-white text-sm font-medium backdrop-blur-sm border border-white/10">Change Image 1</span>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="text-center p-6">
+                                <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center mx-auto mb-4 text-zinc-400 group-hover:text-white transition-colors">
+                                    <ImageIcon className="w-8 h-8" />
+                                </div>
+                                <p className="font-bold text-zinc-300">Upload Reference Image 1</p>
+                                <p className="text-xs text-zinc-500 mt-1">Click to browse</p>
                             </div>
-                        </>
-                    ) : (
-                        <div className="text-center p-6">
-                            <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center mx-auto mb-4 text-zinc-400 group-hover:text-white transition-colors">
-                                <ImageIcon className="w-8 h-8" />
+                        )}
+                        <input 
+                            type="file" 
+                            ref={fileInputRef1} 
+                            onChange={handleImageUpload(0)} 
+                            className="hidden" 
+                            accept="image/*" 
+                        />
+                    </div>
+
+                    {/* Upload Area 2 */}
+                    <div 
+                        onClick={() => fileInputRef2.current?.click()}
+                        className={`relative w-full aspect-[4/3] rounded-2xl border-2 border-dashed transition-all cursor-pointer flex flex-col items-center justify-center gap-4 group overflow-hidden ${userImages[1] ? 'border-zinc-800 bg-black' : 'border-zinc-800 hover:border-zinc-600 bg-zinc-900/20'}`}
+                    >
+                        {userImages[1] ? (
+                            <>
+                                <img src={userImages[1]} className="w-full h-full object-contain" alt="Upload 2" />
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                                    <span className="bg-black/80 px-4 py-2 rounded-lg text-white text-sm font-medium backdrop-blur-sm border border-white/10">Change Image 2</span>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="text-center p-6">
+                                <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center mx-auto mb-4 text-zinc-400 group-hover:text-white transition-colors">
+                                    <ImageIcon className="w-8 h-8" />
+                                </div>
+                                <p className="font-bold text-zinc-300">Upload Reference Image 2 (Optional)</p>
+                                <p className="text-xs text-zinc-500 mt-1">Click to browse</p>
                             </div>
-                            <p className="font-bold text-zinc-300">Upload Reference Image</p>
-                            <p className="text-xs text-zinc-500 mt-1">Click to browse</p>
-                        </div>
-                    )}
-                    <input 
-                        type="file" 
-                        ref={fileInputRef} 
-                        onChange={handleImageUpload} 
-                        className="hidden" 
-                        accept="image/*" 
-                    />
+                        )}
+                        <input 
+                            type="file" 
+                            ref={fileInputRef2} 
+                            onChange={handleImageUpload(1)} 
+                            className="hidden" 
+                            accept="image/*" 
+                        />
+                    </div>
                 </div>
              </div>
         </div>

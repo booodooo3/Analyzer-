@@ -469,15 +469,9 @@ const App: React.FC = () => {
       {/* Navbar */}
       <nav className="p-6 flex justify-between items-center glass-effect sticky top-0 z-50">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-            <div className="w-4 h-4 border-2 border-black rotate-45" />
-          </div>
           <div className="flex flex-col items-center justify-center">
             <span className="text-xl font-bold tracking-tighter uppercase mr-2 ml-2 leading-none">
               {t.appName}
-            </span>
-            <span className={`text-[10px] font-mono tracking-[0.2em] uppercase mr-2 ml-2 transition-all duration-300 ${userId ? 'text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.8)]' : 'text-zinc-600'}`}>
-              Stylestoo
             </span>
           </div>
         </div>
@@ -902,8 +896,8 @@ const App: React.FC = () => {
                     <img src={clothImage?.base64 || clothImage?.url} className="w-full h-full object-contain" />
                    </div>
                  </div>
-                 <p className="text-[10px] text-zinc-500 italic opacity-50">Powered by Stylestoo AI Engine</p>
-              </div>
+                 <p className="text-[10px] text-zinc-500 italic opacity-50">Powered by Analyzer AI Engine</p>
+               </div>
             </div>
           </div>
                 )}

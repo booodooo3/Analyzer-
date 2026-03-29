@@ -235,7 +235,7 @@ export default async (req, context) => {
     const modelOwner = "google";
     let modelName = "nano-banana";
     if (effectivePlusMode) {
-        modelName = "nano-banana";
+        modelName = "nano-banana-2";
     }
     
     console.log(`🚀 Starting Replicate prediction (${modelOwner}/${modelName})... [Plus Mode: ${effectivePlusMode}]`);
@@ -270,8 +270,8 @@ export default async (req, context) => {
           negative_prompt: negativePrompt,
           image_input: [personDataURI, clothDataURI],
           aspect_ratio: "match_input_image",
-          output_format: effectivePlusMode ? "png" : "jpg",
-          resolution: effectivePlusMode ? "2K" : "1K",
+          output_format: "jpg", // Force jpg as requested for plus mode
+          resolution: effectivePlusMode ? "4k" : "1K", // Force 4k for plus mode
           safety_filter_level: "block_only_high",
           num_inference_steps: 25
     };

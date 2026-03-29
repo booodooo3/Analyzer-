@@ -235,7 +235,7 @@ export default async (req, context) => {
     const modelOwner = "google";
     let modelName = "nano-banana";
     if (effectivePlusMode) {
-        modelName = "nano-banana";
+        modelName = "nano-banana-pro";
     }
     
     console.log(`🚀 Starting Replicate prediction (${modelOwner}/${modelName})... [Plus Mode: ${effectivePlusMode}]`);

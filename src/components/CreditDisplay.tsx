@@ -32,7 +32,7 @@ export default function CreditDisplay({
               
               {/* Plus Button */}
               <div className="flex flex-col items-center">
-                <span className="text-[9px] font-thin text-green-400 mb-0.5 tracking-wider">Faster</span>
+                {/* Removed 'Faster' label */}
                 <button
                 onClick={() => !isPlusMode && onTogglePlus && onTogglePlus()}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all duration-300 ${
@@ -52,7 +52,7 @@ export default function CreditDisplay({
 
               {/* ONE Button */}
               <div className="flex flex-col items-center">
-                <span className="text-[9px] font-thin text-green-400 mb-0.5 tracking-wider">Standard</span>
+                {/* Removed 'Standard' label */}
                 <button
                 onClick={() => isPlusMode && onTogglePlus && onTogglePlus()}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all duration-300 ${

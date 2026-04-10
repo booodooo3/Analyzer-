@@ -139,12 +139,14 @@ export default async (req, context) => {
                 image: image,
                 fps: 24
             };
-            // دعم video_path و resolution إذا تم تمريرهم
-            if (video_path) {
-                input.video_path = video_path;
-            }
-            if (resolution) {
-                input.resolution = resolution;
+            // دعم video_path و resolution فقط لموديل bytedance/seedance-2.0
+            if (model === 'bytedance/seedance-2.0') {
+                if (video_path) {
+                    input.video_path = video_path;
+                }
+                if (resolution) {
+                    input.resolution = resolution;
+                }
             }
 
             // Only add aspect_ratio if not using an image (though for I2V it might be ignored, it's safer to keep unless causing issues)

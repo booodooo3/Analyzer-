@@ -101,7 +101,10 @@ export default async (req, context) => {
             let modelOwner = "bytedance";
             let modelName = "seedance-1.5-pro";
 
-            if (model === 'bytedance/seedance-1-pro-fast') {
+            if (model === 'bytedance/seedance-2.0') {
+                modelOwner = "bytedance";
+                modelName = "seedance-2.0";
+            } else if (model === 'bytedance/seedance-1-pro-fast') {
                 modelOwner = "bytedance";
                 modelName = "seedance-1-pro-fast";
             } else if (model === 'bytedance/seedance-1.5-pro') {

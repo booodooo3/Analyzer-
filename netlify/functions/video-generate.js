@@ -136,8 +136,7 @@ export default async (req, context) => {
             let input = {
                 prompt: enhancedPrompt,
                 duration: duration || 10,
-                image: image,
-                fps: 24
+                image: image
             };
             // دعم video_path و resolution فقط لموديل bytedance/seedance-2.0
             if (model === 'bytedance/seedance-2.0') {

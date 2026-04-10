@@ -64,7 +64,7 @@ export default async (req, context) => {
             
             const currentCredits = typeof user.publicMetadata.credits === 'number' ? user.publicMetadata.credits : 3;
             
-            const { image, image2, description, duration, cameraEffect, aiFilter, model, aspectRatio, audioFile, videoInput, characterOrientation } = await req.json();
+            const { image, image2, description, duration, cameraEffect, aiFilter, model, aspectRatio, audioFile, videoInput, characterOrientation, video_path, resolution } = await req.json();
 
             // Calculate cost based on duration
             let cost = 4;
@@ -139,6 +139,13 @@ export default async (req, context) => {
                 image: image,
                 fps: 24
             };
+            // دعم video_path و resolution إذا تم تمريرهم
+            if (video_path) {
+                input.video_path = video_path;
+            }
+            if (resolution) {
+                input.resolution = resolution;
+            }
 
             // Only add aspect_ratio if not using an image (though for I2V it might be ignored, it's safer to keep unless causing issues)
             if (!image) {

@@ -138,6 +138,10 @@ export default async (req, context) => {
                 duration: duration || 10,
                 image: image
             };
+            // تقليل مستوى الفلترة إذا كان النموذج يدعم ذلك
+            if (model === 'bytedance/seedance-2.0' || model === 'bytedance/seedance-1.5-pro' || model === 'bytedance/seedance-1-pro-fast') {
+                input.safety_filter_level = 'off';
+            }
             // دعم video_path و resolution فقط لموديل bytedance/seedance-2.0
             if (model === 'bytedance/seedance-2.0') {
                 if (video_path) {

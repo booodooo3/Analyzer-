@@ -24,6 +24,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [duration, setDuration] = useState(10);
   const [selectedModel, setSelectedModel] = useState('bytedance/seedance-1.5-pro');
   const [aspectRatio, setAspectRatio] = useState('9:16');
+  // دقة الفيديو
+  const [resolution, setResolution] = useState('720p');
   const [processingTime, setProcessingTime] = useState(0);
   const [generatedVideos, setGeneratedVideos] = useState<{ id: string, url: string, timestamp: number }[]>([]);
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
@@ -51,7 +53,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         if (Array.isArray(parsed)) {
           const now = Date.now();
           // Filter out videos older than 5 minutes
-          const valid = parsed.filter((v: any) => now - v.timestamp < 5 * 60 * 1000);
+          const valid = parsed.filter((v: any) => now - v.timestamp < 300000);
           setGeneratedVideos(valid);
           
           if (valid.length !== parsed.length) {
@@ -69,7 +71,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
     const cleanupInterval = setInterval(() => {
       setGeneratedVideos(prev => {
         const now = Date.now();
-        const valid = prev.filter(v => now - v.timestamp < 5 * 60 * 1000);
+        const valid = prev.filter(v => now - v.timestamp < 300000);
         if (valid.length !== prev.length) {
           localStorage.setItem(storageKey, JSON.stringify(valid));
         }
@@ -243,6 +245,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
           aiFilter,
           duration: duration,
           aspectRatio,
+          resolution,
           model: selectedModel,
           audioFile: audioFile?.base64,
           videoInput: videoInput?.base64,
@@ -436,7 +439,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
               <div className="flex justify-between items-end">
                   <span className="text-[10px] font-mono text-green-400">Generated</span>
                   <span className="text-[10px] font-mono text-zinc-400">
-                    {Math.ceil((300000 - (Date.now() - video.timestamp)) / 60000)}m left
+                    {Math.max(0, Math.ceil((300000 - (Date.now() - video.timestamp)) / 60000))}m left
                   </span>
               </div>
             </div>
@@ -751,6 +754,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                           : 'text-zinc-400 border-zinc-800 focus:ring-1 focus:ring-white/20'
                                   }`}
                               >
+                                  <option value="bytedance/seedance-2.0" className="text-purple-500 font-bold">Seedance 2.0</option>
                                   <option value="bytedance/seedance-1.5-pro">Seedance 1.5 Pro</option>
                                   <option value="bytedance/seedance-1-pro-fast" className="text-green-500 font-bold">Seedance 1 Pro Fast</option>
                                   <option value="minimax/hailuo-2.3" className="text-blue-500 font-bold">Minimax Hailuo 2.3</option>
@@ -763,20 +767,20 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
               </div>
 
                     <div className="space-y-2">
-                  {(selectedModel === 'bytedance/seedance-1.5-pro' || selectedModel === 'bytedance/seedance-1-pro-fast' || selectedModel === 'kwaivgi/kling-v2.5-turbo-pro') && (
+                  {(selectedModel === 'bytedance/seedance-2.0' || selectedModel === 'bytedance/seedance-1.5-pro' || selectedModel === 'bytedance/seedance-1-pro-fast' || selectedModel === 'kwaivgi/kling-v2.5-turbo-pro') && (
                       <div className="flex justify-end gap-3 mt-1 mb-2">
                           <label className="flex items-center gap-1.5 cursor-pointer group">
-                              <input 
+                                <input 
                                   type="radio" 
                                   name="duration" 
-                                  value={10} 
-                                  checked={duration === 10} 
-                                  onChange={() => setDuration(10)}
+                                  value={selectedModel === 'bytedance/seedance-2.0' ? 8 : 10} 
+                                  checked={duration === (selectedModel === 'bytedance/seedance-2.0' ? 8 : 10)} 
+                                  onChange={() => setDuration(selectedModel === 'bytedance/seedance-2.0' ? 8 : 10)}
                                   className="accent-green-500 w-3 h-3"
-                              />
-                              <span className="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
-                                  <span className="text-green-500 font-bold">10</span> seconds (<span className="text-green-500 font-bold">4</span> points deduction)
-                              </span>
+                                />
+                                <span className="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
+                                  <span className="text-green-500 font-bold">{selectedModel === 'bytedance/seedance-2.0' ? 8 : 10}</span> seconds (<span className="text-green-500 font-bold">4</span> points deduction)
+                                </span>
                           </label>
                           <label className="flex items-center gap-1.5 cursor-pointer group">
                               <input 
@@ -804,7 +808,34 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                   />
               </div>
 
+              {/* خيارات الدقة ونسبة العرض إلى الارتفاع */}
               <div className="grid grid-cols-1 gap-4">
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Resolution</label>
+                    <select
+                      value={resolution}
+                      onChange={e => setResolution(e.target.value)}
+                      className="w-full bg-black border border-zinc-800 rounded-xl p-2 text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 focus:shadow-[0_0_15px_rgba(34,197,94,0.15)] transition-all duration-300"
+                    >
+                      <option value="720p">720p</option>
+                      <option value="1080p">1080p</option>
+                    </select>
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Aspect Ratio</label>
+                    <select
+                      value={aspectRatio}
+                      onChange={e => setAspectRatio(e.target.value)}
+                      className="w-full bg-black border border-zinc-800 rounded-xl p-2 text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 focus:shadow-[0_0_15px_rgba(34,197,94,0.15)] transition-all duration-300"
+                    >
+                      <option value="9:16">9:16</option>
+                      <option value="16:9">16:9</option>
+                      <option value="1:1">1:1</option>
+                      <option value="4:5">4:5</option>
+                    </select>
+                  </div>
+                </div>
                   <div className="space-y-2">
                       <div className="flex justify-between items-end">
                         <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Camera Effect</label>
@@ -837,7 +868,11 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       : 'bg-gradient-to-r from-zinc-700 to-zinc-600 hover:from-zinc-600 hover:to-zinc-500 text-white shadow-lg shadow-white/5'
                   }`}
               >
-                  {isConverting ? 'Generating Video...' : `Generate Video (${duration === 5 ? 2 : 4} Credits)`}
+                  {isConverting
+                    ? 'Generating Video...'
+                    : selectedModel === 'bytedance/seedance-2.0'
+                      ? `Generate Video (${duration === 5 ? 5 : 7} Credits)`
+                      : `Generate Video (${duration === 5 ? 2 : 4} Credits)`}
               </Button>
 
               {/* Mobile Playlist */}

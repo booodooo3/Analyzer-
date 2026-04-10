@@ -22,7 +22,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [aiFilter, setAiFilter] = useState('No Filter');
   const [helpCategory, setHelpCategory] = useState<'camera' | 'style' | null>(null);
   const [duration, setDuration] = useState(10);
-  const [selectedModel, setSelectedModel] = useState('bytedance/seedance-1.5-pro');
+  const [selectedModel, setSelectedModel] = useState('bytedance/seedance-2.0');
   const [aspectRatio, setAspectRatio] = useState('9:16');
   // دقة الفيديو
   const [resolution, setResolution] = useState('720p');
@@ -100,7 +100,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       setVideoUrl(null);
       setError(null);
       setIsConverting(false);
-      setDuration(10);
+      setDuration(8);
+      setSelectedModel('bytedance/seedance-2.0');
       setStatusMessage('Processing Video');
       setShowLipSync(false);
       setLipSyncAudio(null);

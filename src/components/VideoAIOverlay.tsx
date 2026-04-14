@@ -35,15 +35,86 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [lipSyncAudio, setLipSyncAudio] = useState<{ base64: string, name: string } | null>(null);
   const [videoInput, setVideoInput] = useState<{ base64: string, name: string } | null>(null);
   const [characterOrientation, setCharacterOrientation] = useState<'video' | 'image'>('video');
+  const [pendingVideoId, setPendingVideoId] = useState<string | null>(null);
 
   const { userId } = useAuth();
+
+  const pollStatus = async (currentId: string) => {
+    try {
+      const statusRes = await fetch(`/api/video-generate?id=${currentId}`);
+      const statusData = await statusRes.json();
+
+      if (statusData.status === 'succeeded') {
+        setVideoUrl(statusData.output);
+        setIsConverting(false);
+        setPendingVideoId(null);
+        setStatusMessage('Processing Video');
+        if (userId) {
+            localStorage.removeItem(`pendingVideo_${userId}`);
+        }
+        
+        // Add to generated videos list
+        const newVideo = {
+          id: currentId,
+          url: statusData.output,
+          timestamp: Date.now()
+        };
+        
+        setGeneratedVideos(prev => {
+          // Check if already exists to prevent duplicates
+          if (prev.some(v => v.id === currentId)) return prev;
+          const updated = [newVideo, ...prev];
+          if (userId) {
+            localStorage.setItem(`generatedVideos_${userId}`, JSON.stringify(updated));
+          }
+          return updated;
+        });
+      } else if (statusData.status === 'failed') {
+        setError(statusData.error || 'Video generation failed');
+        setIsConverting(false);
+        setPendingVideoId(null);
+        if (userId) {
+            localStorage.removeItem(`pendingVideo_${userId}`);
+        }
+      } else {
+        // Still processing, poll again
+        setTimeout(() => pollStatus(currentId), 3000);
+      }
+    } catch (e) {
+      console.error("Poll error:", e);
+      // If polling fails (e.g. network), try again
+      setTimeout(() => pollStatus(currentId), 5000);
+    }
+  };
 
   useEffect(() => {
     if (!userId) {
         setGeneratedVideos([]);
+        setPendingVideoId(null);
         return;
     }
     const storageKey = `generatedVideos_${userId}`;
+    const pendingKey = `pendingVideo_${userId}`;
+
+    // Load pending video
+    try {
+      const savedPending = localStorage.getItem(pendingKey);
+      if (savedPending) {
+        const { id, timestamp } = JSON.parse(savedPending);
+        // If less than 15 minutes old, resume polling
+        if (Date.now() - timestamp < 15 * 60 * 1000) {
+          setPendingVideoId(id);
+          setIsConverting(true);
+          // Calculate elapsed time
+          setProcessingTime(Math.floor((Date.now() - timestamp) / 1000));
+          pollStatus(id);
+        } else {
+          localStorage.removeItem(pendingKey);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to parse pending video", e);
+    }
 
     // Load generated videos from local storage
     try {
@@ -93,20 +164,24 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
     return () => clearInterval(interval);
   }, [isConverting]);
 
+  const wasOpen = useRef(isOpen);
   useEffect(() => {
-    if (!isOpen) {
-      setImages([null, null]);
-      setDescription('');
-      setVideoUrl(null);
-      setError(null);
-      setIsConverting(false);
-      setDuration(8);
-      setSelectedModel('bytedance/seedance-2.0');
-      setStatusMessage('Processing Video');
-      setShowLipSync(false);
-      setLipSyncAudio(null);
+    if (wasOpen.current && !isOpen) {
+      if (!pendingVideoId && !videoUrl) {
+        setImages([null, null]);
+        setDescription('');
+        setVideoUrl(null);
+        setError(null);
+        setIsConverting(false);
+        setDuration(8);
+        setSelectedModel('bytedance/seedance-2.0');
+        setStatusMessage('Processing Video');
+        setShowLipSync(false);
+        setLipSyncAudio(null);
+      }
     }
-  }, [isOpen]);
+    wasOpen.current = isOpen;
+  }, [isOpen, pendingVideoId, videoUrl]);
 
   const updateImage = (index: number, data: ImageData) => {
     setImages(prev => {
@@ -261,44 +336,13 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
       const data = await response.json();
       
-      // Poll for status
-      const pollStatus = async (currentId: string) => {
-        try {
-          const statusRes = await fetch(`/api/video-generate?id=${currentId}`);
-          const statusData = await statusRes.json();
-
-          if (statusData.status === 'succeeded') {
-            setVideoUrl(statusData.output);
-            setIsConverting(false);
-            setStatusMessage('Processing Video');
-            
-            // Add to generated videos list
-            const newVideo = {
-              id: currentId,
-              url: statusData.output,
+      if (userId) {
+          localStorage.setItem(`pendingVideo_${userId}`, JSON.stringify({
+              id: data.id,
               timestamp: Date.now()
-            };
-            
-            setGeneratedVideos(prev => {
-              const updated = [newVideo, ...prev];
-              if (userId) {
-                localStorage.setItem(`generatedVideos_${userId}`, JSON.stringify(updated));
-              }
-              return updated;
-            });
-          } else if (statusData.status === 'failed') {
-            setError(statusData.error || 'Video generation failed');
-            setIsConverting(false);
-          } else {
-            // Still processing, poll again
-            setTimeout(() => pollStatus(currentId), 3000);
-          }
-        } catch (e) {
-          console.error("Poll error:", e);
-          // If polling fails (e.g. network), try again
-          setTimeout(() => pollStatus(currentId), 5000);
-        }
-      };
+          }));
+      }
+      setPendingVideoId(data.id);
 
       pollStatus(data.id);
 
@@ -361,51 +405,15 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
         const data = await response.json();
 
-        // Reuse pollStatus logic but modified for this context?
-        // Actually we can just call pollStatus with the new ID
-        // But we need to make sure pollStatus handles the success correctly
-        
-        // Define a polling function for this specific task or reuse the main one
-        // The main pollStatus updates videoUrl and generatedVideos, which is what we want.
-        // It also clears isConverting.
-        
-        const pollLipSync = async (currentId: string) => {
-            try {
-                const statusRes = await fetch(`/api/video-generate?id=${currentId}`);
-                const statusData = await statusRes.json();
+        if (userId) {
+            localStorage.setItem(`pendingVideo_${userId}`, JSON.stringify({
+                id: data.id,
+                timestamp: Date.now()
+            }));
+        }
+        setPendingVideoId(data.id);
 
-                if (statusData.status === 'succeeded') {
-                    setVideoUrl(statusData.output);
-                    setIsConverting(false);
-                    setStatusMessage('Processing Video');
-                    setShowLipSync(false); // Close the lip sync UI
-                    
-                    const newVideo = {
-                        id: currentId,
-                        url: statusData.output,
-                        timestamp: Date.now()
-                    };
-                    
-                    setGeneratedVideos(prev => {
-                        const updated = [newVideo, ...prev];
-                        if (userId) {
-                            localStorage.setItem(`generatedVideos_${userId}`, JSON.stringify(updated));
-                        }
-                        return updated;
-                    });
-                } else if (statusData.status === 'failed') {
-                    setError(statusData.error || 'Lip sync failed');
-                    setIsConverting(false);
-                } else {
-                    setTimeout(() => pollLipSync(currentId), 3000);
-                }
-            } catch (e) {
-                console.error("Poll error:", e);
-                setTimeout(() => pollLipSync(currentId), 5000);
-            }
-        };
-
-        pollLipSync(data.id);
+        pollStatus(data.id);
 
     } catch (err: any) {
         console.error(err);

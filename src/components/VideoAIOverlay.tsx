@@ -26,6 +26,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [aspectRatio, setAspectRatio] = useState('9:16');
   // دقة الفيديو
   const [resolution, setResolution] = useState('720p');
+  const [seed, setSeed] = useState(99);
   const [processingTime, setProcessingTime] = useState(0);
   const [generatedVideos, setGeneratedVideos] = useState<{ id: string, url: string, timestamp: number }[]>([]);
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
@@ -181,6 +182,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         setIsConverting(false);
         setDuration(8);
         setSelectedModel('bytedance/seedance-2.0');
+        setSeed(99);
         setStatusMessage('Processing Video');
         setShowLipSync(false);
         setLipSyncAudio(null);
@@ -328,6 +330,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
           duration: duration,
           aspectRatio,
           resolution,
+          seed,
           model: selectedModel,
           audioFile: audioFile?.base64,
           videoInput: videoInput?.base64,
@@ -838,7 +841,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       className="w-full bg-black border border-zinc-800 rounded-xl p-2 text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 focus:shadow-[0_0_15px_rgba(34,197,94,0.15)] transition-all duration-300"
                     >
                       <option value="720p">720p</option>
-                      <option value="1080p">1080p</option>
+                      <option value="480p">480p</option>
                     </select>
                   </div>
                   <div className="flex-1">
@@ -855,6 +858,20 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                     </select>
                   </div>
                 </div>
+                {selectedModel === 'bytedance/seedance-2.0' && (
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Seed (Integer)</label>
+                      <input
+                        type="number"
+                        value={seed}
+                        onChange={e => setSeed(parseInt(e.target.value) || 0)}
+                        className="w-full bg-black border border-zinc-800 rounded-xl p-2 text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 focus:shadow-[0_0_15px_rgba(34,197,94,0.15)] transition-all duration-300"
+                        placeholder="e.g. 99"
+                      />
+                    </div>
+                  </div>
+                )}
                   <div className="space-y-2">
                       <div className="flex justify-between items-end">
                         <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Camera Effect</label>

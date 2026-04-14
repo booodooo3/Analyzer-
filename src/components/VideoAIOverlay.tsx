@@ -100,11 +100,17 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
     try {
       const savedPending = localStorage.getItem(pendingKey);
       if (savedPending) {
-        const { id, timestamp } = JSON.parse(savedPending);
+        const { id, timestamp, imageBase64, modelName } = JSON.parse(savedPending);
         // If less than 15 minutes old, resume polling
         if (Date.now() - timestamp < 15 * 60 * 1000) {
           setPendingVideoId(id);
           setIsConverting(true);
+          if (imageBase64) {
+             setImages([{ base64: imageBase64, url: '', mimeType: 'image/jpeg' }, null]);
+          }
+          if (modelName) {
+             setSelectedModel(modelName);
+          }
           // Calculate elapsed time
           setProcessingTime(Math.floor((Date.now() - timestamp) / 1000));
           pollStatus(id);
@@ -167,7 +173,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const wasOpen = useRef(isOpen);
   useEffect(() => {
     if (wasOpen.current && !isOpen) {
-      if (!pendingVideoId && !videoUrl) {
+      if (!pendingVideoId && !videoUrl && !isConverting) {
         setImages([null, null]);
         setDescription('');
         setVideoUrl(null);
@@ -181,7 +187,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       }
     }
     wasOpen.current = isOpen;
-  }, [isOpen, pendingVideoId, videoUrl]);
+  }, [isOpen, pendingVideoId, videoUrl, isConverting]);
 
   const updateImage = (index: number, data: ImageData) => {
     setImages(prev => {
@@ -337,14 +343,16 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       const data = await response.json();
       
       if (userId) {
-          localStorage.setItem(`pendingVideo_${userId}`, JSON.stringify({
-              id: data.id,
-              timestamp: Date.now()
-          }));
-      }
-      setPendingVideoId(data.id);
+            localStorage.setItem(`pendingVideo_${userId}`, JSON.stringify({
+                id: data.id,
+                timestamp: Date.now(),
+                imageBase64: videoUrl,
+                modelName: 'pixverse/lipsync'
+            }));
+        }
+        setPendingVideoId(data.id);
 
-      pollStatus(data.id);
+        pollStatus(data.id);
 
     } catch (err: any) {
       console.error(err);
@@ -408,7 +416,9 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         if (userId) {
             localStorage.setItem(`pendingVideo_${userId}`, JSON.stringify({
                 id: data.id,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                imageBase64: processedImage,
+                modelName: selectedModel
             }));
         }
         setPendingVideoId(data.id);

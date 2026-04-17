@@ -37,6 +37,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [videoInput, setVideoInput] = useState<{ base64: string, name: string } | null>(null);
   const [characterOrientation, setCharacterOrientation] = useState<'video' | 'image'>('video');
   const [pendingVideoId, setPendingVideoId] = useState<string | null>(null);
+  const [generationMode, setGenerationMode] = useState<'imageToVideo' | 'textToVideo'>('imageToVideo');
 
   const { userId } = useAuth();
 
@@ -183,6 +184,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         setDuration(8);
         setSelectedModel('bytedance/seedance-2.0');
         setSeed(99);
+        setGenerationMode('imageToVideo');
         setStatusMessage('Processing Video');
         setShowLipSync(false);
         setLipSyncAudio(null);
@@ -270,8 +272,17 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   if (!isOpen) return null;
 
   const handleConvert = async () => {
-    const primaryImage = images.find(img => img !== null);
-    if (!primaryImage) return;
+    // If we're in imageToVideo mode, we MUST have at least one image
+    if (generationMode === 'imageToVideo') {
+      const primaryImage = images.find(img => img !== null);
+      if (!primaryImage) return;
+    }
+    
+    // If textToVideo mode, we MUST have a description
+    if (generationMode === 'textToVideo' && !description.trim()) {
+        setError('Please enter a description for the video');
+        return;
+    }
     
     setIsConverting(true);
     setError(null);
@@ -283,7 +294,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       }
 
       // 1. Resize Image
-      const processImage = async (input: string) => {
+      const processImage = async (input: string | undefined | null) => {
+        if (!input) return null;
         return new Promise<string>((resolve, reject) => {
           const img = new Image();
           img.src = input;
@@ -312,7 +324,9 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         });
       };
 
-      const processedImage = await processImage(primaryImage.base64);
+      const primaryImage = images.find(img => img !== null);
+      const processedImage = generationMode === 'imageToVideo' && primaryImage ? await processImage(primaryImage.base64) : null;
+      const processedImage2 = generationMode === 'imageToVideo' && images[1] ? await processImage(images[1].base64) : null;
 
       // 2. Call API to deduct credits and start generation
       const response = await fetch('/api/video-generate', {
@@ -323,7 +337,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         },
         body: JSON.stringify({
           image: processedImage,
-          image2: images[1] ? await processImage(images[1].base64) : null,
+          image2: processedImage2,
           description,
           cameraEffect,
           aiFilter,
@@ -570,7 +584,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
               <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">
-                      {videoUrl ? 'Generated Video' : 'Upload Image'}
+                      {videoUrl ? 'Generated Video' : (generationMode === 'textToVideo' ? 'Text to Video' : 'Upload Image')}
                     </label>
 
                   </div>
@@ -704,45 +718,102 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                         </div>
                     </div>
                   ) : (
-                    <div className={`grid gap-4 ${supportsTwoImages ? 'grid-cols-2 relative' : 'grid-cols-1'}`}>
-                        {supportsTwoImages && (
-                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden sm:flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 border border-white/10 shadow-xl">
-                                <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                </svg>
-                             </div>
-                        )}
-                        <div className="space-y-2">
-                            {supportsTwoImages && (
-                                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider pl-1 flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                                    Start Frame (Image 1)
-                                </label>
-                            )}
-                            <ImageUploader 
-                                description=""
-                                currentImage={images[0]?.base64}
-                                onImageSelected={(data) => updateImage(0, data)}
-                                className={`aspect-video w-full bg-zinc-950/50 ${supportsTwoImages ? 'border-green-500/20' : ''}`}
-                                objectFit="contain"
-                            />
+                    <div className="space-y-4">
+                      {/* Generation Mode Toggle (Only for Seedance 2.0) */}
+                      {selectedModel === 'bytedance/seedance-2.0' && (
+                        <div className="flex bg-black rounded-xl p-1 border border-zinc-800">
+                          <button
+                            onClick={() => setGenerationMode('imageToVideo')}
+                            className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${
+                              generationMode === 'imageToVideo'
+                                ? 'bg-zinc-900 text-white shadow-md'
+                                : 'text-zinc-500 hover:text-zinc-300'
+                            }`}
+                          >
+                            Image to Video
+                          </button>
+                          <button
+                            onClick={() => {
+                              setGenerationMode('textToVideo');
+                              // Reset aspect ratio to a default for text-to-video if it was "Match Input Image"
+                              if (aspectRatio === 'Match Input Image') {
+                                setAspectRatio('16:9');
+                              }
+                            }}
+                            className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all border border-transparent ${
+                              generationMode === 'textToVideo'
+                                ? 'bg-red-500/10 text-red-500 border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
+                                : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/50'
+                            }`}
+                          >
+                            Text to Video
+                          </button>
                         </div>
+                      )}
 
-                        {supportsTwoImages && (
+                      {generationMode === 'imageToVideo' ? (
+                        <div className={`grid gap-4 ${supportsTwoImages ? 'grid-cols-2 relative' : 'grid-cols-1'}`}>
+                            {supportsTwoImages && (
+                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden sm:flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 border border-white/10 shadow-xl">
+                                    <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                    </svg>
+                                 </div>
+                            )}
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider pl-1 flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                                    Last Frame (Target)
-                                </label>
+                                {supportsTwoImages && (
+                                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider pl-1 flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                        Start Frame (Image 1)
+                                    </label>
+                                )}
                                 <ImageUploader 
-                                    description="Optional target frame"
-                                    currentImage={images[1]?.base64}
-                                    onImageSelected={(data) => updateImage(1, data)}
-                                    className="aspect-video w-full bg-zinc-950/50 border-blue-500/20"
+                                    description=""
+                                    currentImage={images[0]?.base64}
+                                    onImageSelected={(data) => updateImage(0, data)}
+                                    className={`aspect-video w-full bg-zinc-950/50 ${supportsTwoImages ? 'border-green-500/20' : ''}`}
                                     objectFit="contain"
                                 />
                             </div>
-                        )}
+
+                            {supportsTwoImages && (
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider pl-1 flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                        Last Frame (Target)
+                                    </label>
+                                    <ImageUploader 
+                                        description="Optional target frame"
+                                        currentImage={images[1]?.base64}
+                                        onImageSelected={(data) => updateImage(1, data)}
+                                        className="aspect-video w-full bg-zinc-950/50 border-blue-500/20"
+                                        objectFit="contain"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                      ) : (
+                        <div className="w-full aspect-video bg-zinc-950/50 border border-red-500/20 rounded-xl flex flex-col items-center justify-center p-8 text-center space-y-4 relative overflow-hidden group">
+                           {/* Background Pattern */}
+                           <div className="absolute inset-0" 
+                               style={{ 
+                                   backgroundImage: 'radial-gradient(circle, rgba(239,68,68,0.05) 1px, transparent 1px)', 
+                                   backgroundSize: '20px 20px',
+                               }} 
+                           />
+                           
+                           <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20 group-hover:scale-110 group-hover:bg-red-500/20 transition-all duration-500 z-10">
+                               <Languages className="w-8 h-8 text-red-500" />
+                           </div>
+                           
+                           <div className="z-10 space-y-2">
+                               <h3 className="text-lg font-bold text-red-400">Text to Video Mode</h3>
+                               <p className="text-xs text-zinc-400 max-w-sm">
+                                   Describe what you want to see in the "Video Description" box below. The AI will generate a video entirely from your text prompt.
+                               </p>
+                           </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -769,6 +840,9 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                     if (e.target.value === 'minimax/hailuo-2.3') {
                                         setDuration(10);
                                     }
+                                    if (e.target.value !== 'bytedance/seedance-2.0') {
+                                        setGenerationMode('imageToVideo');
+                                    }
                                   }}
                                   className={`bg-black border rounded-lg px-3 py-2 text-xs focus:outline-none transition-all duration-300 ${
                                       selectedModel 
@@ -789,7 +863,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
               </div>
 
                     <div className="space-y-2">
-                  {(selectedModel === 'bytedance/seedance-2.0' || selectedModel === 'bytedance/seedance-1.5-pro' || selectedModel === 'bytedance/seedance-1-pro-fast' || selectedModel === 'kwaivgi/kling-v2.5-turbo-pro') && (
+                  {(selectedModel === 'bytedance/seedance-2.0' || selectedModel === 'bytedance/seedance-1.5-pro' || selectedModel === 'bytedance/seedance-1-pro-fast' || selectedModel === 'kwaivgi/kling-v2.5-turbo-pro') && generationMode === 'imageToVideo' && (
                       <div className="flex justify-end gap-3 mt-1 mb-2">
                           <label className="flex items-center gap-1.5 cursor-pointer group">
                                 <input 
@@ -855,7 +929,9 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       <option value="16:9">16:9</option>
                       <option value="1:1">1:1</option>
                       <option value="4:5">4:5</option>
-                      <option value="Match Input Image">Match Input Image</option>
+                      {generationMode !== 'textToVideo' && (
+                        <option value="Match Input Image">Match Input Image</option>
+                      )}
                     </select>
                   </div>
                 </div>
@@ -897,19 +973,23 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
               <Button 
                   onClick={handleConvert}
-                  disabled={activeImageCount === 0 || isConverting}
+                  disabled={(generationMode === 'imageToVideo' && activeImageCount === 0) || isConverting || (generationMode === 'textToVideo' && !description.trim())}
                   isLoading={isConverting}
                   className={`w-full font-bold py-4 rounded-xl transition-all duration-300 ${
                     isConverting 
                       ? 'bg-zinc-900 border border-green-500/50 text-green-400 shadow-[0_0_30px_rgba(34,197,94,0.2)]' 
-                      : 'bg-gradient-to-r from-zinc-700 to-zinc-600 hover:from-zinc-600 hover:to-zinc-500 text-white shadow-lg shadow-white/5'
+                      : generationMode === 'textToVideo'
+                        ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white shadow-lg shadow-red-500/20 border border-red-500/50'
+                        : 'bg-gradient-to-r from-zinc-700 to-zinc-600 hover:from-zinc-600 hover:to-zinc-500 text-white shadow-lg shadow-white/5'
                   }`}
               >
                   {isConverting
                     ? 'Generating Video...'
-                    : selectedModel === 'bytedance/seedance-2.0'
-                      ? `Generate Video (${duration === 5 ? 5 : 7} Credits)`
-                      : `Generate Video (${duration === 5 ? 2 : 4} Credits)`}
+                    : generationMode === 'textToVideo'
+                      ? 'Generate Video from Text (4 Credits)'
+                      : selectedModel === 'bytedance/seedance-2.0'
+                        ? `Generate Video (${duration === 5 ? 5 : 7} Credits)`
+                        : `Generate Video (${duration === 5 ? 2 : 4} Credits)`}
               </Button>
 
               {/* Mobile Playlist */}

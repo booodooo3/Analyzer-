@@ -74,6 +74,9 @@ export default async (req, context) => {
             if (model === 'bytedance/omni-human' || model === 'kwaivgi/kling-lip-sync' || model === 'pixverse/lipsync') {
                 cost = 2;
             }
+            if (!image && model === 'bytedance/seedance-2.0') {
+                cost = 4; // Cost for text to video
+            }
 
 
             if (currentCredits < cost) {

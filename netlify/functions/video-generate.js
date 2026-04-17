@@ -153,11 +153,13 @@ export default async (req, context) => {
 
             // Only add aspect_ratio if not using an image (though for I2V it might be ignored, it's safer to keep unless causing issues)
             if (!image) {
-                input.aspect_ratio = aspectRatio || "16:9";
+                input.aspect_ratio = aspectRatio === "Match Input Image" ? "16:9" : (aspectRatio || "16:9");
             } else {
                 // Some models might use aspect_ratio even with image, but let's be careful
                 // For seedance, aspect_ratio is ignored if image is used
-                input.aspect_ratio = aspectRatio || "16:9"; 
+                if (aspectRatio !== "Match Input Image") {
+                    input.aspect_ratio = aspectRatio || "16:9"; 
+                }
             }
 
             if (image2) {
@@ -204,8 +206,11 @@ export default async (req, context) => {
                     prompt: enhancedPrompt,
                     start_image: image,
                     duration: duration || 5,
-                    aspect_ratio: aspectRatio || "16:9"
+                    disable_safety_checker: true
                 };
+                if (aspectRatio !== "Match Input Image") {
+                    input.aspect_ratio = aspectRatio || "16:9";
+                }
 
                 // Check if user requested slow motion
                 const isSlowMotionRequested = enhancedPrompt.toLowerCase().includes('slow motion') || 

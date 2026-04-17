@@ -23,7 +23,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [helpCategory, setHelpCategory] = useState<'camera' | 'style' | null>(null);
   const [duration, setDuration] = useState(10);
   const [selectedModel, setSelectedModel] = useState('bytedance/seedance-2.0');
-  const [aspectRatio, setAspectRatio] = useState('9:16');
+  const [aspectRatio, setAspectRatio] = useState('Match Input Image');
   // دقة الفيديو
   const [resolution, setResolution] = useState('720p');
   const [seed, setSeed] = useState(99);
@@ -855,6 +855,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       <option value="16:9">16:9</option>
                       <option value="1:1">1:1</option>
                       <option value="4:5">4:5</option>
+                      <option value="Match Input Image">Match Input Image</option>
                     </select>
                   </div>
                 </div>

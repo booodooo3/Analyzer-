@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Wand2, RotateCcw, Image as ImageIcon, Download, Loader2, Save, Trash2, Clock } from 'lucide-react';
 import { generateTextToImage } from '../services/apiService';
@@ -65,13 +64,17 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
   };
 
   const handleGenerate = async () => {
-    // Only require at least one image
+    // يجب اختيار صورة واحدة على الأقل
     if (userImages.length === 0) {
         setError("Please upload at least one image.");
         return;
     }
     if (!prompt) {
         setError("Please enter a description.");
+        return;
+    }
+    if (selectedBoxes.length === 0) {
+        setError("يرجى اختيار شخص واحد على الأقل.");
         return;
     }
 
@@ -82,8 +85,19 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
         const token = await getToken();
         if (!token) throw new Error("Please login first.");
 
+        // تمرير الصور المختارة فقط حسب ترتيبها
+        const selectedImages = selectedBoxes
+          .map((num) => userImages[num - 1])
+          .filter(Boolean);
+
+        if (selectedImages.length === 0) {
+          setError("لم يتم اختيار صور صحيحة.");
+          setIsGenerating(false);
+          return;
+        }
+
         const result = await generateTextToImage(
-            userImages, // Pass array of images directly
+            selectedImages,
             prompt,
             token
         );
@@ -125,7 +139,10 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
       setUserImages([]);
       setPrompt('');
       setError(null);
+      setSelectedBoxes([1]);
   };
+
+  const [selectedBoxes, setSelectedBoxes] = useState<number[]>([1]);
 
   const getBorderColor = (expiresAt: number) => {
     const timeLeft = expiresAt - Date.now();
@@ -198,11 +215,33 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
 
             {error && <p className="text-red-500 text-xs text-center">{error}</p>}
 
+            {/* مربعات اختيار الأشخاص */}
+            <div className="flex items-center gap-3 justify-center my-4">
+              {[1,2,3,4].map((num) => (
+                <label key={num} className={`flex flex-col items-center cursor-pointer select-none`}>
+                  <input
+                    type="checkbox"
+                    className="accent-blue-500 w-5 h-5 mb-1"
+                    checked={selectedBoxes.includes(num)}
+                    disabled={userImages.length < num}
+                    onChange={() => {
+                      setSelectedBoxes((prev) =>
+                        prev.includes(num)
+                          ? prev.filter((n) => n !== num)
+                          : [...prev, num].sort((a, b) => a - b)
+                      );
+                    }}
+                  />
+                  <span className={`text-xs ${userImages.length < num ? 'text-zinc-500' : 'text-white'}`}>{num}</span>
+                </label>
+              ))}
+            </div>
+
             <button
                 onClick={handleGenerate}
-                disabled={isGenerating || userImages.length === 0 || !prompt}
+                disabled={isGenerating || userImages.length === 0 || !prompt || selectedBoxes.length === 0}
                 className={`w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
-                    isGenerating || userImages.length === 0 || !prompt
+                    isGenerating || userImages.length === 0 || !prompt || selectedBoxes.length === 0
                     ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
                     : 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98]'
                 }`}

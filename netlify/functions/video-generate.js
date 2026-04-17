@@ -138,9 +138,13 @@ export default async (req, context) => {
 
             let input = {
                 prompt: enhancedPrompt,
-                duration: duration || 10,
-                image: image
+                duration: duration || 10
             };
+
+            // Only add image if it exists, otherwise leave it out of the input object completely
+            if (image) {
+                input.image = image;
+            }
             // دعم video_path و resolution فقط لموديل bytedance/seedance-2.0
             if (model === 'bytedance/seedance-2.0') {
                 if (video_path) {
@@ -177,11 +181,14 @@ export default async (req, context) => {
             if (modelOwner === "minimax") {
                 input = {
                     prompt: enhancedPrompt,
-                    first_frame_image: image,
                     duration: 10,
                     resolution: "768p",
-                    prompt_optimizer: true
+                    prompt_optimizer: true,
+                    disable_safety_checker: true
                 };
+                if (image) {
+                    input.first_frame_image = image;
+                }
             } else if (model === 'kwaivgi/kling-lip-sync') {
                 input = {
                     video_url: image, // Frontend sends video URL in the 'image' field
@@ -207,10 +214,14 @@ export default async (req, context) => {
             } else if (modelOwner === "kwaivgi") {
                 input = {
                     prompt: enhancedPrompt,
-                    start_image: image,
                     duration: duration || 5,
                     disable_safety_checker: true
                 };
+                
+                if (image) {
+                    input.start_image = image;
+                }
+
                 if (aspectRatio !== "Match Input Image") {
                     input.aspect_ratio = aspectRatio || "16:9";
                 }

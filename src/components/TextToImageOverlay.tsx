@@ -18,6 +18,8 @@ interface GeneratedImage {
 export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, onClose }) => {
   const { getToken } = useAuth();
     const [userImages, setUserImages] = useState<string[]>([]);
+    const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+    const [imageDescriptions, setImageDescriptions] = useState<string[]>([]);
     const [prompt, setPrompt] = useState('');
     const [aspectRatio, setAspectRatio] = useState<'9:16' | '16:9' | 'Match Input Image'>('9:16');
     const [isGenerating, setIsGenerating] = useState(false);
@@ -35,35 +37,46 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
     return () => clearInterval(interval);
   }, []);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      const newImagesPromises = Array.from(files).map((file) => {
-          return new Promise<string>((resolve) => {
-              const reader = new FileReader();
-              reader.onload = (event) => {
-                  resolve(event.target?.result as string);
-              };
-              reader.readAsDataURL(file);
-          });
-      });
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (files) {
+            const newImagesPromises = Array.from(files).map((file) => {
+                return new Promise<string>((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        resolve(event.target?.result as string);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
 
-      Promise.all(newImagesPromises).then((base64Images) => {
-          setUserImages(prev => {
-              const combined = [...prev, ...base64Images];
-              return combined.slice(0, 14); // Limit to 14 images
-          });
-      });
-    }
-    // Reset input so the same files can be selected again if needed
-    if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-    }
-  };
+            Promise.all(newImagesPromises).then((base64Images) => {
+                setUserImages(prev => {
+                    const combined = [...prev, ...base64Images];
+                    return combined.slice(0, 14); // Limit to 14 images
+                });
+                setImageDescriptions(prev => {
+                    const newDesc = Array.from(files).map(() => '');
+                    const combined = [...prev, ...newDesc];
+                    return combined.slice(0, 14);
+                });
+            });
+        }
+        // Reset input so the same files can be selected again if needed
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
 
-  const removeImage = (indexToRemove: number) => {
-      setUserImages(prev => prev.filter((_, index) => index !== indexToRemove));
-  };
+    const removeImage = (indexToRemove: number) => {
+        setUserImages(prev => prev.filter((_, index) => index !== indexToRemove));
+        setImageDescriptions(prev => prev.filter((_, index) => index !== indexToRemove));
+        if (selectedImageIndex === indexToRemove) {
+            setSelectedImageIndex(null);
+        } else if (selectedImageIndex !== null && selectedImageIndex > indexToRemove) {
+            setSelectedImageIndex(selectedImageIndex - 1);
+        }
+    };
 
   const handleGenerate = async () => {
     // Only require at least one image
@@ -275,30 +288,59 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
                 )}
 
                 {/* Image Grid Preview */}
-                {userImages.length > 0 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full">
-                        {userImages.map((img, index) => (
-                            <div key={index} className="relative group aspect-square rounded-xl overflow-hidden border border-zinc-800 bg-black">
-                                <img src={img} className="w-full h-full object-cover" alt={`Upload ${index + 1}`} />
-                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <button 
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            removeImage(index);
-                                        }}
-                                        className="p-2 bg-red-500/20 hover:bg-red-500/40 text-red-500 rounded-lg backdrop-blur-sm transition-colors"
-                                        title="Remove Image"
-                                    >
-                                        <Trash2 className="w-5 h-5" />
-                                    </button>
-                                </div>
-                                <div className="absolute top-2 left-2 bg-black/80 px-2 py-1 rounded text-[10px] text-white font-mono">
-                                    {index + 1}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                                {userImages.length > 0 && (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full">
+                                        {userImages.map((img, index) => (
+                                            <div
+                                                key={index}
+                                                className={`relative group aspect-square rounded-xl overflow-hidden border-2 bg-black cursor-pointer transition-all ${selectedImageIndex === index ? 'border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'border-zinc-800'}`}
+                                                onClick={() => setSelectedImageIndex(index)}
+                                                tabIndex={0}
+                                                aria-label={`Select image ${index + 1}`}
+                                            >
+                                                <img src={img} className="w-full h-full object-cover" alt={`Upload ${index + 1}`} />
+                                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            removeImage(index);
+                                                        }}
+                                                        className="p-2 bg-red-500/20 hover:bg-red-500/40 text-red-500 rounded-lg backdrop-blur-sm transition-colors"
+                                                        title="Remove Image"
+                                                    >
+                                                        <Trash2 className="w-5 h-5" />
+                                                    </button>
+                                                </div>
+                                                <div className="absolute top-2 left-2 bg-black/80 px-2 py-1 rounded text-[10px] text-white font-mono">
+                                                    {index + 1}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                            {/* Image Description in margin */}
+                                            {selectedImageIndex !== null && userImages[selectedImageIndex] && (
+                                                <div className="w-full max-w-2xl mt-4 flex flex-col items-start">
+                                                    <label className="text-green-400 font-bold text-xs mb-1">وصف الصورة المرفوعة:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="w-full bg-[#111] border border-green-500 rounded-xl p-2 text-sm text-zinc-300 focus:outline-none focus:border-green-400"
+                                                        placeholder="اكتب وصفاً لهذه الصورة..."
+                                                        value={imageDescriptions[selectedImageIndex] || ''}
+                                                        onChange={e => {
+                                                            const newDescs = [...imageDescriptions];
+                                                            newDescs[selectedImageIndex] = e.target.value;
+                                                            setImageDescriptions(newDescs);
+                                                        }}
+                                                    />
+                                                    <div className="mt-2 text-xs text-zinc-400">
+                                                        <span className="font-bold text-green-400">الوصف الحالي:</span>
+                                                        {imageDescriptions[selectedImageIndex]
+                                                            ? <span className="ml-2">{imageDescriptions[selectedImageIndex]}</span>
+                                                            : <span className="ml-2 italic text-zinc-500">لا يوجد وصف بعد</span>}
+                                                    </div>
+                                                </div>
+                                            )}
              </div>
         </div>
 

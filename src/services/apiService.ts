@@ -221,63 +221,70 @@ export const generateHairStyle = async (
 export const generateTextToImage = async (
   images: string[],
   prompt: string,
-  token: string
+  token: string,
+  aspectRatio: '9:16' | '16:9' | 'Match Input Image' = 'Match Input Image'
 ) => {
   try {
-    let resizedImages = [];
-    if (images && images.length > 0) {
-        // Resize all provided images
-        resizedImages = await Promise.all(images.map(img => resizeImage(img)));
-    }
+  let resizedImages = [];
+  if (images && images.length > 0) {
+    // Resize all provided images
+    resizedImages = await Promise.all(images.map(img => resizeImage(img)));
+  }
 
-    const startResponse = await fetch('/api/text-to-image', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ 
-        images: resizedImages, 
-        prompt
-      }),
+  // Map UI aspect ratio to backend value
+  let backendAspectRatio = 'match_input_image';
+  if (aspectRatio === '9:16') backendAspectRatio = '9:16';
+  else if (aspectRatio === '16:9') backendAspectRatio = '16:9';
+
+  const startResponse = await fetch('/api/text-to-image', {
+    method: 'POST',
+    headers: { 
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ 
+    images: resizedImages, 
+    prompt,
+    aspectRatio: backendAspectRatio
+    }),
+  });
+
+  if (!startResponse.ok) {
+    const errorData = await startResponse.json().catch(() => ({}));
+    throw new Error(errorData.error || `Server Error: ${startResponse.status}`);
+  }
+
+  const startData = await startResponse.json();
+  const predictionId = startData.id;
+
+  if (!predictionId) {
+    throw new Error("No prediction ID returned from server.");
+  }
+
+  // Poll for status
+  const pollInterval = 3000;
+  const maxAttempts = 100;
+  let attempts = 0;
+
+  while (attempts < maxAttempts) {
+    attempts++;
+    await new Promise(r => setTimeout(r, pollInterval));
+
+    const statusResponse = await fetch(`/api/text-to-image?id=${encodeURIComponent(predictionId)}`, {
+       headers: { 'Authorization': `Bearer ${token}` }
     });
-
-    if (!startResponse.ok) {
-        const errorData = await startResponse.json().catch(() => ({}));
-        throw new Error(errorData.error || `Server Error: ${startResponse.status}`);
-    }
-
-    const startData = await startResponse.json();
-    const predictionId = startData.id;
-
-    if (!predictionId) {
-        throw new Error("No prediction ID returned from server.");
-    }
-
-    // Poll for status
-    const pollInterval = 3000;
-    const maxAttempts = 100;
-    let attempts = 0;
-
-    while (attempts < maxAttempts) {
-        attempts++;
-        await new Promise(r => setTimeout(r, pollInterval));
-
-        const statusResponse = await fetch(`/api/text-to-image?id=${encodeURIComponent(predictionId)}`, {
-             headers: { 'Authorization': `Bearer ${token}` }
-        });
         
-        if (!statusResponse.ok) continue;
+    if (!statusResponse.ok) continue;
 
-        const statusData = await statusResponse.json();
+    const statusData = await statusResponse.json();
 
-        if (statusData.status === 'succeeded') {
-            return statusData.output;
-        } else if (statusData.status === 'failed' || statusData.status === 'canceled') {
-            throw new Error(statusData.error || "Generation failed.");
-        }
+    if (statusData.status === 'succeeded') {
+      return statusData.output;
+    } else if (statusData.status === 'failed' || statusData.status === 'canceled') {
+      throw new Error(statusData.error || "Generation failed.");
     }
-    throw new Error("Timeout waiting for generation.");
+  }
+  throw new Error("Timeout waiting for generation.");
 
   } catch (err: any) {
     console.error("TextToImage Error:", err);

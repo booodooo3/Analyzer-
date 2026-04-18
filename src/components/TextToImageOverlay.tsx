@@ -87,7 +87,8 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
         const result = await generateTextToImage(
             userImages, // Pass array of images directly
             prompt,
-            token
+            token,
+            aspectRatio
         );
         // Add to generations list
         const newImage: GeneratedImage = {

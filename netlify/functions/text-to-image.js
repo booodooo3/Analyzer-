@@ -96,19 +96,22 @@ export default async (req, context) => {
     }
 
     // 2. Prepare Input for bytedance/seedream-4.5
+    // Accept aspectRatio from frontend, fallback to match_input_image
+    let aspect = body.aspectRatio || "match_input_image";
+    if (aspect === "Match Input Image") aspect = "match_input_image";
     const input = {
-        prompt: prompt || "A creative image",
-        size: "4K",
-        aspect_ratio: "match_input_image",
-        disable_safety_checker: true,
+      prompt: prompt || "A creative image",
+      size: "4K",
+      aspect_ratio: aspect,
+      disable_safety_checker: true,
     };
 
     if (images && images.length > 0) {
-        input.image_input = images; // Pass array of images directly
+      input.image_input = images; // Pass array of images directly
     } else {
-        // Fallback if no image provided
-        input.aspect_ratio = "1:1"; 
-        delete input.image_input;
+      // Fallback if no image provided
+      input.aspect_ratio = "1:1"; 
+      delete input.image_input;
     }
 
     // 3. Call Replicate

@@ -17,12 +17,13 @@ interface GeneratedImage {
 
 export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, onClose }) => {
   const { getToken } = useAuth();
-  const [userImages, setUserImages] = useState<string[]>([]);
-  const [prompt, setPrompt] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [generations, setGenerations] = useState<GeneratedImage[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+    const [userImages, setUserImages] = useState<string[]>([]);
+    const [prompt, setPrompt] = useState('');
+    const [aspectRatio, setAspectRatio] = useState<'9:16' | '16:9' | 'Match Input Image'>('9:16');
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [generations, setGenerations] = useState<GeneratedImage[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Timer to clean up expired images and trigger re-render
   useEffect(() => {
@@ -82,12 +83,12 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
         const token = await getToken();
         if (!token) throw new Error("Please login first.");
 
+        // Pass aspectRatio to backend if needed in the future
         const result = await generateTextToImage(
             userImages, // Pass array of images directly
             prompt,
             token
         );
-        
         // Add to generations list
         const newImage: GeneratedImage = {
             id: Date.now().toString(),
@@ -176,19 +177,36 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
         {/* Left Sidebar - Settings */}
         <div className="w-full lg:w-[320px] flex-shrink-0 flex flex-col border-r border-white/5 bg-[#080808] p-6 space-y-6 overflow-y-auto custom-scrollbar">
             
-            {/* Prompt Input */}
-            <div className="space-y-3">
-               <div className="flex items-center gap-2 text-blue-400 font-medium">
-                  <Wand2 className="w-4 h-4" />
-                  <h3>Description</h3>
-               </div>
-               <textarea
-                 value={prompt}
-                 onChange={(e) => setPrompt(e.target.value)}
-                 placeholder="Describe the changes or the target image..."
-                 className="w-full h-32 bg-[#111] border border-zinc-800 rounded-xl p-3 text-sm text-zinc-300 focus:outline-none focus:border-blue-500 resize-none"
-               />
-            </div>
+                        {/* Prompt Input */}
+                        <div className="space-y-3">
+                             <div className="flex items-center gap-2 text-blue-400 font-medium">
+                                    <Wand2 className="w-4 h-4" />
+                                    <h3>Description</h3>
+                             </div>
+                             <textarea
+                                 value={prompt}
+                                 onChange={(e) => setPrompt(e.target.value)}
+                                 placeholder="Describe the changes or the target image..."
+                                 className="w-full h-32 bg-[#111] border border-zinc-800 rounded-xl p-3 text-sm text-zinc-300 focus:outline-none focus:border-blue-500 resize-none"
+                             />
+                             {/* Aspect Ratio Options */}
+                             <div className="flex gap-2 mt-2">
+                                 {['9:16', '16:9', 'Match Input Image'].map((ratio) => (
+                                     <button
+                                         key={ratio}
+                                         type="button"
+                                         onClick={() => setAspectRatio(ratio as '9:16' | '16:9' | 'Match Input Image')}
+                                         className={`px-3 py-1 rounded-lg font-bold text-xs uppercase tracking-wider border-2 transition-all duration-200 ${
+                                             aspectRatio === ratio
+                                                 ? 'bg-green-600 text-white border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.3)]'
+                                                 : 'bg-black text-green-500 border-green-700 hover:bg-green-900/30'
+                                         }`}
+                                     >
+                                         {ratio}
+                                     </button>
+                                 ))}
+                             </div>
+                        </div>
 
             <div className="space-y-2 text-xs text-zinc-500">
                 <p>• Model: bytedance/seedream-4.5</p>

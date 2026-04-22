@@ -1134,15 +1134,7 @@ const App: React.FC = () => {
                         </li>
                         <li className="flex gap-3">
                             <span className="font-bold text-white min-w-[80px]">Image Input:</span>
-                            <span>Upload a starting image (First Frame) to define the character or scene. Some models support an End Frame (Image 2) to guide the final look.</span>
-                        </li>
-                        <li className="flex gap-3">
-                            <span className="font-bold text-white min-w-[80px]">Video Input:</span>
-                            <span>Used in <strong>Lip Sync</strong> as the target for audio synchronization.</span>
-                        </li>
-                        <li className="flex gap-3">
-                            <span className="font-bold text-white min-w-[80px]">Audio Input:</span>
-                            <span>Upload MP3/WAV files for Lip Sync.</span>
+                            <span>Upload a starting image (First Frame) to define the character or scene. Some models support an End Frame (Image 2) to guide the final look. For Tex 2 Img, you can upload up to 14 reference images.</span>
                         </li>
                     </ul>
                   </div>
@@ -1168,8 +1160,8 @@ const App: React.FC = () => {
                                 <span>4 Credits (7 Credits for Seedance 2.0)</span>
                             </div>
                             <div className="bg-black/20 p-2 rounded border border-white/5">
-                                <span className="text-blue-400 font-bold block">Lip Sync</span>
-                                <span>2 Credits</span>
+                                <span className="text-blue-400 font-bold block">Tex 2 Img</span>
+                                <span>2 Credits per generation</span>
                             </div>
                             <div className="bg-black/20 p-2 rounded border border-white/5">
                                 <span className="text-pink-400 font-bold block">Hair Styler (2K Res)</span>
@@ -1201,6 +1193,14 @@ const App: React.FC = () => {
                             <p className="text-xs text-zinc-400 mt-1">
                                 <strong>Best for:</strong> High-quality, cinematic results.
                                 <br/><strong>Features:</strong> Excellent detail consistency. Defaults to 10s duration for immersive scenes.
+                            </p>
+                        </div>
+
+                        <div className="border-l-2 border-emerald-500 pl-3">
+                            <h4 className="text-emerald-400 font-semibold text-sm">Seedream 4.5 (Tex 2 Img)</h4>
+                            <p className="text-xs text-zinc-400 mt-1">
+                                <strong>Best for:</strong> High-end text-to-image generation and image manipulation.
+                                <br/><strong>Features:</strong> Upload up to 14 reference images to guide generation. Advanced image synthesis using <code>bytedance/seedream-4.5</code>.
                             </p>
                         </div>
                     </div>

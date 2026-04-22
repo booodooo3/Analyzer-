@@ -129,7 +129,7 @@ export default async (req, context) => {
         promptText += ` ${customPrompt} `;
     }
 
-    promptText += "Maintain the original face, facial features, and identity with 100% accuracy. Only modify the hair. The lighting and skin tone should remain consistent.";
+    promptText += "Maintain the original face, facial features, and identity with 100% accuracy. Only modify the hair. The lighting and skin tone should remain consistent. 2k resolution, highly detailed, sharp focus.";
 
     // 3. Call Replicate (Google Gemini 2.5 Flash Image)
     // Model: google/gemini-2.5-flash-image
@@ -138,6 +138,8 @@ export default async (req, context) => {
     let inputParams = {
         prompt: promptText,
         output_format: "jpg",
+        output_quality: 100,
+        megapixels: "2", // For 2K resolution if supported
         aspect_ratio: "match_input_image"
     };
 

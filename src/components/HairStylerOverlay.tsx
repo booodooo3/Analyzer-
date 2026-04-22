@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { X, Scissors, RefreshCw, Wand2, Monitor, RotateCcw, Maximize2, Check, Upload, Loader2, Download, Image as ImageIcon } from 'lucide-react';
 import { HAIR_COLORS, MENS_STYLES, WOMENS_STYLES, REMOVAL_OPTIONS } from '../constants';
 import { Button } from './Button';
@@ -35,6 +35,70 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
     });
     return textures;
   }, []);
+
+  const STORAGE_KEY = 'hairStylerResult';
+  const EXPIRY_TIME = 5 * 60 * 1000;
+
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const { resultImage: savedResult, userImage: savedUser, timestamp } = JSON.parse(saved);
+        if (Date.now() - timestamp < EXPIRY_TIME) {
+          setResultImage(savedResult);
+          setUserImage(savedUser);
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      } catch (e) {
+        console.error('Failed to parse saved hair styler result', e);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (resultImage && userImage) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        resultImage,
+        userImage,
+        timestamp: Date.now()
+      }));
+    }
+  }, [resultImage, userImage]);
+
+  useEffect(() => {
+     const interval = setInterval(() => {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+           try {
+              const { timestamp } = JSON.parse(saved);
+              if (Date.now() - timestamp >= EXPIRY_TIME) {
+                 localStorage.removeItem(STORAGE_KEY);
+                 setResultImage(null);
+              }
+           } catch(e){}
+        }
+     }, 10000);
+     return () => clearInterval(interval);
+  }, []);
+
+  const handleSaveImage = async (url: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `hair-styler-${Date.now()}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Failed to save image:', error);
+      window.open(url, '_blank');
+    }
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -90,10 +154,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
 
   const handleReset = () => {
     setResultImage(null);
-    // Optional: Keep user image or clear it? Usually "Try Another" implies new generation or new image.
-    // If it's "Try Another Style", we keep image. If it's "Start Over", we clear image.
-    // Let's assume reset result but keep image for easy retry.
-    // If they want new image, they can click upload again.
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   const handleFullReset = () => {
@@ -103,6 +164,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
     setSelectedStyle('');
     setKeepCurrentStyle(false);
     setError(null);
+    localStorage.removeItem(STORAGE_KEY);
   };
   
   if (!isOpen) return null;
@@ -389,16 +451,13 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
                         </div>
                         {/* Actions */}
                         <div className="absolute bottom-4 left-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-300">
-                             <a 
-                                href={resultImage} 
-                                download="hair-styler-result.jpg"
+                             <button
+                                onClick={() => resultImage && handleSaveImage(resultImage)}
                                 className="flex-1 bg-white text-black py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-zinc-200 transition-colors shadow-lg"
-                                target="_blank"
-                                rel="noopener noreferrer"
                              >
                                 <Download className="w-4 h-4" />
-                                Download
-                             </a>
+                                Save
+                             </button>
                              <button 
                                 onClick={handleReset}
                                 className="px-4 bg-black/80 backdrop-blur-md border border-white/10 text-white rounded-xl hover:bg-black transition-colors"

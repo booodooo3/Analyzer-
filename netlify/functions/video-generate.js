@@ -107,18 +107,12 @@ export default async (req, context) => {
             if (model === 'bytedance/seedance-2.0') {
                 modelOwner = "bytedance";
                 modelName = "seedance-2.0";
-            } else if (model === 'bytedance/seedance-1-pro-fast') {
-                modelOwner = "bytedance";
-                modelName = "seedance-1-pro-fast";
             } else if (model === 'bytedance/seedance-1.5-pro') {
                 modelOwner = "bytedance";
                 modelName = "seedance-1.5-pro";
             } else if (model === 'minimax/hailuo-2.3') {
                 modelOwner = "minimax";
                 modelName = "hailuo-2.3";
-            } else if (model === 'kwaivgi/kling-v2.5-turbo-pro') {
-                modelOwner = "kwaivgi";
-                modelName = "kling-v2.5-turbo-pro";
             } else if (model === 'kwaivgi/kling-v2.6-motion-control') {
                 modelOwner = "kwaivgi";
                 modelName = "kling-v2.6-motion-control";

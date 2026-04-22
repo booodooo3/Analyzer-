@@ -1202,14 +1202,6 @@ const App: React.FC = () => {
                             </p>
                         </div>
 
-                        <div className="border-l-2 border-orange-500 pl-3">
-                            <h4 className="text-orange-400 font-semibold text-sm">Kling 2.5 Turbo Pro</h4>
-                            <p className="text-xs text-zinc-400 mt-1">
-                                <strong>Best for:</strong> Fast, high-fidelity generations.
-                                <br/><strong>Features:</strong> Reliable character consistency. Supports post-generation Lip Sync.
-                            </p>
-                        </div>
-
                         <div className="border-l-2 border-yellow-500 pl-3">
                             <h4 className="text-yellow-400 font-semibold text-sm">Kling 2.6 Motion Control</h4>
                             <p className="text-xs text-zinc-400 mt-1">

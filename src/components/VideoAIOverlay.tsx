@@ -852,9 +852,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                               >
                                   <option value="bytedance/seedance-2.0" className="text-purple-500 font-bold">Seedance 2.0</option>
                                   <option value="bytedance/seedance-1.5-pro">Seedance 1.5 Pro</option>
-                                  <option value="bytedance/seedance-1-pro-fast" className="text-green-500 font-bold">Seedance 1 Pro Fast</option>
                                   <option value="minimax/hailuo-2.3" className="text-blue-500 font-bold">Minimax Hailuo 2.3</option>
-                                  <option value="kwaivgi/kling-v2.5-turbo-pro" className="text-orange-500 font-bold">Kling 2.5 Turbo Pro</option>
                               </select>
                           </div>
 
@@ -863,7 +861,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
               </div>
 
                     <div className="space-y-2">
-                  {(selectedModel === 'bytedance/seedance-2.0' || selectedModel === 'bytedance/seedance-1.5-pro' || selectedModel === 'bytedance/seedance-1-pro-fast' || selectedModel === 'kwaivgi/kling-v2.5-turbo-pro') && generationMode === 'imageToVideo' && (
+                  {(selectedModel === 'bytedance/seedance-2.0' || selectedModel === 'bytedance/seedance-1.5-pro') && generationMode === 'imageToVideo' && (
                       <div className="flex justify-end gap-3 mt-1 mb-2">
                           <label className="flex items-center gap-1.5 cursor-pointer group">
                                 <input 
@@ -914,6 +912,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       onChange={e => setResolution(e.target.value)}
                       className="w-full bg-black border border-zinc-800 rounded-xl p-2 text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 focus:shadow-[0_0_15px_rgba(34,197,94,0.15)] transition-all duration-300"
                     >
+                      <option value="1080p">1080p</option>
                       <option value="720p">720p</option>
                       <option value="480p">480p</option>
                     </select>

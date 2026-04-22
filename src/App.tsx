@@ -1138,11 +1138,11 @@ const App: React.FC = () => {
                         </li>
                         <li className="flex gap-3">
                             <span className="font-bold text-white min-w-[80px]">Video Input:</span>
-                            <span>Used in <strong>Motion Control</strong> to transfer movement from a source video to your character, or in <strong>Lip Sync</strong> as the target for audio synchronization.</span>
+                            <span>Used in <strong>Lip Sync</strong> as the target for audio synchronization.</span>
                         </li>
                         <li className="flex gap-3">
                             <span className="font-bold text-white min-w-[80px]">Audio Input:</span>
-                            <span>Upload MP3/WAV files for Lip Sync. Note: For Kling models, the audio upload option appears <em>after</em> the initial video generation.</span>
+                            <span>Upload MP3/WAV files for Lip Sync.</span>
                         </li>
                     </ul>
                   </div>
@@ -1166,10 +1166,6 @@ const App: React.FC = () => {
                             <div className="bg-black/20 p-2 rounded border border-white/5">
                                 <span className="text-green-400 font-bold block">Long Video (10s)</span>
                                 <span>4 Credits (7 Credits for Seedance 2.0)</span>
-                            </div>
-                            <div className="bg-black/20 p-2 rounded border border-white/5">
-                                <span className="text-yellow-400 font-bold block">Motion Control</span>
-                                <span>3 Credits</span>
                             </div>
                             <div className="bg-black/20 p-2 rounded border border-white/5">
                                 <span className="text-blue-400 font-bold block">Lip Sync</span>
@@ -1205,14 +1201,6 @@ const App: React.FC = () => {
                             <p className="text-xs text-zinc-400 mt-1">
                                 <strong>Best for:</strong> High-quality, cinematic results.
                                 <br/><strong>Features:</strong> Excellent detail consistency. Defaults to 10s duration for immersive scenes.
-                            </p>
-                        </div>
-
-                        <div className="border-l-2 border-yellow-500 pl-3">
-                            <h4 className="text-yellow-400 font-semibold text-sm">Kling 2.6 Motion Control</h4>
-                            <p className="text-xs text-zinc-400 mt-1">
-                                <strong>Best for:</strong> Precise movement control.
-                                <br/><strong>Features:</strong> Uses a "Source Video" to drive the motion of your "Character Image". Perfect for dance moves or specific actions.
                             </p>
                         </div>
                     </div>

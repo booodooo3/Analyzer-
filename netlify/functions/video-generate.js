@@ -183,6 +183,10 @@ export default async (req, context) => {
                 }
             }
 
+            if (model === 'bytedance/seedance-1.5-pro') {
+                input.disable_safety_checker = true;
+            }
+
             if (modelOwner === "minimax") {
                 input = {
                     prompt: enhancedPrompt,

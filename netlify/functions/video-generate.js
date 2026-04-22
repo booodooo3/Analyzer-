@@ -80,7 +80,9 @@ export default async (req, context) => {
 
             // Custom cost for seedance-2.0 based on duration
             if (model === 'bytedance/seedance-2.0') {
-                if (duration === 8) {
+                if (duration === 5) {
+                    cost = 3;
+                } else if (duration === 8) {
                     cost = 5;
                 } else if (duration === 10) {
                     cost = 7;

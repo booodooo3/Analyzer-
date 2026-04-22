@@ -1161,7 +1161,7 @@ const App: React.FC = () => {
                             </div>
                             <div className="bg-black/20 p-2 rounded border border-white/5">
                                 <span className="text-blue-400 font-bold block">Tex 2 Img</span>
-                                <span>2 Credits per generation</span>
+                                <span>0.5 Credits per generation</span>
                             </div>
                             <div className="bg-black/20 p-2 rounded border border-white/5">
                                 <span className="text-pink-400 font-bold block">Hair Styler (2K Res)</span>

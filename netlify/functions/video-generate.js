@@ -75,7 +75,16 @@ export default async (req, context) => {
                 cost = 2;
             }
             if (!image && model === 'bytedance/seedance-2.0') {
-                cost = 4; // Cost for text to video
+                cost = 5; // Cost for text to video
+            }
+
+            // Custom cost for seedance-2.0 based on duration
+            if (model === 'bytedance/seedance-2.0') {
+                if (duration === 8) {
+                    cost = 5;
+                } else if (duration === 10) {
+                    cost = 7;
+                }
             }
 
 

@@ -1157,11 +1157,15 @@ const App: React.FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
                             <div className="bg-black/20 p-2 rounded border border-white/5">
                                 <span className="text-green-400 font-bold block">Standard Video (5s)</span>
-                                <span>~2 Credits</span>
+                                <span>2 Credits (3 Credits for Seedance 2.0)</span>
+                            </div>
+                            <div className="bg-black/20 p-2 rounded border border-white/5">
+                                <span className="text-green-400 font-bold block">Medium Video (8s)</span>
+                                <span>5 Credits (Seedance 2.0 only)</span>
                             </div>
                             <div className="bg-black/20 p-2 rounded border border-white/5">
                                 <span className="text-green-400 font-bold block">Long Video (10s)</span>
-                                <span>~4 Credits</span>
+                                <span>4 Credits (7 Credits for Seedance 2.0)</span>
                             </div>
                             <div className="bg-black/20 p-2 rounded border border-white/5">
                                 <span className="text-yellow-400 font-bold block">Motion Control</span>
@@ -1172,7 +1176,7 @@ const App: React.FC = () => {
                                 <span>2 Credits</span>
                             </div>
                             <div className="bg-black/20 p-2 rounded border border-white/5">
-                                <span className="text-pink-400 font-bold block">Hair Styler</span>
+                                <span className="text-pink-400 font-bold block">Hair Styler (2K Res)</span>
                                 <span>0.5 Credits per generation</span>
                             </div>
                         </div>
@@ -1187,10 +1191,12 @@ const App: React.FC = () => {
                     </h3>
                     <div className="space-y-4">
                         <div className="border-l-2 border-zinc-600 pl-3">
-                            <h4 className="text-white font-semibold text-sm">Seedance (1.5 Pro / 1 Pro Fast)</h4>
+                            <h4 className="text-white font-semibold text-sm">Seedance (2.0 / 1.5 Pro)</h4>
                             <p className="text-xs text-zinc-400 mt-1">
-                                <strong>Best for:</strong> General purpose video generation.
-                                <br/><strong>Features:</strong> Good balance of speed and quality. Supports 5s and 10s durations.
+                                <strong>Best for:</strong> General purpose high-quality video generation.
+                                <br/><strong>Features:</strong> Excellent balance of speed and cinematic quality.
+                                <br/><strong>Seedance 2.0 Durations:</strong> 5s, 8s, and 10s options.
+                                <br/><strong>Seedance 1.5 Pro Durations:</strong> 5s and 10s options.
                             </p>
                         </div>
 
@@ -1209,6 +1215,20 @@ const App: React.FC = () => {
                                 <br/><strong>Features:</strong> Uses a "Source Video" to drive the motion of your "Character Image". Perfect for dance moves or specific actions.
                             </p>
                         </div>
+                    </div>
+                  </div>
+
+                  {/* 4. Recent Platform Updates */}
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <h3 className="text-white font-bold mb-3 text-lg flex items-center gap-2">
+                        <span className="p-1 bg-green-500/20 rounded text-green-400">✨</span> Recent Platform Updates
+                    </h3>
+                    <div className="text-sm text-zinc-400 leading-relaxed">
+                        <ul className="list-disc pl-5 space-y-2">
+                            <li><strong>Seedance 2.0 Pricing Update:</strong> Adjusted credit system to provide flexible options (5s for 3 credits, 8s for 5 credits, 10s for 7 credits).</li>
+                            <li><strong>Hair Styler Upgrades:</strong> Generations are now rendered in stunning <strong>2K Resolution</strong>. Results are cached locally for <strong>5 minutes</strong> even if you close the window, and a new <strong>Direct Save</strong> button has been added.</li>
+                            <li><strong>Tex 2 Img Tweaks:</strong> We removed the double-click image description feature to streamline the interface and prevent accidental popups.</li>
+                        </ul>
                     </div>
                   </div>
 

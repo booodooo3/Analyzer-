@@ -293,8 +293,7 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
                                         {userImages.map((img, index) => (
                                             <div
                                                 key={index}
-                                                className={`relative group aspect-square rounded-xl overflow-hidden border-2 bg-black cursor-pointer transition-all ${selectedImageIndex === index ? 'border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'border-zinc-800'}`}
-                                                onClick={() => setSelectedImageIndex(index)}
+                                                className={`relative group aspect-square rounded-xl overflow-hidden border-2 bg-black transition-all border-zinc-800`}
                                                 tabIndex={0}
                                                 aria-label={`Select image ${index + 1}`}
                                             >
@@ -318,29 +317,6 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
                                         ))}
                                     </div>
                                 )}
-                                            {/* Image Description in margin */}
-                                            {selectedImageIndex !== null && userImages[selectedImageIndex] && (
-                                                <div className="w-full max-w-2xl mt-4 flex flex-col items-start">
-                                                    <label className="text-green-400 font-bold text-xs mb-1">وصف الصورة المرفوعة:</label>
-                                                    <input
-                                                        type="text"
-                                                        className="w-full bg-[#111] border border-green-500 rounded-xl p-2 text-sm text-zinc-300 focus:outline-none focus:border-green-400"
-                                                        placeholder="اكتب وصفاً لهذه الصورة..."
-                                                        value={imageDescriptions[selectedImageIndex] || ''}
-                                                        onChange={e => {
-                                                            const newDescs = [...imageDescriptions];
-                                                            newDescs[selectedImageIndex] = e.target.value;
-                                                            setImageDescriptions(newDescs);
-                                                        }}
-                                                    />
-                                                    <div className="mt-2 text-xs text-zinc-400">
-                                                        <span className="font-bold text-green-400">الوصف الحالي:</span>
-                                                        {imageDescriptions[selectedImageIndex]
-                                                            ? <span className="ml-2">{imageDescriptions[selectedImageIndex]}</span>
-                                                            : <span className="ml-2 italic text-zinc-500">لا يوجد وصف بعد</span>}
-                                                    </div>
-                                                </div>
-                                            )}
              </div>
         </div>
 

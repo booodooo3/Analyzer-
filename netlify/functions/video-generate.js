@@ -162,10 +162,10 @@ export default async (req, context) => {
                     input.seed = seed;
                 }
                 if (reference_images) {
-                    input.reference_images = reference_images;
+                    input.reference_images = [reference_images];
                 }
                 if (reference_audios) {
-                    input.reference_audios = reference_audios;
+                    input.reference_audios = [reference_audios];
                 }
             }
 

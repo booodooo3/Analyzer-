@@ -64,7 +64,7 @@ export default async (req, context) => {
             
             const currentCredits = typeof user.publicMetadata.credits === 'number' ? user.publicMetadata.credits : 3;
             
-            const { image, image2, description, duration, cameraEffect, aiFilter, model, aspectRatio, audioFile, videoInput, characterOrientation, video_path, resolution, seed } = await req.json();
+            const { image, image2, description, duration, cameraEffect, aiFilter, model, aspectRatio, audioFile, videoInput, characterOrientation, video_path, resolution, seed, reference_images, reference_audios } = await req.json();
 
             // Calculate cost based on duration
             let cost = 4;
@@ -160,6 +160,12 @@ export default async (req, context) => {
                 }
                 if (seed !== undefined) {
                     input.seed = seed;
+                }
+                if (reference_images) {
+                    input.reference_images = reference_images;
+                }
+                if (reference_audios) {
+                    input.reference_audios = reference_audios;
                 }
             }
 

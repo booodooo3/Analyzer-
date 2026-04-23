@@ -35,6 +35,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [showLipSync, setShowLipSync] = useState(false);
   const [lipSyncAudio, setLipSyncAudio] = useState<{ base64: string, name: string } | null>(null);
   const [videoInput, setVideoInput] = useState<{ base64: string, name: string } | null>(null);
+  const [referenceImages, setReferenceImages] = useState<{ base64: string, name: string } | null>(null);
+  const [referenceAudios, setReferenceAudios] = useState<{ base64: string, name: string } | null>(null);
   const [characterOrientation, setCharacterOrientation] = useState<'video' | 'image'>('video');
   const [pendingVideoId, setPendingVideoId] = useState<string | null>(null);
   const [generationMode, setGenerationMode] = useState<'imageToVideo' | 'textToVideo'>('imageToVideo');
@@ -269,6 +271,42 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
     }
   };
 
+  const handleReferenceImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        setError("Reference image is too large. Max 10MB.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setReferenceImages({
+          base64: reader.result as string,
+          name: file.name
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleReferenceAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        setError("Reference audio is too large. Max 10MB.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setReferenceAudios({
+          base64: reader.result as string,
+          name: file.name
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   if (!isOpen) return null;
 
   const handleConvert = async () => {
@@ -348,7 +386,9 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
           model: selectedModel,
           audioFile: audioFile?.base64,
           videoInput: videoInput?.base64,
-          characterOrientation
+          characterOrientation,
+          reference_images: referenceImages?.base64,
+          reference_audios: referenceAudios?.base64
         })
       });
 
@@ -981,18 +1021,52 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                   </div>
                 </div>
                 {selectedModel === 'bytedance/seedance-2.0' && (
-                  <div className="flex gap-4">
-                    <div className="flex-1">
-                      <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Seed (Integer)</label>
-                      <input
-                        type="number"
-                        value={seed}
-                        onChange={e => setSeed(parseInt(e.target.value) || 0)}
-                        className="w-full bg-black border border-zinc-800 rounded-xl p-2 text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 focus:shadow-[0_0_15px_rgba(34,197,94,0.15)] transition-all duration-300"
-                        placeholder="e.g. 99"
-                      />
+                  <>
+                    <div className="flex gap-4">
+                      <div className="flex-1">
+                        <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Seed (Integer)</label>
+                        <input
+                          type="number"
+                          value={seed}
+                          onChange={e => setSeed(parseInt(e.target.value) || 0)}
+                          className="w-full bg-black border border-zinc-800 rounded-xl p-2 text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 focus:shadow-[0_0_15px_rgba(34,197,94,0.15)] transition-all duration-300"
+                          placeholder="e.g. 99"
+                        />
+                      </div>
                     </div>
-                  </div>
+                    <div className="flex gap-4">
+                      <div className="flex-1">
+                        <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Reference Image (Optional)</label>
+                        <div className="relative group mt-1">
+                            <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                onChange={handleReferenceImageUpload}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            />
+                            <button className="w-full flex items-center justify-center gap-2 bg-zinc-900/50 hover:bg-zinc-800 border border-dashed border-zinc-700 hover:border-green-500/50 text-zinc-400 hover:text-green-400 py-2.5 rounded-xl transition-all">
+                                <Upload className="w-4 h-4" />
+                                <span className="text-xs font-medium">{referenceImages ? referenceImages.name : 'Upload Reference Image'}</span>
+                            </button>
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Reference Audio (Optional)</label>
+                        <div className="relative group mt-1">
+                            <input
+                                type="file"
+                                accept="audio/mp3,audio/wav"
+                                onChange={handleReferenceAudioUpload}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            />
+                            <button className="w-full flex items-center justify-center gap-2 bg-zinc-900/50 hover:bg-zinc-800 border border-dashed border-zinc-700 hover:border-blue-500/50 text-zinc-400 hover:text-blue-400 py-2.5 rounded-xl transition-all">
+                                <Upload className="w-4 h-4" />
+                                <span className="text-xs font-medium">{referenceAudios ? referenceAudios.name : 'Upload Reference Audio'}</span>
+                            </button>
+                        </div>
+                      </div>
+                    </div>
+                  </>
                 )}
                   <div className="space-y-2">
                       <div className="flex justify-between items-end">

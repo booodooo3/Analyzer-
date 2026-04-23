@@ -310,10 +310,10 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   if (!isOpen) return null;
 
   const handleConvert = async () => {
-    // If we're in imageToVideo mode, we MUST have at least one image
+    // If we're in imageToVideo mode, we MUST have at least one image or reference image
     if (generationMode === 'imageToVideo') {
       const primaryImage = images.find(img => img !== null);
-      if (!primaryImage) return;
+      if (!primaryImage && !referenceImages) return;
     }
     
     // If textToVideo mode, we MUST have a description
@@ -363,7 +363,14 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       };
 
       const primaryImage = images.find(img => img !== null);
-      const processedImage = generationMode === 'imageToVideo' && primaryImage ? await processImage(primaryImage.base64) : null;
+      let processedImage = null;
+      if (generationMode === 'imageToVideo') {
+          if (primaryImage) {
+              processedImage = await processImage(primaryImage.base64);
+          } else if (referenceImages) {
+              processedImage = await processImage(referenceImages.base64);
+          }
+      }
       const processedImage2 = generationMode === 'imageToVideo' && images[1] ? await processImage(images[1].base64) : null;
 
       // 2. Call API to deduct credits and start generation
@@ -1044,7 +1051,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                 onChange={handleReferenceImageUpload}
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                             />
-                            <button className="w-full flex items-center justify-center gap-2 bg-zinc-900/50 hover:bg-zinc-800 border border-dashed border-zinc-700 hover:border-green-500/50 text-zinc-400 hover:text-green-400 py-2.5 rounded-xl transition-all">
+                            <button className={`w-full flex items-center justify-center gap-2 bg-zinc-900/50 hover:bg-zinc-800 border border-dashed py-2.5 rounded-xl transition-all ${referenceImages && referenceAudios ? 'border-yellow-500 text-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.5)]' : referenceImages ? 'border-green-500 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)]' : 'border-zinc-700 hover:border-green-500/50 text-zinc-400 hover:text-green-400'}`}>
                                 <Upload className="w-4 h-4" />
                                 <span className="text-xs font-medium">{referenceImages ? referenceImages.name : 'Upload Reference Image'}</span>
                             </button>
@@ -1059,7 +1066,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                 onChange={handleReferenceAudioUpload}
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                             />
-                            <button className="w-full flex items-center justify-center gap-2 bg-zinc-900/50 hover:bg-zinc-800 border border-dashed border-zinc-700 hover:border-blue-500/50 text-zinc-400 hover:text-blue-400 py-2.5 rounded-xl transition-all">
+                            <button className={`w-full flex items-center justify-center gap-2 bg-zinc-900/50 hover:bg-zinc-800 border border-dashed py-2.5 rounded-xl transition-all ${referenceImages && referenceAudios ? 'border-yellow-500 text-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.5)]' : referenceAudios ? 'border-blue-500 text-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'border-zinc-700 hover:border-blue-500/50 text-zinc-400 hover:text-blue-400'}`}>
                                 <Upload className="w-4 h-4" />
                                 <span className="text-xs font-medium">{referenceAudios ? referenceAudios.name : 'Upload Reference Audio'}</span>
                             </button>
@@ -1092,7 +1099,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
               <Button 
                   onClick={handleConvert}
-                  disabled={(generationMode === 'imageToVideo' && activeImageCount === 0) || isConverting || (generationMode === 'textToVideo' && !description.trim())}
+                  disabled={(generationMode === 'imageToVideo' && activeImageCount === 0 && !referenceImages) || isConverting || (generationMode === 'textToVideo' && !description.trim())}
                   isLoading={isConverting}
                   className={`w-full font-bold py-4 rounded-xl transition-all duration-300 ${
                     isConverting 

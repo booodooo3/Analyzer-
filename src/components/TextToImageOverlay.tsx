@@ -78,13 +78,14 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
         }
     };
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (overridePrompt?: string) => {
+    const finalPrompt = overridePrompt || prompt;
     // Only require at least one image
     if (userImages.length === 0) {
         setError("Please upload at least one image.");
         return;
     }
-    if (!prompt) {
+    if (!finalPrompt) {
         setError("Please enter a description.");
         return;
     }
@@ -99,7 +100,7 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
         // Pass aspectRatio to backend if needed in the future
         const result = await generateTextToImage(
             userImages, // Pass array of images directly
-            prompt,
+            finalPrompt,
             token,
             aspectRatio
         );
@@ -231,7 +232,7 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
             {error && <p className="text-red-500 text-xs text-center">{error}</p>}
 
             <button
-                onClick={handleGenerate}
+                onClick={() => handleGenerate()}
                 disabled={isGenerating || userImages.length === 0 || !prompt}
                 className={`w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
                     isGenerating || userImages.length === 0 || !prompt
@@ -251,6 +252,43 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
                     </>
                 )}
             </button>
+
+            {/* Quick Virtual Try-On Options */}
+            <div className="mt-4 pt-4 border-t border-white/10">
+                <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Quick Try-On Options</h3>
+                <div className="grid grid-cols-2 gap-2">
+                    {[
+                        'Shirt / T-Shirt',
+                        'Long Dress',
+                        'Short Dress',
+                        'Long Skirt',
+                        'Short Skirt',
+                        'Pants',
+                        'Jacket / Coat',
+                        'Full Outfit (Plus)'
+                    ].map((garment) => (
+                        <button
+                            key={garment}
+                            disabled={isGenerating || userImages.length < 2}
+                            onClick={() => {
+                                const newPrompt = `Virtual try on, fitting the ${garment.toLowerCase()} (Image 2) onto the person (Image 1), highly detailed, realistic, 4k`;
+                                setPrompt(newPrompt);
+                                handleGenerate(newPrompt);
+                            }}
+                            className={`p-2 rounded-lg text-[10px] font-bold transition-all border flex items-center justify-center text-center h-12 ${
+                                isGenerating || userImages.length < 2
+                                ? 'bg-zinc-900/50 border-zinc-800 text-zinc-600 cursor-not-allowed'
+                                : 'bg-blue-600/10 border-blue-500/50 text-blue-400 hover:bg-blue-600 hover:text-white hover:border-blue-400'
+                            }`}
+                        >
+                            {garment}
+                        </button>
+                    ))}
+                </div>
+                <p className="text-[10px] text-zinc-500 mt-3 text-center leading-relaxed">
+                    Upload <strong>Image 1 (Model)</strong> and <strong>Image 2 (Garment)</strong>, then click a category to auto-generate.
+                </p>
+            </div>
         </div>
 
         {/* Center Area - Upload & Preview */}

@@ -101,6 +101,8 @@ export default async (req, context) => {
             if (cameraEffect && cameraEffect !== 'Static') {
                 if (cameraEffect === 'The Camera Follows The Subject Moving') {
                     enhancedPrompt += `, the camera follows the subject moving`;
+                } else if (cameraEffect === 'Free Camera') {
+                    enhancedPrompt += `, dynamic free camera movement, orbiting and panning from multiple angles, professional commercial style cinematography, sweeping dynamic shots, highly cinematic and smooth`;
                 } else {
                     enhancedPrompt += `, ${cameraEffect} camera movement`;
                 }

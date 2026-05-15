@@ -206,7 +206,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const activeImageCount = images.filter(img => img !== null).length;
 
   const CAMERA_EFFECTS = [
-    'Static', 'Zoom In', 'Zoom Out', 'Pan Left', 'Pan Right', 'Pan Up', 'Pan Down',
+    'Static', 'Free Camera', 'Zoom In', 'Zoom Out', 'Pan Left', 'Pan Right', 'Pan Up', 'Pan Down',
     'Slow Motion', 'Hyperlapse / Timelapse', 'Freeze Frame', 'Reverse', 'Roll',
     'Dolly / Tracking', 'Orbit / Arc', 'Crane / Boom / Pedestal', 'Handheld / Shake',
     'Rack Focus', 'Dolly Zoom', 'The Camera Follows The Subject Moving'
@@ -575,7 +575,12 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
       <button
         onClick={() => {
+            // Add a clean state reset when trying again from a specific video
             setVideoUrl(null);
+            setImages([null, null]);
+            setReferenceImages(null);
+            setReferenceAudios(null);
+            setDescription('');
         }}
           className="mt-2 w-full bg-zinc-900 border border-zinc-700 hover:border-white text-white text-[10px] py-1.5 rounded-lg transition-all uppercase tracking-wider font-bold flex items-center justify-center gap-2"
         >

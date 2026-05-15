@@ -113,14 +113,11 @@ export default async (req, context) => {
 
             // Determine Model Version
             let modelOwner = "bytedance";
-            let modelName = "seedance-1.5-pro";
+            let modelName = "seedance-2.0";
 
             if (model === 'bytedance/seedance-2.0') {
                 modelOwner = "bytedance";
                 modelName = "seedance-2.0";
-            } else if (model === 'bytedance/seedance-1.5-pro') {
-                modelOwner = "bytedance";
-                modelName = "seedance-1.5-pro";
             } else if (model === 'minimax/hailuo-2.3') {
                 modelOwner = "minimax";
                 modelName = "hailuo-2.3";
@@ -187,10 +184,6 @@ export default async (req, context) => {
                 } else {
                     input.last_frame_image = image2;
                 }
-            }
-
-            if (model === 'bytedance/seedance-1.5-pro') {
-                input.disable_safety_checker = true;
             }
 
             if (modelOwner === "minimax") {

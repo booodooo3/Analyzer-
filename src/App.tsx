@@ -1179,12 +1179,11 @@ const App: React.FC = () => {
                     </h3>
                     <div className="space-y-4">
                         <div className="border-l-2 border-zinc-600 pl-3">
-                            <h4 className="text-white font-semibold text-sm">Seedance (2.0 / 1.5 Pro)</h4>
+                            <h4 className="text-white font-semibold text-sm">Seedance 2.0</h4>
                             <p className="text-xs text-zinc-400 mt-1">
                                 <strong>Best for:</strong> General purpose high-quality video generation.
                                 <br/><strong>Features:</strong> Excellent balance of speed and cinematic quality.
                                 <br/><strong>Seedance 2.0 Durations:</strong> 5s, 8s, and 10s options.
-                                <br/><strong>Seedance 1.5 Pro Durations:</strong> 5s and 10s options.
                             </p>
                         </div>
 

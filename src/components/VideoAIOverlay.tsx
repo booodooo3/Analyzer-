@@ -898,7 +898,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                   }`}
                               >
                                   <option value="bytedance/seedance-2.0" className="text-purple-500 font-bold">Seedance 2.0</option>
-                                  <option value="bytedance/seedance-1.5-pro">Seedance 1.5 Pro</option>
                                   <option value="minimax/hailuo-2.3" className="text-blue-500 font-bold">Minimax Hailuo 2.3</option>
                               </select>
                           </div>
@@ -908,80 +907,49 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
               </div>
 
                     <div className="space-y-2">
-                  {(selectedModel === 'bytedance/seedance-2.0' || selectedModel === 'bytedance/seedance-1.5-pro') && generationMode === 'imageToVideo' && (
+                  {selectedModel === 'bytedance/seedance-2.0' && generationMode === 'imageToVideo' && (
                       <div className="flex justify-end gap-3 mt-1 mb-2">
-                          {selectedModel === 'bytedance/seedance-2.0' ? (
-                              <>
-                                  <label className="flex items-center gap-1.5 cursor-pointer group">
-                                      <input 
-                                          type="radio" 
-                                          name="duration" 
-                                          value={5} 
-                                          checked={duration === 5} 
-                                          onChange={() => setDuration(5)}
-                                          className="accent-green-500 w-3 h-3"
-                                      />
-                                      <span className="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
-                                          <span className="text-green-500 font-bold">5</span> seconds (<span className="text-green-500 font-bold">3</span> points deduction)
-                                      </span>
-                                  </label>
-                                  <label className="flex items-center gap-1.5 cursor-pointer group">
-                                      <input 
-                                          type="radio" 
-                                          name="duration" 
-                                          value={8} 
-                                          checked={duration === 8} 
-                                          onChange={() => setDuration(8)}
-                                          className="accent-green-500 w-3 h-3"
-                                      />
-                                      <span className="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
-                                          <span className="text-green-500 font-bold">8</span> seconds (<span className="text-green-500 font-bold">5</span> points deduction)
-                                      </span>
-                                  </label>
-                                  <label className="flex items-center gap-1.5 cursor-pointer group">
-                                      <input 
-                                          type="radio" 
-                                          name="duration" 
-                                          value={10} 
-                                          checked={duration === 10} 
-                                          onChange={() => setDuration(10)}
-                                          className="accent-green-500 w-3 h-3"
-                                      />
-                                      <span className="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
-                                          <span className="text-green-500 font-bold">10</span> seconds (<span className="text-green-500 font-bold">7</span> points deduction)
-                                      </span>
-                                  </label>
-                              </>
-                          ) : (
-                              <>
-                                  <label className="flex items-center gap-1.5 cursor-pointer group">
-                                      <input 
-                                          type="radio" 
-                                          name="duration" 
-                                          value={10} 
-                                          checked={duration === 10} 
-                                          onChange={() => setDuration(10)}
-                                          className="accent-green-500 w-3 h-3"
-                                      />
-                                      <span className="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
-                                          <span className="text-green-500 font-bold">10</span> seconds (<span className="text-green-500 font-bold">4</span> points deduction)
-                                      </span>
-                                  </label>
-                                  <label className="flex items-center gap-1.5 cursor-pointer group">
-                                      <input 
-                                          type="radio" 
-                                          name="duration" 
-                                          value={5} 
-                                          checked={duration === 5} 
-                                          onChange={() => setDuration(5)}
-                                          className="accent-green-500 w-3 h-3"
-                                      />
-                                      <span className="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
-                                          <span className="text-green-500 font-bold">5</span> seconds (<span className="text-green-500 font-bold">2</span> points deduction)
-                                      </span>
-                                  </label>
-                              </>
-                          )}
+                          <label className="flex items-center gap-1.5 cursor-pointer group">
+                              <input 
+                                  type="radio" 
+                                  name="duration" 
+                                  value={5} 
+                                  checked={duration === 5} 
+                                  onChange={() => setDuration(5)}
+                                  className="accent-green-500 w-3 h-3"
+                              />
+                              <span className="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
+                                  <span className="text-green-500 font-bold">5</span> seconds (<span className="text-green-500 font-bold">3</span> points deduction)
+                              </span>
+                          </label>
+                          <label className="flex items-center gap-1.5 cursor-pointer group">
+                              <input 
+                                  type="radio" 
+                                  name="duration" 
+                                  value={8} 
+                                  checked={duration === 8} 
+                                  onChange={() => setDuration(8)}
+                                  className="accent-green-500 w-3 h-3"
+                              />
+                              <span className="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
+                                  <span className="text-green-500 font-bold">8</span> seconds (<span className="text-green-500 font-bold">5</span> points deduction)
+                              </span>
+                          </label>
+                          <label className="flex items-center gap-1.5 cursor-pointer group">
+                              <input 
+                                  type="radio" 
+                                  name="duration" 
+                                  value={10} 
+                                  checked={duration === 10} 
+                                  onChange={() => setDuration(10)}
+                                  className="accent-green-500 w-3 h-3"
+                              />
+                              <span className="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
+                                  <span className="text-green-500 font-bold">10</span> seconds (<span className="text-green-500 font-bold">7</span> points deduction)
+                              </span>
+                          </label>
+                      </div>
+                  )}
                       </div>
                   )}
 

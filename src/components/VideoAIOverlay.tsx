@@ -582,6 +582,25 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
           <RotateCcw className="w-3 h-3" />
           Try Again
         </button>
+
+      <button
+        onClick={() => {
+            setGeneratedVideos(prev => {
+                const updated = prev.filter(v => v.id !== video.id);
+                if (userId) {
+                    localStorage.setItem(`generatedVideos_${userId}`, JSON.stringify(updated));
+                }
+                return updated;
+            });
+            if (videoUrl === video.url) {
+                setVideoUrl(null);
+            }
+        }}
+        className="mt-2 w-full bg-red-500/10 border border-red-500/20 hover:border-red-500 hover:bg-red-500/20 text-red-500 text-[10px] py-1.5 rounded-lg transition-all uppercase tracking-wider font-bold flex items-center justify-center gap-2"
+      >
+        <Trash2 className="w-3 h-3" />
+        Delete
+      </button>
     </div>
   ));
 

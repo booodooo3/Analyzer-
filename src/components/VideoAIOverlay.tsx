@@ -950,8 +950,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                           </label>
                       </div>
                   )}
-                      </div>
-                  )}
 
 
 

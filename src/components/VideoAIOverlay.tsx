@@ -348,25 +348,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       }
     }
     
-    // Check payload size roughly
-    let totalSize = 0;
-    const calculateBase64Size = (base64String: string) => {
-        if (!base64String) return 0;
-        const padding = (base64String.match(/=/g) || []).length;
-        return (base64String.length * (3/4)) - padding;
-    };
-    
-    images.forEach(img => { if (img?.base64) totalSize += calculateBase64Size(img.base64); });
-    referenceImages.forEach(img => { if (img?.base64) totalSize += calculateBase64Size(img.base64); });
-    referenceVideos.forEach(vid => { if (vid?.base64) totalSize += calculateBase64Size(vid.base64); });
-    if (referenceAudios?.base64) totalSize += calculateBase64Size(referenceAudios.base64);
-    
-    // Netlify limit is ~6MB. Let's warn if > 5.5MB
-    if (totalSize > 5.5 * 1024 * 1024) {
-        setError(`Total file size is too large (${(totalSize / 1024 / 1024).toFixed(1)}MB). Netlify server limit is 6MB. Please use smaller files or fewer references.`);
-        return;
-    }
-    
     // If textToVideo mode, we MUST have a description
     if (generationMode === 'textToVideo' && !description.trim()) {
         setError('Please enter a description for the video');

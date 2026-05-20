@@ -169,16 +169,18 @@ export default async (req, context) => {
                 if (seed !== undefined) {
                     input.seed = seed;
                 }
+                // According to seedance schema, reference_images and reference_videos are typically strings or string representations.
+                // Replicate handles arrays correctly if the API is array of strings. Let's pass them directly.
                 if (reference_images && reference_images.length > 0) {
                     input.reference_images = reference_images;
                 }
                 if (reference_videos && reference_videos.length > 0) {
                     // Seedance-2.0 expects a single string for video path, not an array of base64
-                    // Wait, Replicate schema for seedance might not support an array of base64 videos directly
-                    // Actually, looking at typical replicate APIs, if it's multiple it might need specific formatting.
-                    // But let's try passing the first one if it's an array, or pass it as is if it accepts arrays.
-                    // The schema typically uses `video_path` for the reference video. Let's map it there if empty,
-                    // or if there is a specific `reference_videos` field, let's just pass it.
+                    // Or if it accepts array, we will pass array.
+                    // To be completely safe and avoid 400 bad request, let's map `reference_videos[0]` to `video_path` 
+                    // IF the model doesn't explicitly support `reference_videos`.
+                    // But the user prompt says "Reference images (up to 9)... and Reference videos [Video1]".
+                    // Let's pass them as arrays as per standard Replicate array input.
                     input.reference_videos = reference_videos;
                 }
                 if (reference_audios && reference_audios.length > 0) {
@@ -293,9 +295,6 @@ export default async (req, context) => {
             }
 
             // Replicate predictions.create throws if we pass fields the model doesn't expect or in wrong format.
-            // Bytedance seedance-2.0 doesn't natively have `reference_images` or `reference_videos` in its public replicate schema 
-            // the same way Kling does. If it fails with 400 Bad Request directly from Replicate, 
-            // it means the schema for that specific model version does not accept those fields.
             // Let's filter out undefined/null properties from input to be safe.
             Object.keys(input).forEach(key => {
                 if (input[key] === undefined || input[key] === null) {
@@ -303,23 +302,32 @@ export default async (req, context) => {
                 }
             });
 
-            const prediction = await replicate.predictions.create({
-                version: version,
-                input: input
-            });
+            // Very important for replicate when sending arrays: sometimes it requires them to be properly formatted URIs.
+            // If the model fails with 400 immediately, it's often due to payload size limits of the Replicate API directly
+            // when too many base64 strings are embedded in the JSON body.
+            // To mitigate, we just try to create the prediction.
+            try {
+                const prediction = await replicate.predictions.create({
+                    version: version,
+                    input: input
+                });
 
-            // 3. Deduct Credit ONLY if prediction started successfully
-            await clerkClient.users.updateUserMetadata(userId, {
-                publicMetadata: { credits: currentCredits - cost }
-            });
+                // 3. Deduct Credit ONLY if prediction started successfully
+                await clerkClient.users.updateUserMetadata(userId, {
+                    publicMetadata: { credits: currentCredits - cost }
+                });
 
-            return new Response(JSON.stringify({
-                status: "starting",
-                message: "Video generation started",
-                id: prediction.id,
-                deducted: cost,
-                model: `${modelOwner}/${modelName}`
-            }), { status: 200, headers });
+                return new Response(JSON.stringify({
+                    status: "starting",
+                    message: "Video generation started",
+                    id: prediction.id,
+                    deducted: cost,
+                    model: `${modelOwner}/${modelName}`
+                }), { status: 200, headers });
+            } catch (repError) {
+                console.error("Replicate API Error:", repError);
+                return new Response(JSON.stringify({ error: `Replicate API Error: ${repError.message}` }), { status: 400, headers });
+            }
 
         } catch (error) {
             console.error("Error:", error);

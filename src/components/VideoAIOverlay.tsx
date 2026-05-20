@@ -35,7 +35,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [showLipSync, setShowLipSync] = useState(false);
   const [lipSyncAudio, setLipSyncAudio] = useState<{ base64: string, name: string } | null>(null);
   const [videoInput, setVideoInput] = useState<{ base64: string, name: string } | null>(null);
-  const [referenceImages, setReferenceImages] = useState<{ base64: string, name: string } | null>(null);
+  const [referenceImages, setReferenceImages] = useState<{ base64: string, name: string }[]>([]);
+  const [referenceVideos, setReferenceVideos] = useState<{ base64: string, name: string }[]>([]);
   const [referenceAudios, setReferenceAudios] = useState<{ base64: string, name: string } | null>(null);
   const [characterOrientation, setCharacterOrientation] = useState<'video' | 'image'>('video');
   const [pendingVideoId, setPendingVideoId] = useState<string | null>(null);
@@ -272,21 +273,49 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   };
 
   const handleReferenceImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 9) {
+      setError("You can only upload up to 9 reference images.");
+      return;
+    }
+    
+    setReferenceImages([]);
+    
+    files.forEach(file => {
       if (file.size > 10 * 1024 * 1024) {
-        setError("Reference image is too large. Max 10MB.");
+        setError("One of the reference images is too large. Max 10MB per image.");
         return;
       }
       const reader = new FileReader();
       reader.onloadend = () => {
-        setReferenceImages({
+        setReferenceImages(prev => [...prev, {
           base64: reader.result as string,
           name: file.name
-        });
+        }]);
       };
       reader.readAsDataURL(file);
-    }
+    });
+  };
+
+  const handleReferenceVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    
+    setReferenceVideos([]);
+    
+    files.forEach(file => {
+      if (file.size > 50 * 1024 * 1024) { // Allow up to 50MB for videos
+        setError("One of the reference videos is too large. Max 50MB per video.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setReferenceVideos(prev => [...prev, {
+          base64: reader.result as string,
+          name: file.name
+        }]);
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleReferenceAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -313,7 +342,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
     // If we're in imageToVideo mode, we MUST have at least one image or reference image
     if (generationMode === 'imageToVideo') {
       const primaryImage = images.find(img => img !== null);
-      if (!primaryImage && !referenceImages) return;
+      if (!primaryImage && referenceImages.length === 0 && referenceVideos.length === 0) return;
     }
     
     // If textToVideo mode, we MUST have a description
@@ -367,8 +396,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       if (generationMode === 'imageToVideo') {
           if (primaryImage) {
               processedImage = await processImage(primaryImage.base64);
-          } else if (referenceImages) {
-              processedImage = await processImage(referenceImages.base64);
+          } else if (referenceImages.length > 0) {
+              processedImage = await processImage(referenceImages[0].base64);
           }
       }
       const processedImage2 = generationMode === 'imageToVideo' && images[1] ? await processImage(images[1].base64) : null;
@@ -394,7 +423,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
           audioFile: audioFile?.base64,
           videoInput: videoInput?.base64,
           characterOrientation,
-          reference_images: referenceImages?.base64,
+          reference_images: referenceImages.length > 0 ? referenceImages.map(img => img.base64) : undefined,
+          reference_videos: referenceVideos.length > 0 ? referenceVideos.map(vid => vid.base64) : undefined,
           reference_audios: referenceAudios?.base64
         })
       });
@@ -578,7 +608,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
             // Add a clean state reset when trying again from a specific video
             setVideoUrl(null);
             setImages([null, null]);
-            setReferenceImages(null);
+            setReferenceImages([]);
+            setReferenceVideos([]);
             setReferenceAudios(null);
             setDescription('');
         }}
@@ -1031,22 +1062,43 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                         />
                       </div>
                     </div>
-                    <div className="flex gap-4">
+                    <div className="flex flex-col gap-4">
                       <div className="flex-1">
-                        <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Reference Image (Optional)</label>
+                        <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Reference Images (Optional)</label>
+                        <p className="text-[10px] text-zinc-500 mb-2">Reference images (up to 9) for character consistency, style guidance, and scene composition. Cannot be used together with first/last frame images. You can reference them in your prompt as [Image1], [Image2], etc.</p>
                         <div className="relative group mt-1">
                             <input
                                 type="file"
+                                multiple
                                 accept="image/jpeg,image/png,image/webp"
                                 onChange={handleReferenceImageUpload}
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                             />
-                            <button className={`w-full flex items-center justify-center gap-2 bg-zinc-900/50 hover:bg-zinc-800 border border-dashed py-2.5 rounded-xl transition-all ${referenceImages && referenceAudios ? 'border-yellow-500 text-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.5)]' : referenceImages ? 'border-green-500 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)]' : 'border-zinc-700 hover:border-green-500/50 text-zinc-400 hover:text-green-400'}`}>
+                            <button className={`w-full flex items-center justify-center gap-2 bg-zinc-900/50 hover:bg-zinc-800 border border-dashed py-2.5 rounded-xl transition-all ${referenceImages.length > 0 && referenceAudios ? 'border-yellow-500 text-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.5)]' : referenceImages.length > 0 ? 'border-green-500 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)]' : 'border-zinc-700 hover:border-green-500/50 text-zinc-400 hover:text-green-400'}`}>
                                 <Upload className="w-4 h-4" />
-                                <span className="text-xs font-medium">{referenceImages ? referenceImages.name : 'Upload Reference Image'}</span>
+                                <span className="text-xs font-medium">{referenceImages.length > 0 ? `${referenceImages.length} images selected` : 'Upload Reference Images (Max 9)'}</span>
                             </button>
                         </div>
                       </div>
+                      
+                      <div className="flex-1">
+                        <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Reference Videos (Optional)</label>
+                        <p className="text-[10px] text-zinc-500 mb-2">For motion transfer, style reference, and editing. Reference them in your prompt as [Video1], [Video2], etc.</p>
+                        <div className="relative group mt-1">
+                            <input
+                                type="file"
+                                multiple
+                                accept="video/mp4,video/webm,video/quicktime"
+                                onChange={handleReferenceVideoUpload}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            />
+                            <button className={`w-full flex items-center justify-center gap-2 bg-zinc-900/50 hover:bg-zinc-800 border border-dashed py-2.5 rounded-xl transition-all ${referenceVideos.length > 0 ? 'border-blue-500 text-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'border-zinc-700 hover:border-blue-500/50 text-zinc-400 hover:text-blue-400'}`}>
+                                <Upload className="w-4 h-4" />
+                                <span className="text-xs font-medium">{referenceVideos.length > 0 ? `${referenceVideos.length} videos selected` : 'Upload Reference Videos'}</span>
+                            </button>
+                        </div>
+                      </div>
+
                       <div className="flex-1">
                         <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Reference Audio (Optional)</label>
                         <div className="relative group mt-1">
@@ -1056,7 +1108,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                 onChange={handleReferenceAudioUpload}
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                             />
-                            <button className={`w-full flex items-center justify-center gap-2 bg-zinc-900/50 hover:bg-zinc-800 border border-dashed py-2.5 rounded-xl transition-all ${referenceImages && referenceAudios ? 'border-yellow-500 text-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.5)]' : referenceAudios ? 'border-blue-500 text-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'border-zinc-700 hover:border-blue-500/50 text-zinc-400 hover:text-blue-400'}`}>
+                            <button className={`w-full flex items-center justify-center gap-2 bg-zinc-900/50 hover:bg-zinc-800 border border-dashed py-2.5 rounded-xl transition-all ${referenceAudios ? 'border-purple-500 text-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.2)]' : 'border-zinc-700 hover:border-purple-500/50 text-zinc-400 hover:text-purple-400'}`}>
                                 <Upload className="w-4 h-4" />
                                 <span className="text-xs font-medium">{referenceAudios ? referenceAudios.name : 'Upload Reference Audio'}</span>
                             </button>

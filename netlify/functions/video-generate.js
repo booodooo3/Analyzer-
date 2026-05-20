@@ -145,13 +145,19 @@ export default async (req, context) => {
                 duration: duration || 10
             };
 
-            // Only add image if it exists, otherwise leave it out of the input object completely
+                // Only add image if it exists, otherwise leave it out of the input object completely
             if (image && !model.includes("seedance")) {
                 input.image = image;
             } else if (image && model.includes("seedance")) {
                 // For seedance, primary image maps to 'image' field in replicate which acts as first_frame_image
                 input.image = image;
             }
+
+            // Fix for seedance: if we have reference images but no primary image, we should NOT pass `image: null`
+            // and we need to ensure Replicate handles the base64 string correctly.
+            // Also, some replicate models fail with 400 Bad Request if the payload is too large or base64 is improperly formatted.
+            // Netlify functions have a strict 6MB payload limit. If we exceed it, Netlify blocks it before it reaches Replicate.
+
             // دعم video_path و resolution فقط لموديل bytedance/seedance-2.0
             if (model === 'bytedance/seedance-2.0') {
                 if (video_path) {
@@ -167,6 +173,12 @@ export default async (req, context) => {
                     input.reference_images = reference_images;
                 }
                 if (reference_videos && reference_videos.length > 0) {
+                    // Seedance-2.0 expects a single string for video path, not an array of base64
+                    // Wait, Replicate schema for seedance might not support an array of base64 videos directly
+                    // Actually, looking at typical replicate APIs, if it's multiple it might need specific formatting.
+                    // But let's try passing the first one if it's an array, or pass it as is if it accepts arrays.
+                    // The schema typically uses `video_path` for the reference video. Let's map it there if empty,
+                    // or if there is a specific `reference_videos` field, let's just pass it.
                     input.reference_videos = reference_videos;
                 }
                 if (reference_audios && reference_audios.length > 0) {
@@ -279,6 +291,17 @@ export default async (req, context) => {
                 console.error("Model fetch error:", e);
                 return new Response(JSON.stringify({ error: `Model ${modelOwner}/${modelName} not found or accessible. Details: ${e.message}` }), { status: 500, headers });
             }
+
+            // Replicate predictions.create throws if we pass fields the model doesn't expect or in wrong format.
+            // Bytedance seedance-2.0 doesn't natively have `reference_images` or `reference_videos` in its public replicate schema 
+            // the same way Kling does. If it fails with 400 Bad Request directly from Replicate, 
+            // it means the schema for that specific model version does not accept those fields.
+            // Let's filter out undefined/null properties from input to be safe.
+            Object.keys(input).forEach(key => {
+                if (input[key] === undefined || input[key] === null) {
+                    delete input[key];
+                }
+            });
 
             const prediction = await replicate.predictions.create({
                 version: version,

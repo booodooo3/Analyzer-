@@ -430,8 +430,23 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to start video generation');
+        let errorMessage = 'Failed to start video generation';
+        try {
+            const text = await response.text();
+            if (text) {
+                try {
+                    const data = JSON.parse(text);
+                    errorMessage = data.error || errorMessage;
+                } catch (e) {
+                    errorMessage = `Server error (${response.status}): Payload may be too large. Try smaller or fewer files.`;
+                }
+            } else {
+                errorMessage = `Server error (${response.status}): Empty response.`;
+            }
+        } catch (e) {
+            errorMessage = `Server error (${response.status})`;
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -501,8 +516,23 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         });
 
         if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.error || 'Failed to start lip sync');
+            let errorMessage = 'Failed to start lip sync';
+            try {
+                const text = await response.text();
+                if (text) {
+                    try {
+                        const data = JSON.parse(text);
+                        errorMessage = data.error || errorMessage;
+                    } catch (e) {
+                        errorMessage = `Server error (${response.status}): Payload may be too large.`;
+                    }
+                } else {
+                    errorMessage = `Server error (${response.status}): Empty response.`;
+                }
+            } catch (e) {
+                errorMessage = `Server error (${response.status})`;
+            }
+            throw new Error(errorMessage);
         }
 
         const data = await response.json();

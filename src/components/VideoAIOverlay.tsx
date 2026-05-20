@@ -309,18 +309,28 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
   const handleReferenceVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
+    const currentCount = referenceVideos.length;
     
-    setReferenceVideos([]);
+    if (currentCount + files.length > 5) { // Limit to 5 reference videos
+      setError("You can only upload up to 5 reference videos.");
+      return;
+    }
     
     files.forEach(file => {
-      if (file.size > 50 * 1024 * 1024) { // Allow up to 50MB for videos
+      if (file.size > 50 * 1024 * 1024) { // 50MB limit
         setError("One of the reference videos is too large. Max 50MB per video.");
         return;
       }
-      setReferenceVideos(prev => [...prev, {
-        file,
-        name: file.name
-      }]);
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setReferenceVideos(prev => [...prev, {
+          file,
+          name: file.name,
+          base64: reader.result as string
+        }]);
+      };
+      reader.readAsDataURL(file);
     });
   };
 
@@ -335,10 +345,11 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       reader.onloadend = () => {
         setReferenceAudios({
           file,
-          name: file.name
+          name: file.name,
+          base64: reader.result as string
         });
       };
-      reader.readAsArrayBuffer(file);
+      reader.readAsDataURL(file);
     }
   };
 
@@ -435,9 +446,9 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
           audioFile: audioFile?.base64,
           videoInput: videoInput?.base64,
           characterOrientation,
-          reference_images: referenceImages.length > 0 ? referenceImages.map(img => img.base64) : undefined,
-          reference_videos: referenceVideos.length > 0 ? referenceVideos.map(vid => vid.base64) : undefined,
-          reference_audios: referenceAudios?.base64
+          reference_images: referenceImages.filter(img => img.base64).map(img => img.base64),
+          reference_videos: referenceVideos.filter(vid => vid.base64).map(vid => vid.base64),
+          reference_audios: referenceAudios?.base64 ? [referenceAudios.base64] : undefined
         })
       });
 
@@ -1165,6 +1176,30 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                 <span className="text-xs font-medium">{referenceVideos.length > 0 ? `${referenceVideos.length} videos selected` : 'Upload Reference Videos'}</span>
                             </button>
                         </div>
+                        
+                        {/* Reference Videos Preview */}
+                        {referenceVideos.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-zinc-700">
+                            {referenceVideos.map((vid, idx) => (
+                              <div key={idx} className="relative group flex-shrink-0">
+                                {vid.base64 && (
+                                  <div className="w-16 h-16 rounded-lg bg-zinc-800 border border-white/10 flex items-center justify-center overflow-hidden">
+                                    <video src={vid.base64} className="w-full h-full object-cover" />
+                                  </div>
+                                )}
+                                <button
+                                  onClick={() => setReferenceVideos(prev => prev.filter((_, i) => i !== idx))}
+                                  className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-20"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                                <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-[8px] text-white text-center py-0.5 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                                  Vid{idx + 1}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
                       <div className="flex-1">
@@ -1181,6 +1216,24 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                 <span className="text-xs font-medium">{referenceAudios ? referenceAudios.name : 'Upload Reference Audio'}</span>
                             </button>
                         </div>
+                        
+                        {/* Reference Audio Preview */}
+                        {referenceAudios && (
+                          <div className="mt-2 flex items-center gap-3 bg-purple-500/5 border border-purple-500/20 px-3 py-2 rounded-xl">
+                            <div className="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400">
+                                <Mic className="w-3 h-3" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-[10px] font-medium text-purple-400 truncate">{referenceAudios.name}</p>
+                            </div>
+                            <button 
+                                onClick={() => setReferenceAudios(null)}
+                                className="p-1 hover:bg-red-500/10 rounded-lg text-zinc-500 hover:text-red-400 transition-colors"
+                            >
+                                <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </>

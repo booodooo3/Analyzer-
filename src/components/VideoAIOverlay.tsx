@@ -339,10 +339,13 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   if (!isOpen) return null;
 
   const handleConvert = async () => {
-    // If we're in imageToVideo mode, we MUST have at least one image or reference image
+    // If we're in imageToVideo mode, we MUST have at least one image or reference image or reference video
     if (generationMode === 'imageToVideo') {
       const primaryImage = images.find(img => img !== null);
-      if (!primaryImage && referenceImages.length === 0 && referenceVideos.length === 0) return;
+      if (!primaryImage && referenceImages.length === 0 && referenceVideos.length === 0) {
+        setError('Please upload an image, reference image, or reference video.');
+        return;
+      }
     }
     
     // If textToVideo mode, we MUST have a description
@@ -396,9 +399,12 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       if (generationMode === 'imageToVideo') {
           if (primaryImage) {
               processedImage = await processImage(primaryImage.base64);
-          } else if (referenceImages.length > 0) {
-              processedImage = await processImage(referenceImages[0].base64);
           }
+          // We intentionally DO NOT set processedImage to a reference image here.
+          // The API expects 'image' to be the first_frame_image.
+          // If we pass a reference_image to 'image', the model might complain about missing first_frame_image
+          // while getting a reference image, or we might double-pass it.
+          // We leave processedImage as null if there's no primary image.
       }
       const processedImage2 = generationMode === 'imageToVideo' && images[1] ? await processImage(images[1].base64) : null;
 
@@ -1171,7 +1177,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
               <Button 
                   onClick={handleConvert}
-                  disabled={(generationMode === 'imageToVideo' && activeImageCount === 0 && !referenceImages) || isConverting || (generationMode === 'textToVideo' && !description.trim())}
+                  disabled={(generationMode === 'imageToVideo' && activeImageCount === 0 && referenceImages.length === 0 && referenceVideos.length === 0) || isConverting || (generationMode === 'textToVideo' && !description.trim())}
                   isLoading={isConverting}
                   className={`w-full font-bold py-4 rounded-xl transition-all duration-300 ${
                     isConverting 

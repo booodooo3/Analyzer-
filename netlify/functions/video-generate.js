@@ -74,7 +74,7 @@ export default async (req, context) => {
             if (model === 'bytedance/omni-human' || model === 'kwaivgi/kling-lip-sync' || model === 'pixverse/lipsync') {
                 cost = 2;
             }
-            if (!image && model === 'bytedance/seedance-2.0') {
+            if (!image && model === 'bytedance/seedance-2.0' && !reference_images && !reference_videos) {
                 cost = 5; // Cost for text to video
             }
 
@@ -146,7 +146,10 @@ export default async (req, context) => {
             };
 
             // Only add image if it exists, otherwise leave it out of the input object completely
-            if (image) {
+            if (image && !model.includes("seedance")) {
+                input.image = image;
+            } else if (image && model.includes("seedance")) {
+                // For seedance, primary image maps to 'image' field in replicate which acts as first_frame_image
                 input.image = image;
             }
             // دعم video_path و resolution فقط لموديل bytedance/seedance-2.0
@@ -160,13 +163,13 @@ export default async (req, context) => {
                 if (seed !== undefined) {
                     input.seed = seed;
                 }
-                if (reference_images) {
-                    input.reference_images = Array.isArray(reference_images) ? reference_images : [reference_images];
+                if (reference_images && reference_images.length > 0) {
+                    input.reference_images = reference_images;
                 }
-                if (reference_videos) {
-                    input.reference_videos = Array.isArray(reference_videos) ? reference_videos : [reference_videos];
+                if (reference_videos && reference_videos.length > 0) {
+                    input.reference_videos = reference_videos;
                 }
-                if (reference_audios) {
+                if (reference_audios && reference_audios.length > 0) {
                     input.reference_audios = Array.isArray(reference_audios) ? reference_audios : [reference_audios];
                 }
             }

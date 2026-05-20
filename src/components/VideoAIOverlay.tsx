@@ -12,6 +12,12 @@ interface VideoAIOverlayProps {
   getToken: () => Promise<string | null>;
 }
 
+interface UploadedAsset {
+  file: File;
+  name: string;
+  base64?: string;
+}
+
 export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose, getToken }) => {
   const [images, setImages] = useState<(ImageData | null)[]>([null, null]);
   const [description, setDescription] = useState('');
@@ -30,14 +36,14 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [processingTime, setProcessingTime] = useState(0);
   const [generatedVideos, setGeneratedVideos] = useState<{ id: string, url: string, timestamp: number }[]>([]);
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
-  const [audioFile, setAudioFile] = useState<{ base64: string, name: string } | null>(null);
+  const [audioFile, setAudioFile] = useState<{ base64: string, name: string, file?: File } | null>(null);
   const [statusMessage, setStatusMessage] = useState('Processing Video');
   const [showLipSync, setShowLipSync] = useState(false);
   const [lipSyncAudio, setLipSyncAudio] = useState<{ base64: string, name: string } | null>(null);
-  const [videoInput, setVideoInput] = useState<{ base64: string, name: string } | null>(null);
-  const [referenceImages, setReferenceImages] = useState<{ base64: string, name: string }[]>([]);
-  const [referenceVideos, setReferenceVideos] = useState<{ base64: string, name: string }[]>([]);
-  const [referenceAudios, setReferenceAudios] = useState<{ base64: string, name: string } | null>(null);
+  const [videoInput, setVideoInput] = useState<{ base64: string, name: string, file?: File } | null>(null);
+  const [referenceImages, setReferenceImages] = useState<UploadedAsset[]>([]);
+  const [referenceVideos, setReferenceVideos] = useState<UploadedAsset[]>([]);
+  const [referenceAudios, setReferenceAudios] = useState<UploadedAsset | null>(null);
   const [characterOrientation, setCharacterOrientation] = useState<'video' | 'image'>('video');
   const [pendingVideoId, setPendingVideoId] = useState<string | null>(null);
   const [generationMode, setGenerationMode] = useState<'imageToVideo' | 'textToVideo'>('imageToVideo');
@@ -246,7 +252,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       reader.onloadend = () => {
         setAudioFile({
           base64: reader.result as string,
-          name: file.name
+          name: file.name,
+          file
         });
       };
       reader.readAsDataURL(file);
@@ -265,7 +272,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       reader.onloadend = () => {
         setVideoInput({
           base64: reader.result as string,
-          name: file.name
+          name: file.name,
+          file
         });
       };
       reader.readAsDataURL(file);
@@ -274,23 +282,25 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
   const handleReferenceImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    if (files.length > 9) {
+    const currentCount = referenceImages.length;
+    
+    if (currentCount + files.length > 9) {
       setError("You can only upload up to 9 reference images.");
       return;
     }
-    
-    setReferenceImages([]);
     
     files.forEach(file => {
       if (file.size > 10 * 1024 * 1024) {
         setError("One of the reference images is too large. Max 10MB per image.");
         return;
       }
+      
       const reader = new FileReader();
       reader.onloadend = () => {
         setReferenceImages(prev => [...prev, {
-          base64: reader.result as string,
-          name: file.name
+          file,
+          name: file.name,
+          base64: reader.result as string
         }]);
       };
       reader.readAsDataURL(file);
@@ -307,14 +317,10 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         setError("One of the reference videos is too large. Max 50MB per video.");
         return;
       }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setReferenceVideos(prev => [...prev, {
-          base64: reader.result as string,
-          name: file.name
-        }]);
-      };
-      reader.readAsDataURL(file);
+      setReferenceVideos(prev => [...prev, {
+        file,
+        name: file.name
+      }]);
     });
   };
 
@@ -328,11 +334,11 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       const reader = new FileReader();
       reader.onloadend = () => {
         setReferenceAudios({
-          base64: reader.result as string,
+          file,
           name: file.name
         });
       };
-      reader.readAsDataURL(file);
+      reader.readAsArrayBuffer(file);
     }
   };
 
@@ -1115,6 +1121,32 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                 <span className="text-xs font-medium">{referenceImages.length > 0 ? `${referenceImages.length} images selected` : 'Upload Reference Images (Max 9)'}</span>
                             </button>
                         </div>
+                        
+                        {/* Reference Images Preview */}
+                        {referenceImages.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-zinc-700">
+                            {referenceImages.map((img, idx) => (
+                              <div key={idx} className="relative group flex-shrink-0">
+                                {img.base64 && (
+                                  <img 
+                                    src={img.base64} 
+                                    alt={`Ref ${idx + 1}`} 
+                                    className="w-16 h-16 rounded-lg object-cover border border-white/10 group-hover:border-green-500/50 transition-colors"
+                                  />
+                                )}
+                                <button
+                                  onClick={() => setReferenceImages(prev => prev.filter((_, i) => i !== idx))}
+                                  className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                                <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-[8px] text-white text-center py-0.5 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                                  Img{idx + 1}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       
                       <div className="flex-1">

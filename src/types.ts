@@ -2,6 +2,7 @@ export interface ImageData {
   base64: string;
   mimeType: string;
   url?: string;
+  file?: File;
 }
 
 export enum AppState {

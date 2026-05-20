@@ -21,7 +21,8 @@ export const ImageUploader: React.FC<UploaderProps> = ({ description, currentIma
       reader.onloadend = () => {
         onImageSelected({
           base64: reader.result as string,
-          mimeType: file.type
+          mimeType: file.type,
+          file
         });
       };
       reader.readAsDataURL(file);

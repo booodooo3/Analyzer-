@@ -109,29 +109,53 @@ export const performVirtualTryOn = async (person: ImageData, cloth: ImageData, t
     const pollInterval = 3000; // 3 seconds
     const maxAttempts = 100; // 5 minutes timeout
     let attempts = 0;
+    let consecutiveFetchErrors = 0;
+    const maxConsecutiveFetchErrors = 5;
 
     while (attempts < maxAttempts) {
         attempts++;
         await new Promise(r => setTimeout(r, pollInterval));
 
-        const statusResponse = await fetch(`/api/generate?id=${encodeURIComponent(predictionId)}`, {
-             headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (!statusResponse.ok) continue;
+        try {
+            const statusResponse = await fetch(`/api/generate?id=${encodeURIComponent(predictionId)}`, {
+                 headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            // Reset error counter on successful fetch
+            consecutiveFetchErrors = 0;
 
-        const statusData = await statusResponse.json();
-        
-        if (statusData.status === 'succeeded') {
-             return {
-                front: statusData.output.front,
-                side: statusData.output.side || statusData.output.front,
-                full: statusData.output.full || statusData.output.front
-             };
-        }
+            if (!statusResponse.ok) {
+                // If it's a server error but the request reached the server, we might want to wait and try again
+                if (statusResponse.status >= 500) {
+                    continue;
+                }
+                const errorData = await statusResponse.json().catch(() => ({}));
+                throw new Error(errorData.error || `Server Error: ${statusResponse.status}`);
+            }
 
-        if (statusData.status === 'failed' || statusData.status === 'canceled') {
-            throw new Error(`Generation failed: ${statusData.error || 'Unknown error'}`);
+            const statusData = await statusResponse.json();
+            
+            if (statusData.status === 'succeeded') {
+                 return {
+                    front: statusData.output.front,
+                    side: statusData.output.side || statusData.output.front,
+                    full: statusData.output.full || statusData.output.front
+                 };
+            }
+
+            if (statusData.status === 'failed' || statusData.status === 'canceled') {
+                throw new Error(`Generation failed: ${statusData.error || 'Unknown error'}`);
+            }
+        } catch (fetchErr: any) {
+            consecutiveFetchErrors++;
+            console.warn(`Fetch attempt ${attempts} failed (${consecutiveFetchErrors}/${maxConsecutiveFetchErrors}):`, fetchErr);
+            
+            // If we hit too many consecutive fetch errors (like "Failed to fetch"), then give up
+            if (consecutiveFetchErrors >= maxConsecutiveFetchErrors) {
+                throw new Error(`Network Error: Connection lost during generation. Please check your internet. (${fetchErr.message})`);
+            }
+            // Otherwise, just continue to the next attempt (wait and try again)
+            continue;
         }
         
         // If 'starting' or 'processing', continue loop
@@ -191,23 +215,41 @@ export const generateHairStyle = async (
     const pollInterval = 3000;
     const maxAttempts = 100;
     let attempts = 0;
+    let consecutiveFetchErrors = 0;
+    const maxConsecutiveFetchErrors = 5;
 
     while (attempts < maxAttempts) {
         attempts++;
         await new Promise(r => setTimeout(r, pollInterval));
 
-        const statusResponse = await fetch(`/api/hair-styler?id=${encodeURIComponent(predictionId)}`, {
-             headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (!statusResponse.ok) continue;
+        try {
+            const statusResponse = await fetch(`/api/hair-styler?id=${encodeURIComponent(predictionId)}`, {
+                 headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            // Reset error counter on successful fetch
+            consecutiveFetchErrors = 0;
 
-        const statusData = await statusResponse.json();
+            if (!statusResponse.ok) {
+                if (statusResponse.status >= 500) continue;
+                const errorData = await statusResponse.json().catch(() => ({}));
+                throw new Error(errorData.error || `Server Error: ${statusResponse.status}`);
+            }
 
-        if (statusData.status === 'succeeded') {
-            return statusData.output;
-        } else if (statusData.status === 'failed' || statusData.status === 'canceled') {
-            throw new Error(statusData.error || "Generation failed.");
+            const statusData = await statusResponse.json();
+
+            if (statusData.status === 'succeeded') {
+                return statusData.output;
+            } else if (statusData.status === 'failed' || statusData.status === 'canceled') {
+                throw new Error(statusData.error || "Generation failed.");
+            }
+        } catch (fetchErr: any) {
+            consecutiveFetchErrors++;
+            console.warn(`Fetch attempt ${attempts} failed (${consecutiveFetchErrors}/${maxConsecutiveFetchErrors}):`, fetchErr);
+            if (consecutiveFetchErrors >= maxConsecutiveFetchErrors) {
+                throw new Error(`Network Error: Connection lost during generation. (${fetchErr.message})`);
+            }
+            continue;
         }
     }
     throw new Error("Timeout waiting for generation.");
@@ -265,23 +307,41 @@ export const generateTextToImage = async (
   const pollInterval = 3000;
   const maxAttempts = 100;
   let attempts = 0;
+  let consecutiveFetchErrors = 0;
+  const maxConsecutiveFetchErrors = 5;
 
   while (attempts < maxAttempts) {
     attempts++;
     await new Promise(r => setTimeout(r, pollInterval));
 
-    const statusResponse = await fetch(`/api/text-to-image?id=${encodeURIComponent(predictionId)}`, {
-       headers: { 'Authorization': `Bearer ${token}` }
-    });
-        
-    if (!statusResponse.ok) continue;
+    try {
+      const statusResponse = await fetch(`/api/text-to-image?id=${encodeURIComponent(predictionId)}`, {
+         headers: { 'Authorization': `Bearer ${token}` }
+      });
+          
+      // Reset error counter on successful fetch
+      consecutiveFetchErrors = 0;
 
-    const statusData = await statusResponse.json();
+      if (!statusResponse.ok) {
+        if (statusResponse.status >= 500) continue;
+        const errorData = await statusResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server Error: ${statusResponse.status}`);
+      }
 
-    if (statusData.status === 'succeeded') {
-      return statusData.output;
-    } else if (statusData.status === 'failed' || statusData.status === 'canceled') {
-      throw new Error(statusData.error || "Generation failed.");
+      const statusData = await statusResponse.json();
+
+      if (statusData.status === 'succeeded') {
+        return statusData.output;
+      } else if (statusData.status === 'failed' || statusData.status === 'canceled') {
+        throw new Error(statusData.error || "Generation failed.");
+      }
+    } catch (fetchErr: any) {
+      consecutiveFetchErrors++;
+      console.warn(`Fetch attempt ${attempts} failed (${consecutiveFetchErrors}/${maxConsecutiveFetchErrors}):`, fetchErr);
+      if (consecutiveFetchErrors >= maxConsecutiveFetchErrors) {
+        throw new Error(`Network Error: Connection lost during generation. (${fetchErr.message})`);
+      }
+      continue;
     }
   }
   throw new Error("Timeout waiting for generation.");

@@ -5,6 +5,7 @@ import { ImageUploader } from './ImageUploader';
 import { Button } from './Button';
 import { ImageData } from '../types';
 import HelpModal from './HelpModal';
+import { uploadToCloudinary } from '../utils/cloudinary';
 
 interface VideoAIOverlayProps {
   isOpen: boolean;
@@ -39,7 +40,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [audioFile, setAudioFile] = useState<{ base64: string, name: string, file?: File } | null>(null);
   const [statusMessage, setStatusMessage] = useState('Processing Video');
   const [showLipSync, setShowLipSync] = useState(false);
-  const [lipSyncAudio, setLipSyncAudio] = useState<{ base64: string, name: string } | null>(null);
+  const [lipSyncAudio, setLipSyncAudio] = useState<{ base64: string, name: string, file?: File } | null>(null);
   const [videoInput, setVideoInput] = useState<{ base64: string, name: string, file?: File } | null>(null);
   const [referenceImages, setReferenceImages] = useState<UploadedAsset[]>([]);
   const [referenceVideos, setReferenceVideos] = useState<UploadedAsset[]>([]);
@@ -243,8 +244,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const handleAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
-        setError("Audio file is too large. Max 10MB.");
+      if (file.size > 200 * 1024 * 1024) { // 200MB limit
+        setError("Audio file is too large. Max 200MB.");
         return;
       }
       
@@ -263,8 +264,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit to avoid payload issues
-        setError("Video file is too large. Max 10MB.");
+      if (file.size > 200 * 1024 * 1024) { // 200MB limit
+        setError("Video file is too large. Max 200MB.");
         return;
       }
       
@@ -317,8 +318,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
     }
     
     files.forEach(file => {
-      if (file.size > 50 * 1024 * 1024) { // 50MB limit
-        setError("One of the reference videos is too large. Max 50MB per video.");
+      if (file.size > 200 * 1024 * 1024) { // 200MB limit
+        setError("One of the reference videos is too large. Max 200MB per video.");
         return;
       }
       
@@ -425,6 +426,37 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       }
       const processedImage2 = generationMode === 'imageToVideo' && images[1] ? await processImage(images[1].base64) : null;
 
+      // 1.5 Upload large files to Cloudinary
+      setStatusMessage('Uploading files...');
+      let uploadedAudioUrl = audioFile?.base64;
+      let uploadedVideoUrl = videoInput?.base64;
+      let uploadedRefAudios = referenceAudios?.base64 ? [referenceAudios.base64] : undefined;
+      let uploadedRefVideos = referenceVideos.filter(vid => vid.base64).map(vid => vid.base64 as string);
+
+      if (audioFile?.file) {
+          uploadedAudioUrl = await uploadToCloudinary(audioFile.file);
+      }
+      if (videoInput?.file) {
+          uploadedVideoUrl = await uploadToCloudinary(videoInput.file);
+      }
+      if (referenceAudios?.file) {
+          uploadedRefAudios = [await uploadToCloudinary(referenceAudios.file)];
+      }
+      
+      const uploadedRefVideosUrls = [];
+      for (const vid of referenceVideos) {
+          if (vid.file) {
+              uploadedRefVideosUrls.push(await uploadToCloudinary(vid.file));
+          } else if (vid.base64) {
+              uploadedRefVideosUrls.push(vid.base64);
+          }
+      }
+      if (uploadedRefVideosUrls.length > 0) {
+          uploadedRefVideos = uploadedRefVideosUrls;
+      }
+      
+      setStatusMessage('Processing Video');
+
       // 2. Call API to deduct credits and start generation
       const response = await fetch('/api/video-generate', {
         method: 'POST',
@@ -443,12 +475,12 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
           resolution,
           seed,
           model: selectedModel,
-          audioFile: audioFile?.base64,
-          videoInput: videoInput?.base64,
+          audioFile: uploadedAudioUrl,
+          videoInput: uploadedVideoUrl,
           characterOrientation,
           reference_images: referenceImages.filter(img => img.base64).map(img => img.base64),
-          reference_videos: referenceVideos.filter(vid => vid.base64).map(vid => vid.base64),
-          reference_audios: referenceAudios?.base64 ? [referenceAudios.base64] : undefined
+          reference_videos: uploadedRefVideos,
+          reference_audios: uploadedRefAudios
         })
       });
 
@@ -496,8 +528,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const handleLipSyncUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-        if (file.size > 10 * 1024 * 1024) {
-            alert("File size too large. Please upload a file smaller than 10MB.");
+        if (file.size > 200 * 1024 * 1024) {
+            alert("File size too large. Please upload a file smaller than 200MB.");
             return;
         }
         const reader = new FileReader();
@@ -524,6 +556,13 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
             throw new Error("Authentication failed");
         }
 
+        let finalAudioUrl = lipSyncAudio.base64;
+        if (lipSyncAudio.file) {
+            setStatusMessage('Uploading audio...');
+            finalAudioUrl = await uploadToCloudinary(lipSyncAudio.file);
+            setStatusMessage('Starting Lip Sync...');
+        }
+
         const response = await fetch('/api/video-generate', {
             method: 'POST',
             headers: {
@@ -532,7 +571,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
             },
             body: JSON.stringify({
                 image: videoUrl, // Use video URL for lipsync
-                audioFile: lipSyncAudio.base64,
+                audioFile: finalAudioUrl,
                 model: 'pixverse/lipsync',
                 description: 'Lip Sync' // Placeholder
             })

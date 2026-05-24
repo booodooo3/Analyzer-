@@ -249,15 +249,11 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         return;
       }
       
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAudioFile({
-          base64: reader.result as string,
-          name: file.name,
-          file
-        });
-      };
-      reader.readAsDataURL(file);
+      setAudioFile({
+        base64: URL.createObjectURL(file),
+        name: file.name,
+        file
+      });
     }
   };
 
@@ -269,15 +265,11 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         return;
       }
       
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setVideoInput({
-          base64: reader.result as string,
-          name: file.name,
-          file
-        });
-      };
-      reader.readAsDataURL(file);
+      setVideoInput({
+        base64: URL.createObjectURL(file),
+        name: file.name,
+        file
+      });
     }
   };
 
@@ -323,15 +315,11 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         return;
       }
       
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setReferenceVideos(prev => [...prev, {
-          file,
-          name: file.name,
-          base64: reader.result as string
-        }]);
-      };
-      reader.readAsDataURL(file);
+      setReferenceVideos(prev => [...prev, {
+        file,
+        name: file.name,
+        base64: URL.createObjectURL(file)
+      }]);
     });
   };
 
@@ -342,15 +330,11 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         setError("Reference audio is too large. Max 10MB.");
         return;
       }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setReferenceAudios({
-          file,
-          name: file.name,
-          base64: reader.result as string
-        });
-      };
-      reader.readAsDataURL(file);
+      setReferenceAudios({
+        file,
+        name: file.name,
+        base64: URL.createObjectURL(file)
+      });
     }
   };
 
@@ -431,28 +415,38 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       let uploadedAudioUrl = audioFile?.base64;
       let uploadedVideoUrl = videoInput?.base64;
       let uploadedRefAudios = referenceAudios?.base64 ? [referenceAudios.base64] : undefined;
-      let uploadedRefVideos = referenceVideos.filter(vid => vid.base64).map(vid => vid.base64 as string);
+      let uploadedRefVideos = referenceVideos.filter(vid => vid.base64 && !vid.base64.startsWith('blob:')).map(vid => vid.base64 as string);
 
       if (audioFile?.file) {
           uploadedAudioUrl = await uploadToCloudinary(audioFile.file);
+      } else if (uploadedAudioUrl?.startsWith('blob:')) {
+          uploadedAudioUrl = undefined;
       }
+      
       if (videoInput?.file) {
           uploadedVideoUrl = await uploadToCloudinary(videoInput.file);
+      } else if (uploadedVideoUrl?.startsWith('blob:')) {
+          uploadedVideoUrl = undefined;
       }
+      
       if (referenceAudios?.file) {
           uploadedRefAudios = [await uploadToCloudinary(referenceAudios.file)];
+      } else if (uploadedRefAudios?.[0]?.startsWith('blob:')) {
+          uploadedRefAudios = undefined;
       }
       
       const uploadedRefVideosUrls = [];
       for (const vid of referenceVideos) {
           if (vid.file) {
               uploadedRefVideosUrls.push(await uploadToCloudinary(vid.file));
-          } else if (vid.base64) {
+          } else if (vid.base64 && !vid.base64.startsWith('blob:')) {
               uploadedRefVideosUrls.push(vid.base64);
           }
       }
       if (uploadedRefVideosUrls.length > 0) {
           uploadedRefVideos = uploadedRefVideosUrls;
+      } else {
+          uploadedRefVideos = undefined; // prevent sending empty array if we cleared out blobs
       }
       
       setStatusMessage('Processing Video');
@@ -532,14 +526,11 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
             alert("File size too large. Please upload a file smaller than 200MB.");
             return;
         }
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setLipSyncAudio({
-                base64: reader.result as string,
-                name: file.name
-            });
-        };
-        reader.readAsDataURL(file);
+        setLipSyncAudio({
+            base64: URL.createObjectURL(file),
+            name: file.name,
+            file
+        });
     }
   };
 
@@ -561,6 +552,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
             setStatusMessage('Uploading audio...');
             finalAudioUrl = await uploadToCloudinary(lipSyncAudio.file);
             setStatusMessage('Starting Lip Sync...');
+        } else if (finalAudioUrl?.startsWith('blob:')) {
+            finalAudioUrl = undefined;
         }
 
         const response = await fetch('/api/video-generate', {

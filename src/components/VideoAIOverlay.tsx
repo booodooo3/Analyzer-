@@ -27,7 +27,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [cameraEffect, setCameraEffect] = useState('Static');
   const [aiFilter, setAiFilter] = useState('No Filter');
-  const [helpCategory, setHelpCategory] = useState<'camera' | 'style' | null>(null);
+  const [helpCategory, setHelpCategory] = useState<'camera' | 'style' | 'predictionError' | null>(null);
   const [duration, setDuration] = useState(10);
   const [selectedModel, setSelectedModel] = useState('bytedance/seedance-2.0');
   const [aspectRatio, setAspectRatio] = useState('Match Input Image');
@@ -1014,6 +1014,12 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       <div className="flex flex-col items-end gap-1">
                           <span className="text-[10px] text-white font-bold uppercase tracking-wider">Ai Model</span>
                           <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => setHelpCategory('predictionError')}
+                                className="text-[9px] px-2 py-1 rounded-full bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-500 border border-yellow-500/30 transition-colors tracking-wide uppercase font-bold"
+                              >
+                                Help
+                              </button>
                               {supportsTwoImages && (
                                 <span className="text-[9px] text-white font-bold uppercase tracking-wider animate-in fade-in slide-in-from-right-4">Supports 2 Images</span>
                               )}

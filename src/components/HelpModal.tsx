@@ -4,7 +4,7 @@ import { X, Languages } from 'lucide-react';
 interface HelpModalProps {
   isOpen: boolean;
   onClose: () => void;
-  category?: 'camera' | 'style';
+  category?: 'camera' | 'style' | 'predictionError';
 }
 
 type ContentItem = {
@@ -433,9 +433,14 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, category = 'came
 
   const currentContent = category === 'camera' ? cameraContent[language] : styleContent[language];
   const isRTL = language === 'ar';
-  const modalTitle = category === 'camera' 
-    ? (language === 'en' ? 'Camera Effects Guide' : 'دليل تأثيرات الكاميرا')
-    : (language === 'en' ? 'AI Style Filters Guide' : 'دليل أنماط الذكاء الاصطناعي');
+  let modalTitle = '';
+  if (category === 'camera') {
+    modalTitle = language === 'en' ? 'Camera Effects Guide' : 'دليل تأثيرات الكاميرا';
+  } else if (category === 'style') {
+    modalTitle = language === 'en' ? 'AI Style Filters Guide' : 'دليل أنماط الذكاء الاصطناعي';
+  } else if (category === 'predictionError') {
+    modalTitle = language === 'en' ? 'Prediction Error Fix' : 'حل مشكلة Prediction failed';
+  }
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -470,24 +475,59 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, category = 'came
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
-          {currentContent.map((section, idx) => (
-            <section key={idx} className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
-              <h3 className={`text-lg font-bold ${section.colorClass} border-b ${section.borderColorClass} pb-2`}>
-                {section.title}
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {section.items.map((item, itemIdx) => (
-                  <EffectItem 
-                    key={itemIdx}
-                    title={item.title}
-                    desc={item.desc}
-                    usage={item.usage}
-                    isRTL={isRTL}
-                  />
-                ))}
+          {category === 'predictionError' ? (
+            <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
+              <div className="bg-red-500/10 border border-red-500/30 p-4 rounded-xl">
+                <h3 className="text-red-500 font-bold mb-2 font-mono text-sm">Prediction failed</h3>
+                <p className="text-red-400 text-xs font-mono">
+                  Error: Prediction failed: Async prediction failed: ModelError: The input or output was flagged as sensitive. Please try again with different inputs. (E005) (uIJ6l3ruRD)
+                </p>
               </div>
-            </section>
-          ))}
+              <div className="bg-zinc-800/50 p-6 rounded-xl border border-zinc-700">
+                <h4 className="text-lg font-bold text-white mb-4">
+                  {language === 'en' ? 'How to fix this error:' : 'كيف تحل هذه المشكلة:'}
+                </h4>
+                <ol className={`list-decimal list-inside space-y-4 text-zinc-300 ${isRTL ? 'font-arabic' : ''}`}>
+                  {language === 'en' ? (
+                    <>
+                      <li>Close this window and go to the <strong>Add Noise</strong> page from the main menu.</li>
+                      <li>Upload the image that caused this error.</li>
+                      <li>Apply a noise amount between <strong>16% and 20%</strong>.</li>
+                      <li>Click <strong>Save Image</strong> to download the modified image.</li>
+                      <li>Return to the <strong>Video AI</strong> page and upload the new noisy image instead.</li>
+                    </>
+                  ) : (
+                    <>
+                      <li>أغلق هذه النافذة واذهب إلى صفحة <strong>Add Noise</strong> من القائمة الرئيسية.</li>
+                      <li>ارفع الصورة التي تسببت في ظهور هذا الخطأ.</li>
+                      <li>أضف نسبة نويز (Noise) تتراوح بين <strong>16% إلى 20%</strong>.</li>
+                      <li>اضغط على <strong>Save Image</strong> لتحميل الصورة المعدلة.</li>
+                      <li>عد إلى صفحة <strong>Video AI</strong> وارفع الصورة الجديدة بدلاً من القديمة.</li>
+                    </>
+                  )}
+                </ol>
+              </div>
+            </div>
+          ) : (
+            currentContent?.map((section, idx) => (
+              <section key={idx} className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                <h3 className={`text-lg font-bold ${section.colorClass} border-b ${section.borderColorClass} pb-2`}>
+                  {section.title}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {section.items.map((item, itemIdx) => (
+                    <EffectItem 
+                      key={itemIdx}
+                      title={item.title}
+                      desc={item.desc}
+                      usage={item.usage}
+                      isRTL={isRTL}
+                    />
+                  ))}
+                </div>
+              </section>
+            ))
+          )}
         </div>
         
         {/* Footer */}

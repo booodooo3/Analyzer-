@@ -1148,6 +1148,14 @@ const App: React.FC = () => {
                         <p>Our system uses credits to process high-quality AI generations. Costs vary by complexity and duration:</p>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
                             <div className="bg-black/20 p-2 rounded border border-white/5">
+                                <span className="text-yellow-400 font-bold block">Try-On (One Mode)</span>
+                                <span>0.5 Credits per generation</span>
+                            </div>
+                            <div className="bg-black/20 p-2 rounded border border-white/5">
+                                <span className="text-yellow-400 font-bold block">Try-On (Plus Mode)</span>
+                                <span>3 Credits (3 Angles, 4K)</span>
+                            </div>
+                            <div className="bg-black/20 p-2 rounded border border-white/5">
                                 <span className="text-green-400 font-bold block">Standard Video (5s)</span>
                                 <span>2 Credits (3 Credits for Seedance 2.0)</span>
                             </div>
@@ -1178,6 +1186,22 @@ const App: React.FC = () => {
                         <span className="p-1 bg-purple-500/20 rounded text-purple-400">🤖</span> AI Models & Best Use Cases
                     </h3>
                     <div className="space-y-4">
+                        <div className="border-l-2 border-yellow-500 pl-3">
+                            <h4 className="text-yellow-400 font-semibold text-sm">Virtual Try-On Models</h4>
+                            <div className="text-xs text-zinc-400 mt-1 space-y-2">
+                                <p>
+                                    <strong>One Mode (Standard):</strong> Uses the <code className="text-white bg-black/30 px-1 rounded">google/nano-banana</code> model.
+                                    <br/>Generates a single high-quality image.
+                                    <br/><strong>Cost:</strong> 0.5 Credits.
+                                </p>
+                                <p>
+                                    <strong>Plus Mode:</strong> Uses the <code className="text-white bg-black/30 px-1 rounded">google/nano-banana-pro</code> model in 4K resolution.
+                                    <br/>Generates three distinct angles (Front, Side, Full Body).
+                                    <br/><strong>Cost:</strong> 3 Credits.
+                                </p>
+                            </div>
+                        </div>
+
                         <div className="border-l-2 border-zinc-600 pl-3">
                             <h4 className="text-white font-semibold text-sm">Seedance 2.0</h4>
                             <p className="text-xs text-zinc-400 mt-1">

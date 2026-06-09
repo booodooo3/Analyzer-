@@ -1017,16 +1017,10 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                               {supportsTwoImages && (
                                 <span className="text-[9px] text-white font-bold uppercase tracking-wider animate-in fade-in slide-in-from-right-4">Supports 2 Images</span>
                               )}
-                              {selectedModel === 'minimax/hailuo-2.3' && (
-                                  <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 animate-pulse" />
-                              )}
                               <select 
                                   value={selectedModel}
                                   onChange={(e) => {
                                     setSelectedModel(e.target.value);
-                                    if (e.target.value === 'minimax/hailuo-2.3') {
-                                        setDuration(10);
-                                    }
                                     if (e.target.value !== 'bytedance/seedance-2.0') {
                                         setGenerationMode('imageToVideo');
                                     }
@@ -1038,7 +1032,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                   }`}
                               >
                                   <option value="bytedance/seedance-2.0" className="text-purple-500 font-bold">Seedance 2.0</option>
-                                  <option value="minimax/hailuo-2.3" className="text-blue-500 font-bold">Minimax Hailuo 2.3</option>
                               </select>
                           </div>
 

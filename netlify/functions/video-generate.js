@@ -120,9 +120,7 @@ export default async (req, context) => {
             if (model === 'bytedance/seedance-2.0') {
                 modelOwner = "bytedance";
                 modelName = "seedance-2.0";
-            } else if (model === 'minimax/hailuo-2.3') {
-                modelOwner = "minimax";
-                modelName = "hailuo-2.3";
+
             } else if (model === 'kwaivgi/kling-v2.6-motion-control') {
                 modelOwner = "kwaivgi";
                 modelName = "kling-v2.6-motion-control";
@@ -208,18 +206,7 @@ export default async (req, context) => {
                 }
             }
 
-            if (modelOwner === "minimax") {
-                input = {
-                    prompt: enhancedPrompt,
-                    duration: 10,
-                    resolution: "768p",
-                    prompt_optimizer: true,
-                    disable_safety_checker: true
-                };
-                if (image) {
-                    input.first_frame_image = image;
-                }
-            } else if (model === 'kwaivgi/kling-lip-sync') {
+ if (model === 'kwaivgi/kling-lip-sync') {
                 input = {
                     video_url: image, // Frontend sends video URL in the 'image' field
                     audio_file: audioFile

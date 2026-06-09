@@ -1187,13 +1187,7 @@ const App: React.FC = () => {
                             </p>
                         </div>
 
-                        <div className="border-l-2 border-blue-500 pl-3">
-                            <h4 className="text-blue-400 font-semibold text-sm">Minimax Hailuo 2.3</h4>
-                            <p className="text-xs text-zinc-400 mt-1">
-                                <strong>Best for:</strong> High-quality, cinematic results.
-                                <br/><strong>Features:</strong> Excellent detail consistency. Defaults to 10s duration for immersive scenes.
-                            </p>
-                        </div>
+
 
                         <div className="border-l-2 border-emerald-500 pl-3">
                             <h4 className="text-emerald-400 font-semibold text-sm">Seedream 4.5 (Tex 2 Img)</h4>

@@ -109,10 +109,22 @@ export const AddNoiseOverlay: React.FC<AddNoiseOverlayProps> = ({ isOpen, onClos
   };
 
   const handleSaveImage = () => {
-    if (!resultImage) return;
+    if (!resultImage || !canvasRef.current) return;
+    
+    let quality = 0.92;
+    let dataUrl = canvasRef.current.toDataURL('image/jpeg', quality);
+    let sizeKB = (dataUrl.length * 0.75) / 1024;
+    
+    // Decrease quality until size is under 500 KB, or quality hits a minimum threshold
+    while (sizeKB > 500 && quality > 0.1) {
+      quality -= 0.1;
+      dataUrl = canvasRef.current.toDataURL('image/jpeg', quality);
+      sizeKB = (dataUrl.length * 0.75) / 1024;
+    }
+
     const link = document.createElement('a');
-    link.href = resultImage;
-    link.download = `noise-${Date.now()}.png`;
+    link.href = dataUrl;
+    link.download = `noise-${Date.now()}.jpg`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

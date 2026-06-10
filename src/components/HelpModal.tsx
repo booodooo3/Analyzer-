@@ -439,7 +439,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, category = 'came
   } else if (category === 'style') {
     modalTitle = language === 'en' ? 'AI Style Filters Guide' : 'دليل أنماط الذكاء الاصطناعي';
   } else if (category === 'predictionError') {
-    modalTitle = language === 'en' ? 'Prediction Error Fix' : 'حل مشكلة Prediction failed';
+    modalTitle = language === 'en' ? 'Help & Error Fixes' : 'المساعدة وحلول المشاكل';
   }
 
   return (
@@ -506,6 +506,24 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, category = 'came
                     </>
                   )}
                 </ol>
+              </div>
+
+              <div className="bg-blue-500/10 p-6 rounded-xl border border-blue-500/30 mt-6">
+                <h4 className="text-lg font-bold text-blue-400 mb-4">
+                  {language === 'en' ? 'How to use References:' : 'كيفية عمل مرجع (Reference):'}
+                </h4>
+                <div className="space-y-4">
+                  <p className={`text-zinc-300 text-sm leading-relaxed ${isRTL ? 'font-arabic' : ''}`}>
+                    {language === 'en' 
+                      ? 'You can use reference images or videos in your prompt by typing [Image1], [Image2], or [Video1]. The AI will understand that you want to apply the style or subject of that reference into the generated video. See the example below:'
+                      : 'يمكنك استخدام الصور أو الفيديوهات المرجعية في الوصف الخاص بك بكتابة [Image1] أو [Image2] أو [Video1]. سيفهم الذكاء الاصطناعي أنك تريد تطبيق النمط أو العنصر الموجود في المرجع على الفيديو المُنشأ. شاهد المثال بالأسفل:'}
+                  </p>
+                  <img 
+                    src="https://analyzer-a.org/wp-content/uploads/2026/06/111.png" 
+                    alt="Reference Example" 
+                    className="w-full max-w-2xl mx-auto rounded-xl border border-zinc-600 shadow-lg"
+                  />
+                </div>
               </div>
             </div>
           ) : (

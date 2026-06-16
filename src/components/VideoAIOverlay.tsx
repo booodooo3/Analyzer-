@@ -221,10 +221,42 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   ];
 
   const AI_FILTERS = [
-    'No Filter', 'Claymation', 'Pixel Art', '3D Cartoon (Pixar Style)', 'Anime',
-    'Cinematic', 'Cyberpunk', 'Oil Painting', 'Pencil Sketch', 'Origami',
-    'Arabic Heritage', 'Modern Saudi'
+    { label: 'بدون فلتر', value: 'No Filter' },
+    { label: 'صلصال (Claymation)', value: 'Claymation' },
+    { label: 'بكسل آرت (Pixel Art)', value: 'Pixel Art' },
+    { label: 'كارتون 3D (نمط بيكسار)', value: '3D Cartoon (Pixar Style)' },
+    { label: 'أنمي ياباني', value: 'Anime' },
+    { label: 'سينمائي واقعي', value: 'Cinematic' },
+    { label: 'سايبر بانك (مستقبلي)', value: 'Cyberpunk' },
+    { label: 'رسم زيتي', value: 'Oil Painting' },
+    { label: 'رسم تخطيطي (سكتش)', value: 'Pencil Sketch' },
+    { label: 'فن طي الورق (أوريغامي)', value: 'Origami' },
+    { label: 'تراث عربي', value: 'Arabic Heritage' }
   ];
+
+  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedFilter = e.target.value;
+    const oldFilter = aiFilter;
+    setAiFilter(selectedFilter);
+
+    if (selectedFilter !== 'No Filter') {
+      const filterLabel = AI_FILTERS.find(f => f.value === selectedFilter)?.label || selectedFilter;
+      
+      setDescription(prev => {
+        let newDesc = prev;
+        if (oldFilter !== 'No Filter') {
+          const oldLabel = AI_FILTERS.find(f => f.value === oldFilter)?.label || oldFilter;
+          newDesc = newDesc.replace(`\n[Filter: ${oldLabel}]`, '').replace(`[Filter: ${oldLabel}]`, '').trim();
+        }
+        return newDesc ? `${newDesc}\n[Filter: ${filterLabel}]` : `[Filter: ${filterLabel}]`;
+      });
+    } else {
+       setDescription(prev => {
+          const oldLabel = AI_FILTERS.find(f => f.value === oldFilter)?.label || oldFilter;
+          return prev.replace(`\n[Filter: ${oldLabel}]`, '').replace(`[Filter: ${oldLabel}]`, '').trim();
+       });
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -1286,6 +1318,25 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       >
                           {CAMERA_EFFECTS.map(effect => (
                               <option key={effect} value={effect} className="text-green-500 bg-zinc-900">{effect}</option>
+                          ))}
+                      </select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                      <div className="flex justify-between items-end">
+                        <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                          فلاتر الذكاء الاصطناعي (Style Transfer)
+                        </label>
+                      </div>
+                      <select 
+                          value={aiFilter}
+                          onChange={handleFilterChange}
+                          className="w-full bg-black border border-green-500/50 rounded-xl p-3 text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)] transition-all duration-300 font-bold"
+                          dir="rtl"
+                      >
+                          {AI_FILTERS.map(filter => (
+                              <option key={filter.value} value={filter.value} className="text-green-500 bg-zinc-900 font-bold">{filter.label}</option>
                           ))}
                       </select>
                   </div>

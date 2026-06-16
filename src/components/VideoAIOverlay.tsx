@@ -221,17 +221,17 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   ];
 
   const AI_FILTERS = [
-    { label: 'بدون فلتر', value: 'No Filter' },
-    { label: 'صلصال (Claymation)', value: 'Claymation' },
-    { label: 'بكسل آرت (Pixel Art)', value: 'Pixel Art' },
-    { label: 'كارتون 3D (نمط بيكسار)', value: '3D Cartoon (Pixar Style)' },
-    { label: 'أنمي ياباني', value: 'Anime' },
-    { label: 'سينمائي واقعي', value: 'Cinematic' },
-    { label: 'سايبر بانك (مستقبلي)', value: 'Cyberpunk' },
-    { label: 'رسم زيتي', value: 'Oil Painting' },
-    { label: 'رسم تخطيطي (سكتش)', value: 'Pencil Sketch' },
-    { label: 'فن طي الورق (أوريغامي)', value: 'Origami' },
-    { label: 'تراث عربي', value: 'Arabic Heritage' }
+    { label: 'No Filter', value: 'No Filter' },
+    { label: 'Claymation', value: 'Claymation' },
+    { label: 'Pixel Art', value: 'Pixel Art' },
+    { label: '3D Cartoon (Pixar Style)', value: '3D Cartoon (Pixar Style)' },
+    { label: 'Anime', value: 'Anime' },
+    { label: 'Cinematic', value: 'Cinematic' },
+    { label: 'Cyberpunk', value: 'Cyberpunk' },
+    { label: 'Oil Painting', value: 'Oil Painting' },
+    { label: 'Pencil Sketch', value: 'Pencil Sketch' },
+    { label: 'Origami', value: 'Origami' },
+    { label: 'Arabic Heritage', value: 'Arabic Heritage' }
   ];
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -1326,14 +1326,13 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       <div className="flex justify-between items-end">
                         <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                          فلاتر الذكاء الاصطناعي (Style Transfer)
+                          AI Filters (Style Transfer)
                         </label>
                       </div>
                       <select 
                           value={aiFilter}
                           onChange={handleFilterChange}
                           className="w-full bg-black border border-green-500/50 rounded-xl p-3 text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)] transition-all duration-300 font-bold"
-                          dir="rtl"
                       >
                           {AI_FILTERS.map(filter => (
                               <option key={filter.value} value={filter.value} className="text-green-500 bg-zinc-900 font-bold">{filter.label}</option>

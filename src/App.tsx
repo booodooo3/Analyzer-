@@ -404,7 +404,11 @@ const App: React.FC = () => {
       setGeneratedResults(prev => {
         const updated = [newResult, ...prev];
         if (userId) {
-           localStorage.setItem(`generatedResults_${userId}`, JSON.stringify(updated));
+           try {
+             localStorage.setItem(`generatedResults_${userId}`, JSON.stringify(updated));
+           } catch (e) {
+             console.warn('Failed to save generated results to localStorage (quota exceeded)', e);
+           }
         }
         return updated;
       });

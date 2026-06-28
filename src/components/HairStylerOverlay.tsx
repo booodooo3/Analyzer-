@@ -58,11 +58,17 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
 
   useEffect(() => {
     if (resultImage && userImage) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        resultImage,
-        userImage,
-        timestamp: Date.now()
-      }));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          resultImage,
+          userImage,
+          timestamp: Date.now()
+        }));
+      } catch (e) {
+        console.warn('Failed to save hair styler result to localStorage (quota exceeded)', e);
+        // Clear to prevent corrupted state and free up some space
+        localStorage.removeItem(STORAGE_KEY);
+      }
     }
   }, [resultImage, userImage]);
 

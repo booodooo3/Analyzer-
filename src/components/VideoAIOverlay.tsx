@@ -77,7 +77,11 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
           if (prev.some(v => v.id === currentId)) return prev;
           const updated = [newVideo, ...prev];
           if (userId) {
-            localStorage.setItem(`generatedVideos_${userId}`, JSON.stringify(updated));
+            try {
+              localStorage.setItem(`generatedVideos_${userId}`, JSON.stringify(updated));
+            } catch (e) {
+              console.warn('Failed to save generated videos to localStorage', e);
+            }
           }
           return updated;
         });
@@ -625,12 +629,16 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         const data = await response.json();
 
         if (userId) {
-            localStorage.setItem(`pendingVideo_${userId}`, JSON.stringify({
-                id: data.id,
-                timestamp: Date.now(),
-                imageBase64: processedImage,
-                modelName: selectedModel
-            }));
+            try {
+                localStorage.setItem(`pendingVideo_${userId}`, JSON.stringify({
+                    id: data.id,
+                    timestamp: Date.now(),
+                    imageBase64: processedImage,
+                    modelName: selectedModel
+                }));
+            } catch (e) {
+                console.warn('Failed to save pending video to localStorage (quota exceeded)', e);
+            }
         }
         setPendingVideoId(data.id);
 

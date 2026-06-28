@@ -7,6 +7,27 @@ interface AddNoiseOverlayProps {
   onClose: () => void;
 }
 
+const sizePresets = [
+  { label: 'Original Size', width: null, height: null },
+  { label: 'Auto Resolution...', width: null, height: null },
+  { label: '960 x 640 px 144 ppi', width: 960, height: 640 },
+  { label: '1024 x 768 px 72 ppi', width: 1024, height: 768 },
+  { label: '1136 x 640 px 144 ppi', width: 1136, height: 640 },
+  { label: '1366 x 768 px 72 ppi', width: 1366, height: 768 },
+  { label: 'A4 210 x 297 mm 300 dpi', width: 2480, height: 3508 },
+  { label: 'A6 105 x 148 mm 300 dpi', width: 1240, height: 1748 },
+  { label: 'Legal 8.5 x 14 in 300 dpi', width: 2550, height: 4200 },
+  { label: 'Letter 8.5 x 11 in 300 dpi', width: 2550, height: 3300 },
+  { label: '4 x 6 in 300 dpi', width: 1200, height: 1800 },
+  { label: '5 x 7 in 300 dpi', width: 1500, height: 2100 },
+  { label: '8 x 10 in 300 dpi', width: 2400, height: 3000 },
+  { label: '11 x 14 in 300 dpi', width: 3300, height: 4200 },
+  { label: 'Load Preset...', width: null, height: null },
+  { label: 'Save Preset...', width: null, height: null },
+  { label: 'Delete Preset...', width: null, height: null },
+  { label: 'Custom', width: null, height: null },
+];
+
 export const AddNoiseOverlay: React.FC<AddNoiseOverlayProps> = ({ isOpen, onClose }) => {
   const [userImage, setUserImage] = useState<string | null>(null);
   const [resultImage, setResultImage] = useState<string | null>(null);
@@ -16,6 +37,7 @@ export const AddNoiseOverlay: React.FC<AddNoiseOverlayProps> = ({ isOpen, onClos
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [imgWidth, setImgWidth] = useState<number>(0);
   const [imgHeight, setImgHeight] = useState<number>(0);
+  const [preset, setPreset] = useState<string>('Original Size');
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -140,7 +162,34 @@ export const AddNoiseOverlay: React.FC<AddNoiseOverlayProps> = ({ isOpen, onClos
     setAmount(16.19);
     setDistribution('uniform');
     setMonochromatic(true);
+    setPreset('Original Size');
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handlePresetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedLabel = e.target.value;
+    setPreset(selectedLabel);
+    
+    if (selectedLabel === 'Original Size' && imageObjRef.current) {
+      setImgWidth(imageObjRef.current.width);
+      setImgHeight(imageObjRef.current.height);
+    } else {
+      const presetData = sizePresets.find(p => p.label === selectedLabel);
+      if (presetData && presetData.width && presetData.height) {
+        setImgWidth(presetData.width);
+        setImgHeight(presetData.height);
+      }
+    }
+  };
+
+  const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setImgWidth(parseInt(e.target.value) || 0);
+    setPreset('Custom');
+  };
+
+  const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setImgHeight(parseInt(e.target.value) || 0);
+    setPreset('Custom');
   };
 
   if (!isOpen) return null;
@@ -167,12 +216,24 @@ export const AddNoiseOverlay: React.FC<AddNoiseOverlayProps> = ({ isOpen, onClos
              <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Image Size</h2>
              <div className="space-y-3">
                <div className="flex items-center justify-between">
+                 <span className="text-sm text-zinc-400">Fit To:</span>
+                 <select 
+                   value={preset}
+                   onChange={handlePresetChange}
+                   className="w-[180px] bg-zinc-900 border border-zinc-700 rounded-md px-2 py-1 text-white text-sm focus:outline-none truncate"
+                 >
+                   {sizePresets.map((p, i) => (
+                     <option key={i} value={p.label}>{p.label}</option>
+                   ))}
+                 </select>
+               </div>
+               <div className="flex items-center justify-between">
                  <span className="text-sm text-zinc-400">Width:</span>
                  <div className="flex items-center gap-2">
                    <input 
                      type="number" 
                      value={imgWidth || ''}
-                     onChange={(e) => setImgWidth(parseInt(e.target.value) || 0)}
+                     onChange={handleWidthChange}
                      className="w-20 bg-zinc-900 border border-zinc-700 rounded-md px-2 py-1 text-white text-sm focus:outline-none"
                    />
                    <span className="text-xs text-zinc-500">px</span>
@@ -184,7 +245,7 @@ export const AddNoiseOverlay: React.FC<AddNoiseOverlayProps> = ({ isOpen, onClos
                    <input 
                      type="number" 
                      value={imgHeight || ''}
-                     onChange={(e) => setImgHeight(parseInt(e.target.value) || 0)}
+                     onChange={handleHeightChange}
                      className="w-20 bg-zinc-900 border border-zinc-700 rounded-md px-2 py-1 text-white text-sm focus:outline-none"
                    />
                    <span className="text-xs text-zinc-500">px</span>

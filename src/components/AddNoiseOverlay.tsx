@@ -38,6 +38,11 @@ export const AddNoiseOverlay: React.FC<AddNoiseOverlayProps> = ({ isOpen, onClos
   const [imgWidth, setImgWidth] = useState<number>(0);
   const [imgHeight, setImgHeight] = useState<number>(0);
   const [preset, setPreset] = useState<string>('Original Size');
+  const [showJpegOptions, setShowJpegOptions] = useState<boolean>(false);
+  const [jpegQuality, setJpegQuality] = useState<number>(6);
+  const [jpegFormat, setJpegFormat] = useState<string>('progressive');
+  const [jpegScans, setJpegScans] = useState<number>(3);
+  const [estimatedSize, setEstimatedSize] = useState<string>('...');
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -134,19 +139,35 @@ export const AddNoiseOverlay: React.FC<AddNoiseOverlayProps> = ({ isOpen, onClos
     }
   };
 
-  const handleSaveImage = () => {
-    if (!resultImage || !canvasRef.current) return;
+  const updateEstimatedSize = (q: number) => {
+    if (!canvasRef.current) return;
+    const qualityMap = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 0.98, 1.0];
+    const mappedQuality = qualityMap[Math.max(0, Math.min(12, Math.round(q)))];
     
-    let quality = 0.92;
-    let dataUrl = canvasRef.current.toDataURL('image/jpeg', quality);
-    let sizeKB = (dataUrl.length * 0.75) / 1024;
-    
-    // Decrease quality until size is under 500 KB, or quality hits a minimum threshold
-    while (sizeKB > 500 && quality > 0.1) {
-      quality -= 0.1;
-      dataUrl = canvasRef.current.toDataURL('image/jpeg', quality);
-      sizeKB = (dataUrl.length * 0.75) / 1024;
+    const dataUrl = canvasRef.current.toDataURL('image/jpeg', mappedQuality);
+    const sizeKB = (dataUrl.length * 0.75) / 1024;
+    setEstimatedSize(`${sizeKB.toFixed(1)}K`);
+  };
+
+  useEffect(() => {
+    if (showJpegOptions) {
+      updateEstimatedSize(jpegQuality);
     }
+  }, [jpegQuality, showJpegOptions]);
+
+  const handleSaveClick = () => {
+    if (!resultImage || !canvasRef.current) return;
+    updateEstimatedSize(jpegQuality);
+    setShowJpegOptions(true);
+  };
+
+  const confirmSaveImage = () => {
+    if (!canvasRef.current) return;
+    
+    const qualityMap = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 0.98, 1.0];
+    const mappedQuality = qualityMap[Math.max(0, Math.min(12, Math.round(jpegQuality)))];
+    
+    const dataUrl = canvasRef.current.toDataURL('image/jpeg', mappedQuality);
 
     const link = document.createElement('a');
     link.href = dataUrl;
@@ -154,6 +175,8 @@ export const AddNoiseOverlay: React.FC<AddNoiseOverlayProps> = ({ isOpen, onClos
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    
+    setShowJpegOptions(false);
   };
 
   const handleReset = () => {
@@ -210,6 +233,148 @@ export const AddNoiseOverlay: React.FC<AddNoiseOverlayProps> = ({ isOpen, onClos
 
       <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden">
         
+        {showJpegOptions && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            <div className="bg-[#535353] border border-[#666] shadow-[0_4px_24px_rgba(0,0,0,0.5)] w-[420px] flex flex-col font-sans text-[13px] text-[#e0e0e0] select-none">
+              <div className="px-3 py-1.5 flex justify-between items-center bg-[#535353] border-b border-[#444]">
+                <span>JPEG Options</span>
+                <button onClick={() => setShowJpegOptions(false)} className="text-zinc-400 hover:text-white transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              
+              <div className="p-3 flex gap-3">
+                {/* Left Column */}
+                <div className="flex-1 flex flex-col gap-4">
+                  {/* Matte */}
+                  <div className="flex items-center gap-2 px-1">
+                    <span className="text-[#888]">Matte:</span>
+                    <select disabled className="flex-1 bg-[#535353] border border-[#444] rounded-sm px-1 py-0.5 text-[#888] appearance-none">
+                      <option>None</option>
+                    </select>
+                  </div>
+
+                  {/* Image Options */}
+                  <fieldset className="border border-[#444] rounded-sm px-3 pb-3 pt-4 relative">
+                    <legend className="absolute -top-2.5 left-2 bg-[#535353] px-1 text-[#ccc]">Image Options</legend>
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="w-[45px] text-right">Quality:</span>
+                      <input 
+                        type="number" 
+                        min="0" 
+                        max="12" 
+                        value={jpegQuality}
+                        onChange={(e) => setJpegQuality(parseInt(e.target.value) || 0)}
+                        className="w-10 bg-[#333] border border-[#222] text-white text-center py-0.5 outline-none focus:border-blue-500"
+                      />
+                      <select 
+                        value={jpegQuality <= 4 ? 'Low' : jpegQuality <= 7 ? 'Medium' : jpegQuality <= 9 ? 'High' : 'Maximum'}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === 'Low') setJpegQuality(3);
+                          else if (val === 'Medium') setJpegQuality(6);
+                          else if (val === 'High') setJpegQuality(8);
+                          else if (val === 'Maximum') setJpegQuality(12);
+                        }}
+                        className="flex-1 bg-[#535353] border border-[#444] rounded-sm px-1 py-0.5 text-white"
+                      >
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                        <option value="Maximum">Maximum</option>
+                      </select>
+                    </div>
+                    <div className="px-1 relative">
+                      <div className="flex justify-between text-[11px] text-[#aaa] mb-1">
+                        <span>small file</span>
+                        <span>large file</span>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max="12" 
+                        value={jpegQuality}
+                        onChange={(e) => setJpegQuality(parseInt(e.target.value))}
+                        className="w-full accent-[#ccc] h-1 bg-[#333] rounded-full appearance-none outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-[#ddd] [&::-webkit-slider-thumb]:rounded-full cursor-pointer"
+                      />
+                    </div>
+                  </fieldset>
+
+                  {/* Format Options */}
+                  <fieldset className="border border-[#444] rounded-sm px-3 pb-3 pt-4 relative">
+                    <legend className="absolute -top-2.5 left-2 bg-[#535353] px-1 text-[#ccc]">Format Options</legend>
+                    <div className="flex flex-col gap-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input 
+                          type="radio" 
+                          value="baseline"
+                          checked={jpegFormat === 'baseline'}
+                          onChange={(e) => setJpegFormat(e.target.value)}
+                          className="accent-[#ccc] bg-[#333] border-[#222]"
+                        />
+                        <span>Baseline ("Standard")</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input 
+                          type="radio" 
+                          value="optimized"
+                          checked={jpegFormat === 'optimized'}
+                          onChange={(e) => setJpegFormat(e.target.value)}
+                          className="accent-[#ccc] bg-[#333] border-[#222]"
+                        />
+                        <span>Baseline Optimized</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input 
+                          type="radio" 
+                          value="progressive"
+                          checked={jpegFormat === 'progressive'}
+                          onChange={(e) => setJpegFormat(e.target.value)}
+                          className="accent-[#ccc] bg-[#333] border-[#222]"
+                        />
+                        <span>Progressive</span>
+                      </label>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 pl-6 mt-2">
+                      <span className={`${jpegFormat !== 'progressive' ? 'text-[#888]' : ''}`}>Scans:</span>
+                      <select 
+                        disabled={jpegFormat !== 'progressive'}
+                        value={jpegScans}
+                        onChange={(e) => setJpegScans(parseInt(e.target.value))}
+                        className="bg-[#535353] border border-[#444] rounded-sm px-2 py-0.5 text-white disabled:text-[#888] disabled:border-[#444]"
+                      >
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                      </select>
+                    </div>
+                  </fieldset>
+                </div>
+
+                {/* Right Column */}
+                <div className="w-[100px] flex flex-col gap-2">
+                  <button onClick={confirmSaveImage} className="w-full bg-[#666] hover:bg-[#777] border border-[#444] rounded-sm py-1 shadow-sm active:bg-[#555]">
+                    OK
+                  </button>
+                  <button onClick={() => setShowJpegOptions(false)} className="w-full bg-[#666] hover:bg-[#777] border border-[#444] rounded-sm py-1 shadow-sm active:bg-[#555]">
+                    Cancel
+                  </button>
+
+                  <div className="mt-4 flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="accent-[#ccc] bg-[#333] border-[#222]" />
+                    <span>Preview</span>
+                  </div>
+
+                  <div className="mt-auto text-[11px] text-[#ccc] pt-4">
+                    {estimatedSize}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Settings Panel */}
         <div className="w-full lg:w-[320px] flex-shrink-0 flex flex-col border-r border-white/5 bg-[#080808] p-6 space-y-6 overflow-y-auto order-2 lg:order-1 h-auto lg:h-full">
           <div className="space-y-4">
@@ -321,7 +486,7 @@ export const AddNoiseOverlay: React.FC<AddNoiseOverlayProps> = ({ isOpen, onClos
 
           <div className="pt-8 space-y-3 mt-auto">
              <Button 
-                onClick={handleSaveImage}
+                onClick={handleSaveClick}
                 disabled={!resultImage}
                 className="w-full font-bold flex items-center justify-center gap-2"
              >

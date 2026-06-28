@@ -14,6 +14,8 @@ export const AddNoiseOverlay: React.FC<AddNoiseOverlayProps> = ({ isOpen, onClos
   const [distribution, setDistribution] = useState<'uniform' | 'gaussian'>('uniform');
   const [monochromatic, setMonochromatic] = useState<boolean>(true);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [imgWidth, setImgWidth] = useState<number>(0);
+  const [imgHeight, setImgHeight] = useState<number>(0);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -24,6 +26,8 @@ export const AddNoiseOverlay: React.FC<AddNoiseOverlayProps> = ({ isOpen, onClos
       const img = new Image();
       img.onload = () => {
         imageObjRef.current = img;
+        setImgWidth(img.width);
+        setImgHeight(img.height);
         applyNoise();
       };
       img.src = userImage;
@@ -34,7 +38,7 @@ export const AddNoiseOverlay: React.FC<AddNoiseOverlayProps> = ({ isOpen, onClos
     if (imageObjRef.current) {
       applyNoise();
     }
-  }, [amount, distribution, monochromatic]);
+  }, [amount, distribution, monochromatic, imgWidth, imgHeight]);
 
   const applyNoise = () => {
     if (!imageObjRef.current || !canvasRef.current) return;
@@ -47,9 +51,9 @@ export const AddNoiseOverlay: React.FC<AddNoiseOverlayProps> = ({ isOpen, onClos
       if (!ctx) return;
 
       const img = imageObjRef.current!;
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
+      canvas.width = imgWidth || img.width;
+      canvas.height = imgHeight || img.height;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;
@@ -124,7 +128,7 @@ export const AddNoiseOverlay: React.FC<AddNoiseOverlayProps> = ({ isOpen, onClos
 
     const link = document.createElement('a');
     link.href = dataUrl;
-    link.download = `noise-${Date.now()}.jpg`;
+    link.download = `error-500-${Date.now()}.jpg`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -143,12 +147,12 @@ export const AddNoiseOverlay: React.FC<AddNoiseOverlayProps> = ({ isOpen, onClos
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col bg-[#050505] text-white animate-in fade-in duration-300">
-      <header className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-[#050505]">
+      <header className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-[#2d1414]">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-zinc-800 rounded-lg flex items-center justify-center shadow-lg">
-            <Sparkles className="w-4 h-4 text-white" />
+            <Sparkles className="w-4 h-4 text-[#d97777]" />
           </div>
-          <h1 className="text-lg font-bold tracking-tight">Add Noise</h1>
+          <h1 className="text-lg font-bold tracking-tight text-[#d97777]">Error 500</h1>
         </div>
         <button className="p-2 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 hover:text-white" onClick={onClose}>
            <X className="w-4 h-4" />
@@ -160,6 +164,36 @@ export const AddNoiseOverlay: React.FC<AddNoiseOverlayProps> = ({ isOpen, onClos
         {/* Settings Panel */}
         <div className="w-full lg:w-[320px] flex-shrink-0 flex flex-col border-r border-white/5 bg-[#080808] p-6 space-y-6 overflow-y-auto order-2 lg:order-1 h-auto lg:h-full">
           <div className="space-y-4">
+             <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Image Size</h2>
+             <div className="space-y-3">
+               <div className="flex items-center justify-between">
+                 <span className="text-sm text-zinc-400">Width:</span>
+                 <div className="flex items-center gap-2">
+                   <input 
+                     type="number" 
+                     value={imgWidth || ''}
+                     onChange={(e) => setImgWidth(parseInt(e.target.value) || 0)}
+                     className="w-20 bg-zinc-900 border border-zinc-700 rounded-md px-2 py-1 text-white text-sm focus:outline-none"
+                   />
+                   <span className="text-xs text-zinc-500">px</span>
+                 </div>
+               </div>
+               <div className="flex items-center justify-between">
+                 <span className="text-sm text-zinc-400">Height:</span>
+                 <div className="flex items-center gap-2">
+                   <input 
+                     type="number" 
+                     value={imgHeight || ''}
+                     onChange={(e) => setImgHeight(parseInt(e.target.value) || 0)}
+                     className="w-20 bg-zinc-900 border border-zinc-700 rounded-md px-2 py-1 text-white text-sm focus:outline-none"
+                   />
+                   <span className="text-xs text-zinc-500">px</span>
+                 </div>
+               </div>
+             </div>
+          </div>
+
+          <div className="space-y-4 pt-4 border-t border-white/5">
              <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Amount</h2>
              <div className="flex items-center gap-4">
                 <input 

@@ -490,7 +490,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, category = 'came
                 <ol className={`list-decimal list-inside space-y-4 text-zinc-300 ${isRTL ? 'font-arabic' : ''}`}>
                   {language === 'en' ? (
                     <>
-                      <li>Close this window and go to the <strong>Add Noise</strong> page from the main menu.</li>
+                      <li>Close this window and go to the <strong>Error 500</strong> page from the main menu.</li>
                       <li>Upload the image that caused this error.</li>
                       <li>Apply a noise amount between <strong>16% and 20%</strong>.</li>
                       <li>Click <strong>Save Image</strong> to download the modified image.</li>
@@ -498,7 +498,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, category = 'came
                     </>
                   ) : (
                     <>
-                      <li>أغلق هذه النافذة واذهب إلى صفحة <strong>Add Noise</strong> من القائمة الرئيسية.</li>
+                      <li>أغلق هذه النافذة واذهب إلى صفحة <strong>Error 500</strong> من القائمة الرئيسية.</li>
                       <li>ارفع الصورة التي تسببت في ظهور هذا الخطأ.</li>
                       <li>أضف نسبة نويز (Noise) تتراوح بين <strong>16% إلى 20%</strong>.</li>
                       <li>اضغط على <strong>Save Image</strong> لتحميل الصورة المعدلة.</li>

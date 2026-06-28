@@ -130,10 +130,10 @@ export default function CreditDisplay({
                   <button
                     onClick={onOpenAddNoise}
                     className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-zinc-700 bg-black text-white shadow-[0_0_10px_rgba(255,255,255,0.1)] hover:border-zinc-500 transition-all duration-300"
-                    title="Add Noise to Image"
+                    title="Error 500"
                   >
                     <span className="text-xs font-bold uppercase tracking-wider">
-                      Add Noise
+                      Error 500
                     </span>
                   </button>
                   <span className="text-[9px] font-thin text-zinc-500 mt-0.5 tracking-wider">Press</span>

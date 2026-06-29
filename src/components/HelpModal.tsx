@@ -134,6 +134,67 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, category = 'came
             usage: "الاستخدام: لحظة إدراك صادمة، رعب نفسي، أو شعور بالدوار."
           }
         ]
+      },
+      {
+        title: "5. تأثيرات الكاميرا التفاعلية (Real-Time Effects)",
+        colorClass: "text-pink-400",
+        borderColorClass: "border-pink-500/20",
+        items: [
+          {
+            title: "AI Scene Relighting (تغيير الإضاءة بالذكاء الاصطناعي)",
+            desc: "الشرح: خوارزمية تحلل شكل الوجه وتغير إضاءته (Relighting) لتتناسب مع خلفية جديدة.",
+            usage: "الاستخدام: إضافة إضاءة سينمائية حمراء وزرقاء متناغمة مع محيط افتراضي بدلاً من مجرد تغيير الخلفية."
+          },
+          {
+            title: "Gesture-Triggered VFX (تأثيرات مفعلة بحركات اليد)",
+            desc: "الشرح: الكاميرا تتعرف على إيماءات معينة لتوليد تأثيرات بصرية فورية.",
+            usage: "الاستخدام: فرقعة الأصابع أو إغلاق قبضة اليد لإطلاق شرارات مضيئة أو إظهار واجهات ثلاثية الأبعاد (Holograms)."
+          },
+          {
+            title: "Narrative Autofocus (التركيز السينمائي الذكي)",
+            desc: "الشرح: أداة تتبع العنصر أو الشخص الأهم في المشهد وتجعل التركيز عليه بدقة عالية مع طمس الباقي.",
+            usage: "الاستخدام: تتغير ديناميكياً عند دخول شخص آخر للكادر أو عند توجيه النظر إليه بطريقة سينمائية (Bokeh)."
+          }
+        ]
+      },
+      {
+        title: "6. خدع توليدية متقدمة (Generative AI Tricks)",
+        colorClass: "text-teal-400",
+        borderColorClass: "border-teal-500/20",
+        items: [
+          {
+            title: "Real-time Style Transfer (التحويل الفوري للنمط)",
+            desc: "الشرح: تحويل بث الكاميرا المباشر أو الفيديوهات المسجلة إلى أنماط مختلفة باستخدام نماذج توليدية.",
+            usage: "الاستخدام: تحويل المشهد إلى أسلوب \"سايبربانك\" أو أفاتار واقعي جداً بدقة 8K."
+          },
+          {
+            title: "Video Outpainting / Infinite Zoom (التوسعة الذكية للمشهد)",
+            desc: "الشرح: خدعة برمجية تأخذ إطار الفيديو وتقوم بتوليد وتوسعة المشهد خارج حدود الكاميرا الحقيقية.",
+            usage: "الاستخدام: يعطي انطباعاً بأن الكاميرا تبتعد تدريجياً في عالم افتراضي ضخم."
+          },
+          {
+            title: "Dynamic Object Replacement (الاستبدال الديناميكي للعناصر)",
+            desc: "الشرح: تحديد عنصر في الفيديو ليقوم الذكاء الاصطناعي بتتبعه واستبداله فوراً بعنصر آخر.",
+            usage: "الاستخدام: استبدال كوب على المكتب بمجسم ثلاثي الأبعاد مع الحفاظ على زوايا الظل وحركة الكاميرا."
+          }
+        ]
+      },
+      {
+        title: "7. أدوات التلاعب بالزمن والحركة (Time & Motion)",
+        colorClass: "text-indigo-400",
+        borderColorClass: "border-indigo-500/20",
+        items: [
+          {
+            title: "Motion Trails & Echoes (التقاط الحركة المستمر)",
+            desc: "الشرح: تأثير يقوم بتتبع حركة الشخص وتوليد \"نسخ طيفية\" تتأخر عنه بأجزاء من الثانية.",
+            usage: "الاستخدام: تأثير رائع لفيديوهات الرقص أو الرياضة."
+          },
+          {
+            title: "AI Video Stabilization (تثبيت الحركة التوليدي)",
+            desc: "الشرح: خوارزمية تعالج الاهتزازات العنيفة وتتخيل الأطراف المفقودة من الفيديو التي تخرج من الكادر.",
+            usage: "الاستخدام: بديل متقدم لتقليل الاهتزاز العادي، حيث يعيد رسم الأطراف المفقودة."
+          }
+        ]
       }
     ],
     en: [
@@ -242,6 +303,67 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, category = 'came
             title: "Dolly Zoom",
             desc: "Explanation: Moving camera back while zooming in (or vice versa).",
             usage: "Usage: Shocking realization moment, psychological horror, or vertigo effect."
+          }
+        ]
+      },
+      {
+        title: "5. Real-Time Effects",
+        colorClass: "text-pink-400",
+        borderColorClass: "border-pink-500/20",
+        items: [
+          {
+            title: "AI Scene Relighting",
+            desc: "Explanation: An algorithm that analyzes facial structure and adjusts lighting to match a new background.",
+            usage: "Usage: Adding cinematic red and blue lighting harmonized with a virtual environment instead of just changing the background."
+          },
+          {
+            title: "Gesture-Triggered VFX",
+            desc: "Explanation: The camera recognizes specific gestures to generate instant visual effects.",
+            usage: "Usage: Snapping fingers or closing a fist to shoot luminous sparks or display 3D interfaces (Holograms)."
+          },
+          {
+            title: "Narrative Autofocus",
+            desc: "Explanation: A tool that tracks the most important subject in the scene, focusing on it with high precision while blurring the rest.",
+            usage: "Usage: Dynamically changes focus when another person enters the frame or when looking in a different direction with cinematic Bokeh."
+          }
+        ]
+      },
+      {
+        title: "6. Generative AI Tricks",
+        colorClass: "text-teal-400",
+        borderColorClass: "border-teal-500/20",
+        items: [
+          {
+            title: "Real-time Style Transfer",
+            desc: "Explanation: Converting live camera feeds or recorded videos into different styles using generative models.",
+            usage: "Usage: Transforming the scene into a \"Cyberpunk\" style or a highly realistic 8K avatar."
+          },
+          {
+            title: "Video Outpainting / Infinite Zoom",
+            desc: "Explanation: A software trick that takes the video frame and generates/expands the scene beyond the actual camera boundaries.",
+            usage: "Usage: Gives the impression that the camera is gradually zooming out into a massive virtual world."
+          },
+          {
+            title: "Dynamic Object Replacement",
+            desc: "Explanation: Select an element in the video, and AI tracks and replaces it instantly with another object.",
+            usage: "Usage: Replacing a cup on a desk with a 3D model while preserving shadow angles and camera movement."
+          }
+        ]
+      },
+      {
+        title: "7. Time & Motion",
+        colorClass: "text-indigo-400",
+        borderColorClass: "border-indigo-500/20",
+        items: [
+          {
+            title: "Motion Trails & Echoes",
+            desc: "Explanation: An effect that tracks a person's movement and generates \"spectral copies\" trailing by fractions of a second.",
+            usage: "Usage: A fantastic effect for dance or sports videos."
+          },
+          {
+            title: "AI Video Stabilization",
+            desc: "Explanation: An algorithm that handles violent shakes and \"imagines\" missing parts of the video that exit the frame.",
+            usage: "Usage: Advanced alternative to standard stabilization by redrawing missing edges."
           }
         ]
       }

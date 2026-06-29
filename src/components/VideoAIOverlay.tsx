@@ -229,6 +229,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
   const AI_FILTERS = [
     { label: 'No Filter', value: 'No Filter' },
+    { label: 'Try On', value: 'Try On' },
     { label: 'Claymation', value: 'Claymation' },
     { label: 'Pixel Art', value: 'Pixel Art' },
     { label: '3D Cartoon (Pixar Style)', value: '3D Cartoon (Pixar Style)' },

@@ -383,6 +383,11 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, category = 'came
             usage: "النتيجة: عادة متوازنة وطبيعية."
           },
           {
+            title: "Try On (تجربة الملابس)",
+            desc: "الشرح: تجربة افتراضية واقعية حيث يتم تركيب جميع أنواع قطع الملابس المرفوعة (Image 2) على الشخص (Image 1).",
+            usage: "النتيجة: تفاصيل دقيقة وواقعية."
+          },
+          {
             title: "Cinematic (سينمائي)",
             desc: "الشرح: يجعل النتيجة تبدو كقطعة من فيلم هوليوودي.",
             usage: "المظهر: إضاءة درامية، تباين عالٍ، ألوان واقعية لكن غنية، وتركيز عالٍ على الجودة والواقعية (Photorealistic)."
@@ -471,6 +476,11 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, category = 'came
             title: "No Filter",
             desc: "Explanation: Keeps the image as is or as described in text without forcing a specific style.",
             usage: "Result: Usually balanced and natural."
+          },
+          {
+            title: "Try On",
+            desc: "Explanation: A virtual reality experience where all types of uploaded clothing items (Image 2) are fitted onto the person (Image 1).",
+            usage: "Result: Accurate details and realistic look."
           },
           {
             title: "Cinematic",

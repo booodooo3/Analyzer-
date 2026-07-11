@@ -233,7 +233,7 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
                                          type="button"
                                          disabled={isGenerating || userImages.length < 2}
                                          onClick={() => {
-                                             const newPrompt = "Face swap, placing the face from Image 1 onto the person in Image 2, seamlessly matching skin tone and body color, highly detailed, realistic, 4k";
+                                             const newPrompt = "Full head swap, perfectly transferring the entire head, face, hair, hairstyle, glasses, moles, and all facial features from Image 1 onto the body in Image 2. The skin tone and body color must match seamlessly. Highly detailed, realistic, 4k";
                                              setPrompt(newPrompt);
                                              handleGenerate(newPrompt);
                                          }}

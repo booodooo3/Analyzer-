@@ -223,29 +223,9 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
 
                         {/* Prompt Input */}
                         <div className="space-y-3">
-                             <div className="flex items-center justify-between">
-                                 <div className="flex items-center gap-2 text-blue-400 font-medium">
-                                        <Wand2 className="w-4 h-4" />
-                                        <h3>Description</h3>
-                                 </div>
-                                 {model === 'bytedance/seedream-4.5' && (
-                                     <button
-                                         type="button"
-                                         disabled={isGenerating || userImages.length < 2}
-                                         onClick={() => {
-                                             const newPrompt = "Full head swap, perfectly transferring the entire head, face, hair, hairstyle, glasses, moles, and all facial features from Image 1 onto the body in Image 2. The skin tone and body color must match seamlessly. Highly detailed, realistic, 4k";
-                                             setPrompt(newPrompt);
-                                             handleGenerate(newPrompt);
-                                         }}
-                                         className={`px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-all border ${
-                                             isGenerating || userImages.length < 2
-                                             ? 'bg-yellow-900/20 border-yellow-900/50 text-yellow-700/50 cursor-not-allowed'
-                                             : 'bg-yellow-500/20 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500 hover:text-white'
-                                         }`}
-                                     >
-                                         Face Swapper
-                                     </button>
-                                 )}
+                             <div className="flex items-center gap-2 text-blue-400 font-medium">
+                                    <Wand2 className="w-4 h-4" />
+                                    <h3>Description</h3>
                              </div>
                              <textarea
                                  value={prompt}

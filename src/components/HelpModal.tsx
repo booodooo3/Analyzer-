@@ -627,6 +627,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, category = 'came
                       <li>Apply a noise amount between <strong>16% and 20%</strong>.</li>
                       <li>Click <strong>Save Image</strong> to download the modified image.</li>
                       <li>Return to the <strong>Video AI</strong> page and upload the new noisy image instead.</li>
+                      <li><strong>Best Solution:</strong> You can also go to <strong>Tex 2 Img</strong>, upload the image, select the <strong>seedream-5-pro</strong> model, save it as <strong>jpeg</strong>, and then upload it back to Video AI.</li>
                     </>
                   ) : (
                     <>
@@ -635,6 +636,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, category = 'came
                       <li>أضف نسبة نويز (Noise) تتراوح بين <strong>16% إلى 20%</strong>.</li>
                       <li>اضغط على <strong>Save Image</strong> لتحميل الصورة المعدلة.</li>
                       <li>عد إلى صفحة <strong>Video AI</strong> وارفع الصورة الجديدة بدلاً من القديمة.</li>
+                      <li><strong>أفضل حل:</strong> يمكنك أيضاً الذهاب إلى خانة <strong>Tex 2 Img</strong> ورفع الصورة واختيار موديل <strong>seedream-5-pro</strong> وحفظها بصيغة <strong>jpeg</strong>، ثم العودة لرفعها في Video AI.</li>
                     </>
                   )}
                 </ol>

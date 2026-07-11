@@ -264,7 +264,10 @@ export const generateTextToImage = async (
   images: string[],
   prompt: string,
   token: string,
-  aspectRatio: '9:16' | '16:9' | 'Match Input Image' = 'Match Input Image'
+  aspectRatio: '9:16' | '16:9' | 'Match Input Image' = 'Match Input Image',
+  model: string = 'bytedance/seedream-4.5',
+  size: string = '4K',
+  outputFormat: string = 'jpeg'
 ) => {
   try {
   let resizedImages = [];
@@ -287,7 +290,10 @@ export const generateTextToImage = async (
     body: JSON.stringify({ 
     images: resizedImages, 
     prompt,
-    aspectRatio: backendAspectRatio
+    aspectRatio: backendAspectRatio,
+    model,
+    size,
+    outputFormat
     }),
   });
 

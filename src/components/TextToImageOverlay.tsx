@@ -22,6 +22,9 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
     const [imageDescriptions, setImageDescriptions] = useState<string[]>([]);
     const [prompt, setPrompt] = useState('');
     const [aspectRatio, setAspectRatio] = useState<'9:16' | '16:9' | 'Match Input Image'>('9:16');
+    const [model, setModel] = useState<string>('bytedance/seedream-4.5');
+    const [size, setSize] = useState<string>('4K');
+    const [outputFormat, setOutputFormat] = useState<string>('jpeg');
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [generations, setGenerations] = useState<GeneratedImage[]>([]);
@@ -36,6 +39,14 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
 
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (model === 'bytedance/seedream-5-pro') {
+        setSize('2K');
+    } else {
+        setSize('4K');
+    }
+  }, [model]);
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
@@ -102,7 +113,10 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
             userImages, // Pass array of images directly
             finalPrompt,
             token,
-            aspectRatio
+            aspectRatio,
+            model,
+            size,
+            outputFormat
         );
         // Add to generations list
         const newImage: GeneratedImage = {
@@ -169,7 +183,7 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
           <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
             <Wand2 className="w-4 h-4 text-white" />
           </div>
-          <h1 className="text-lg font-bold tracking-tight">Tex 2 Img <span className="text-zinc-500 font-normal text-sm ml-2">bytedance/seedream-4.5</span></h1>
+          <h1 className="text-lg font-bold tracking-tight">Tex 2 Img <span className="text-zinc-500 font-normal text-sm ml-2">{model.split('/')[1]}</span></h1>
         </div>
         
         <div className="flex items-center gap-4">
@@ -192,6 +206,21 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
         {/* Left Sidebar - Settings */}
         <div className="w-full lg:w-[320px] flex-shrink-0 flex flex-col border-r border-white/5 bg-[#080808] p-6 space-y-6 overflow-y-auto custom-scrollbar">
             
+                        {/* Model Selection */}
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Model</label>
+                            </div>
+                            <select 
+                                value={model}
+                                onChange={(e) => setModel(e.target.value)}
+                                className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 text-white"
+                            >
+                                <option value="bytedance/seedream-4.5">Seedream 4.5</option>
+                                <option value="bytedance/seedream-5-pro">Seedream 5 Pro</option>
+                            </select>
+                        </div>
+
                         {/* Prompt Input */}
                         <div className="space-y-3">
                              <div className="flex items-center gap-2 text-blue-400 font-medium">
@@ -223,9 +252,42 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
                              </div>
                         </div>
 
+                        {/* Additional Settings */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Size</label>
+                                <select 
+                                    value={size}
+                                    onChange={(e) => setSize(e.target.value)}
+                                    className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500 text-white"
+                                >
+                                    {model === 'bytedance/seedream-5-pro' ? (
+                                        <>
+                                            <option value="1K">1K (~2 megapixels)</option>
+                                            <option value="2K">2K (~4 megapixels)</option>
+                                        </>
+                                    ) : (
+                                        <option value="4K">4K Resolution</option>
+                                    )}
+                                </select>
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Format</label>
+                                <select 
+                                    value={outputFormat}
+                                    onChange={(e) => setOutputFormat(e.target.value)}
+                                    className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500 text-white"
+                                >
+                                    <option value="jpeg">JPEG</option>
+                                    <option value="png">PNG</option>
+                                    <option value="webp">WEBP</option>
+                                </select>
+                            </div>
+                        </div>
+
             <div className="space-y-2 text-xs text-zinc-500">
-                <p>• Model: bytedance/seedream-4.5</p>
-                <p>• Settings: 4K Resolution, Match Input Image</p>
+                <p>• Model: {model}</p>
+                <p>• Settings: {size} Resolution, {aspectRatio}</p>
                 <p>• Cost: 0.5 Credits</p>
             </div>
 

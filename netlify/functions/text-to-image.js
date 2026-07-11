@@ -57,7 +57,7 @@ export default async (req, context) => {
 
   try {
     const body = await req.json();
-    const { images, prompt } = body; // changed from image to images
+    const { images, prompt, model = "bytedance/seedream-4.5", size = "4K", outputFormat = "jpeg" } = body; // changed from image to images
 
     // 1. Verify Auth & Credits
     let userId;
@@ -101,8 +101,9 @@ export default async (req, context) => {
     if (aspect === "Match Input Image") aspect = "match_input_image";
     const input = {
       prompt: prompt || "A creative image",
-      size: "4K",
+      size: size,
       aspect_ratio: aspect,
+      output_format: outputFormat,
       disable_safety_checker: true,
     };
 
@@ -115,10 +116,10 @@ export default async (req, context) => {
     }
 
     // 3. Call Replicate
-    console.log(`🚀 Starting TextToImage generation with prompt: ${input.prompt}`);
+    console.log(`🚀 Starting TextToImage generation with prompt: ${input.prompt}, model: ${model}`);
 
     const prediction = await replicate.predictions.create({
-      model: "bytedance/seedream-4.5",
+      model: model,
       input: input
     });
 

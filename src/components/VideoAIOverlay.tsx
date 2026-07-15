@@ -53,7 +53,12 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
   const pollStatus = async (currentId: string) => {
     try {
-      const statusRes = await fetch(`/api/video-generate?id=${currentId}`);
+      const token = await getToken();
+      const statusRes = await fetch(`/api/video-generate?id=${currentId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const statusData = await statusRes.json();
 
       if (statusData.status === 'succeeded') {

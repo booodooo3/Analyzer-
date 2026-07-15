@@ -29,6 +29,55 @@ export default async (req, context) => {
                 if (Array.isArray(outputUrl)) {
                     outputUrl = outputUrl[0];
                 }
+                
+                // Deduct credits here if not already deducted
+                const authHeader = req.headers.get("Authorization");
+                const token = authHeader?.split(" ")[1];
+                
+                if (token && token !== "null" && token !== "undefined") {
+                    try {
+                        const verified = await clerkClient.verifyToken(token);
+                        const userId = verified.sub;
+                        const user = await clerkClient.users.getUser(userId);
+                        
+                        const deductedPredictions = user.publicMetadata.deducted_predictions || [];
+                        if (!deductedPredictions.includes(predictionId)) {
+                            // Calculate cost
+                            let model = prediction.model;
+                            let duration = prediction.input?.duration || 10;
+                            let image = prediction.input?.image || prediction.input?.video_url || prediction.input?.video || prediction.input?.start_image;
+                            
+                            let cost = 4;
+                            if (duration === 5) {
+                                cost = 2;
+                            }
+                            if (model === 'bytedance/omni-human' || model === 'kwaivgi/kling-lip-sync' || model === 'pixverse/lipsync') {
+                                cost = 2;
+                            }
+                            if (!image && model === 'bytedance/seedance-2.0' && !prediction.input?.reference_images && !prediction.input?.reference_videos) {
+                                cost = 5;
+                            }
+                            if (model === 'bytedance/seedance-2.0') {
+                                if (duration === 5) cost = 3;
+                                else if (duration === 8) cost = 5;
+                                else if (duration === 10) cost = 7;
+                            }
+                            
+                            const currentCredits = typeof user.publicMetadata.credits === 'number' ? user.publicMetadata.credits : 3;
+                            const newDeducted = [...deductedPredictions, predictionId].slice(-50);
+                            
+                            await clerkClient.users.updateUserMetadata(userId, {
+                                publicMetadata: { 
+                                    credits: Math.max(0, currentCredits - cost),
+                                    deducted_predictions: newDeducted
+                                }
+                            });
+                        }
+                    } catch (e) {
+                        console.error("Credit deduction error in GET:", e);
+                    }
+                }
+
                 return new Response(JSON.stringify({ 
                     status: "succeeded", 
                     output: outputUrl,
@@ -299,16 +348,12 @@ export default async (req, context) => {
                     input: input
                 });
 
-                // 3. Deduct Credit ONLY if prediction started successfully
-                await clerkClient.users.updateUserMetadata(userId, {
-                    publicMetadata: { credits: currentCredits - cost }
-                });
-
+                // Credits will be deducted when the video generation succeeds
                 return new Response(JSON.stringify({
                     status: "starting",
                     message: "Video generation started",
                     id: prediction.id,
-                    deducted: cost,
+                    cost: cost,
                     model: `${modelOwner}/${modelName}`
                 }), { status: 200, headers });
             } catch (repError) {

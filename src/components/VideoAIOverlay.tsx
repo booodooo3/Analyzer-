@@ -1310,6 +1310,12 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                           AI Filters (Style Transfer)
                         </label>
+                        <button
+                          onClick={() => setHelpCategory('style')}
+                          className="text-[9px] px-2 py-1 rounded-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-500 hover:text-zinc-300 border border-zinc-700/50 transition-colors tracking-wide uppercase"
+                        >
+                          This For Help
+                        </button>
                       </div>
                       <select 
                           value={aiFilter}

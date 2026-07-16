@@ -7,14 +7,16 @@ export default function CreditDisplay({
   onCheckout,
   onOpenVideoAI,
   onOpenHairStyler,
-  onOpenTextToImage
+  onOpenTextToImage,
+  onOpenAddNoise
 }: { 
   isPlusMode?: boolean, 
   onTogglePlus?: () => void, 
   onCheckout?: () => void,
   onOpenVideoAI?: () => void,
   onOpenHairStyler?: () => void,
-  onOpenTextToImage?: () => void
+  onOpenTextToImage?: () => void,
+  onOpenAddNoise?: () => void
 }) { 
   const { user, isLoaded } = useUser(); 
   
@@ -115,6 +117,23 @@ export default function CreditDisplay({
                   >
                     <span className="text-xs font-bold uppercase tracking-wider">
                       video Ai
+                    </span>
+                  </button>
+                  <span className="text-[9px] font-thin text-zinc-500 mt-0.5 tracking-wider">Press</span>
+                </div>
+              )}
+
+              {/* Add Noise Button */}
+              {onOpenAddNoise && (
+                <div className="flex flex-col items-center ml-2">
+                  <span className="text-[9px] font-thin text-transparent mb-0.5 tracking-wider select-none">Spacer</span>
+                  <button
+                    onClick={onOpenAddNoise}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-zinc-700 bg-black text-white shadow-[0_0_10px_rgba(255,255,255,0.1)] hover:border-zinc-500 transition-all duration-300"
+                    title="Error 500"
+                  >
+                    <span className="text-xs font-bold uppercase tracking-wider">
+                      Error 500
                     </span>
                   </button>
                   <span className="text-[9px] font-thin text-zinc-500 mt-0.5 tracking-wider">Press</span>

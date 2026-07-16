@@ -612,7 +612,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, category = 'came
               <div className="bg-red-500/10 border border-red-500/30 p-4 rounded-xl">
                 <h3 className="text-red-500 font-bold mb-2 font-mono text-sm">Prediction failed</h3>
                 <p className="text-red-400 text-xs font-mono">
-                  Server error (400): Empty response. (or any other prediction error)
+                  Error: Prediction failed: Async prediction failed: ModelError: The input or output was flagged as sensitive. Please try again with different inputs. (E005) (uIJ6l3ruRD)
                 </p>
               </div>
               <div className="bg-zinc-800/50 p-6 rounded-xl border border-zinc-700">
@@ -622,19 +622,21 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, category = 'came
                 <ol className={`list-decimal list-inside space-y-4 text-zinc-300 ${isRTL ? 'font-arabic' : ''}`}>
                   {language === 'en' ? (
                     <>
-                      <li>Close this window and go to the <strong>Tex 2 Img</strong> page from the main menu.</li>
-                      <li>Select the <strong>seedream-4.5</strong> model.</li>
-                      <li>Upload your image and make any minor edit (e.g., change clothes color, add an accessory, or anything).</li>
+                      <li>Close this window and go to the <strong>Error 500</strong> page from the main menu.</li>
+                      <li>Upload the image that caused this error.</li>
+                      <li>Apply a noise amount between <strong>16% and 20%</strong>.</li>
                       <li>Click <strong>Save Image</strong> to download the modified image.</li>
-                      <li>Return to the <strong>Video AI</strong> page and upload the new saved image.</li>
+                      <li>Return to the <strong>Video AI</strong> page and upload the new noisy image instead.</li>
+                      <li><strong>Best Solution:</strong> You can also go to <strong>Tex 2 Img</strong>, upload the image, select the <strong>seedream-5-pro</strong> model (do anything to the image, even change the color of clothes or add a brooch, just do anything so you can save it), save it as <strong>jpeg</strong>, and then upload it back to Video AI.</li>
                     </>
                   ) : (
                     <>
-                      <li>أغلق هذه النافذة واذهب إلى خانة <strong>Tex 2 Img</strong> من القائمة الرئيسية.</li>
-                      <li>اختر موديل <strong>seedream-4.5</strong>.</li>
-                      <li>ارفع الصورة وعدل عليها أي شيء (حتى لو تغيير لون الملابس أو إضافة بروش، المهم أي تعديل بسيط).</li>
-                      <li>احفظ الصورة بصيغة <strong>jpeg</strong> أو أي صيغة متاحة.</li>
-                      <li>عد لرفعها هنا في صفحة <strong>Video AI</strong>.</li>
+                      <li>أغلق هذه النافذة واذهب إلى صفحة <strong>Error 500</strong> من القائمة الرئيسية.</li>
+                      <li>ارفع الصورة التي تسببت في ظهور هذا الخطأ.</li>
+                      <li>أضف نسبة نويز (Noise) تتراوح بين <strong>16% إلى 20%</strong>.</li>
+                      <li>اضغط على <strong>Save Image</strong> لتحميل الصورة المعدلة.</li>
+                      <li>عد إلى صفحة <strong>Video AI</strong> وارفع الصورة الجديدة بدلاً من القديمة.</li>
+                      <li><strong>أفضل حل:</strong> يمكنك أيضاً الذهاب إلى خانة <strong>Tex 2 Img</strong> ورفع الصورة واختيار موديل <strong>seedream-5-pro</strong> (اعمل اي شي على الصوره حتى لو تغير لون ملابس تضع بروش المهم اي شي لتستطيع تحفظها) وحفظها بصيغة <strong>jpeg</strong>، ثم العودة لرفعها في Video AI.</li>
                     </>
                   )}
                 </ol>

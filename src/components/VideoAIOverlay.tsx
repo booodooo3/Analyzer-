@@ -4,6 +4,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { ImageUploader } from './ImageUploader';
 import { Button } from './Button';
 import { ImageData } from '../types';
+import HelpModal from './HelpModal';
 import { uploadToCloudinary } from '../utils/cloudinary';
 
 interface VideoAIOverlayProps {
@@ -26,6 +27,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [cameraEffect, setCameraEffect] = useState('Static');
   const [aiFilter, setAiFilter] = useState('No Filter');
+  const [helpCategory, setHelpCategory] = useState<'camera' | 'style' | 'predictionError' | null>(null);
   const [duration, setDuration] = useState(10);
   const [selectedModel, setSelectedModel] = useState('bytedance/seedance-2.0');
   const [aspectRatio, setAspectRatio] = useState('Match Input Image');
@@ -268,6 +270,21 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
        });
     }
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if typing in an input or textarea
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+      if (isOpen && (e.key === 'h' || e.key === 'H')) {
+        setHelpCategory(prev => prev ? null : 'camera');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
 
   const handleAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -761,6 +778,12 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
   return (
     <>
+      <HelpModal 
+        isOpen={!!helpCategory} 
+        onClose={() => setHelpCategory(null)} 
+        category={helpCategory || 'camera'} 
+      />
+      
       <div className="fixed inset-0 z-[50] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300 overflow-y-auto">
         {/* Backdrop */}
         <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={onClose} />
@@ -1040,6 +1063,12 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       <div className="flex flex-col items-end gap-1">
                           <span className="text-[10px] text-white font-bold uppercase tracking-wider">Ai Model</span>
                           <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => setHelpCategory('predictionError')}
+                                className="text-[9px] px-2 py-1 rounded-full bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-500 border border-yellow-500/30 transition-colors tracking-wide uppercase font-bold"
+                              >
+                                Help
+                              </button>
                               {supportsTwoImages && (
                                 <span className="text-[9px] text-white font-bold uppercase tracking-wider animate-in fade-in slide-in-from-right-4">Supports 2 Images</span>
                               )}
@@ -1292,6 +1321,12 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                   <div className="space-y-2">
                       <div className="flex justify-between items-end">
                         <label className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Camera Effect</label>
+                        <button
+                          onClick={() => setHelpCategory('camera')}
+                          className="text-[9px] px-2 py-1 rounded-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-500 hover:text-zinc-300 border border-zinc-700/50 transition-colors tracking-wide uppercase"
+                        >
+                          This For Help
+                        </button>
                       </div>
                       <select 
                           value={cameraEffect}
@@ -1310,12 +1345,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                           AI Filters (Style Transfer)
                         </label>
-                        <button
-                          onClick={() => setHelpCategory('style')}
-                          className="text-[9px] px-2 py-1 rounded-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-500 hover:text-zinc-300 border border-zinc-700/50 transition-colors tracking-wide uppercase"
-                        >
-                          This For Help
-                        </button>
                       </div>
                       <select 
                           value={aiFilter}

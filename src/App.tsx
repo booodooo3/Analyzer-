@@ -7,7 +7,6 @@ import { Button } from './components/Button';
 import { VideoAIOverlay } from './components/VideoAIOverlay';
 import { HairStylerOverlay } from './components/HairStylerOverlay';
 import { TextToImageOverlay } from './components/TextToImageOverlay';
-import { AddNoiseOverlay } from './components/AddNoiseOverlay';
 import ContactModal from './components/ContactModal';
 import { performVirtualTryOn, analyzeStyle } from './services/apiService';
 import { ImageData, AppState, GarmentType } from './types';
@@ -104,7 +103,6 @@ const App: React.FC = () => {
   const [isHairStylerOpen, setIsHairStylerOpen] = useState(false);
   const [isTextToImageOpen, setIsTextToImageOpen] = useState(false);
   const [isVideoAIOpen, setIsVideoAIOpen] = useState(false);
-  const [isAddNoiseOpen, setIsAddNoiseOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [isTermsOpen, setIsTermsOpen] = useState(false);
@@ -504,7 +502,6 @@ const App: React.FC = () => {
                   onOpenVideoAI={() => setIsVideoAIOpen(true)}
                   onOpenHairStyler={() => setIsHairStylerOpen(true)}
                   onOpenTextToImage={() => setIsTextToImageOpen(true)}
-                  onOpenAddNoise={() => setIsAddNoiseOpen(true)}
                 />
                 <UserButton />
               </div>
@@ -1003,11 +1000,6 @@ const App: React.FC = () => {
       <TextToImageOverlay
         isOpen={isTextToImageOpen}
         onClose={() => setIsTextToImageOpen(false)}
-      />
-
-      <AddNoiseOverlay
-        isOpen={isAddNoiseOpen}
-        onClose={() => setIsAddNoiseOpen(false)}
       />
 
       <ContactModal 

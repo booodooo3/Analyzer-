@@ -113,7 +113,7 @@ export default async (req, context) => {
             
             const currentCredits = typeof user.publicMetadata.credits === 'number' ? user.publicMetadata.credits : 3;
             
-            const { image, image2, description, duration, cameraEffect, aiFilter, model, aspectRatio, audioFile, videoInput, characterOrientation, video_path, resolution, seed, reference_images, reference_videos, reference_audios } = await req.json();
+            const { image, image2, description, duration, cameraEffect, aiFilter, model, aspectRatio, audioFile, videoInput, characterOrientation, video_path, resolution, seed, reference_images, reference_videos, reference_audios, video_reference_type } = await req.json();
 
             // Calculate cost based on duration
             let cost = 4;
@@ -170,6 +170,9 @@ export default async (req, context) => {
                 modelOwner = "bytedance";
                 modelName = "seedance-2.0";
 
+            } else if (model === 'kwaivgi/kling-v3-omni-video') {
+                modelOwner = "kwaivgi";
+                modelName = "kling-v3-omni-video";
             } else if (model === 'kwaivgi/kling-v2.6-motion-control') {
                 modelOwner = "kwaivgi";
                 modelName = "kling-v2.6-motion-control";
@@ -277,6 +280,28 @@ export default async (req, context) => {
                     character_orientation: characterOrientation || "video",
                     keep_original_sound: true
                 };
+            } else if (model === 'kwaivgi/kling-v3-omni-video') {
+                modelOwner = "kwaivgi";
+                modelName = "kling-v3-omni-video";
+                input = {
+                    prompt: enhancedPrompt || "",
+                    start_image: image,
+                    mode: "pro", // default
+                    duration: duration || 5,
+                };
+                
+                if (reference_images && reference_images.length > 0) {
+                    input.reference_image = reference_images[0];
+                }
+                if (reference_videos && reference_videos.length > 0) {
+                    input.reference_video = reference_videos[0];
+                }
+                if (video_reference_type) {
+                    input.video_reference_type = video_reference_type;
+                }
+                if (aspectRatio !== "Match Input Image") {
+                    input.output_video_ratio = aspectRatio || "16:9";
+                }
             } else if (modelOwner === "kwaivgi") {
                 input = {
                     prompt: enhancedPrompt,

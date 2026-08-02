@@ -1255,7 +1255,11 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                     <div className="flex flex-col gap-4 mt-4">
                       <div className="flex-1">
                         <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Reference Images (Optional)</label>
-                        <p className="text-[10px] text-zinc-500 mb-2">Reference images (up to 9) for character consistency, style guidance, and scene composition. Cannot be used together with first/last frame images. You can reference them in your prompt as [Image1], [Image2], etc.</p>
+                        <p className="text-[10px] text-zinc-500 mb-2">
+                          {selectedModel === 'kwaivgi/kling-v3-omni-video' 
+                            ? 'Reference images for elements, scenes, or styles. Supports .jpg/.jpeg/.png. Max 7 without video, 4 with video.'
+                            : 'Reference images (up to 9) for character consistency, style guidance, and scene composition. Cannot be used together with first/last frame images. You can reference them in your prompt as [Image1], [Image2], etc.'}
+                        </p>
                         <div className="relative group mt-1">
                             <input
                                 type="file"
@@ -1266,7 +1270,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                             />
                             <button className={`w-full flex items-center justify-center gap-2 bg-zinc-900/50 hover:bg-zinc-800 border border-dashed py-2.5 rounded-xl transition-all ${referenceImages.length > 0 && referenceAudios ? 'border-yellow-500 text-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.5)]' : referenceImages.length > 0 ? 'border-green-500 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)]' : 'border-zinc-700 hover:border-green-500/50 text-zinc-400 hover:text-green-400'}`}>
                                 <Upload className="w-4 h-4" />
-                                <span className="text-xs font-medium">{referenceImages.length > 0 ? `${referenceImages.length} images selected` : 'Upload Reference Images (Max 9)'}</span>
+                                <span className="text-xs font-medium">{referenceImages.length > 0 ? `${referenceImages.length} images selected` : selectedModel === 'kwaivgi/kling-v3-omni-video' ? 'Upload Reference Images (Max 7)' : 'Upload Reference Images (Max 9)'}</span>
                             </button>
                         </div>
                         

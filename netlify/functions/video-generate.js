@@ -291,7 +291,9 @@ export default async (req, context) => {
                 };
                 
                 if (reference_images && reference_images.length > 0) {
-                    input.reference_image = reference_images[0];
+                    // Limit reference images based on whether a reference video is provided
+                    const maxImages = (reference_videos && reference_videos.length > 0) ? 4 : 7;
+                    input.reference_images = reference_images.slice(0, maxImages);
                 }
                 if (reference_videos && reference_videos.length > 0) {
                     input.reference_video = reference_videos[0];

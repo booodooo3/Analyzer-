@@ -113,7 +113,7 @@ export default async (req, context) => {
             
             const currentCredits = typeof user.publicMetadata.credits === 'number' ? user.publicMetadata.credits : 3;
             
-            const { image, image2, description, duration, cameraEffect, aiFilter, model, aspectRatio, audioFile, videoInput, characterOrientation, video_path, resolution, seed, reference_images, reference_videos, reference_audios, video_reference_type } = await req.json();
+            const { image, image2, description, duration, cameraEffect, aiFilter, model, aspectRatio, audioFile, videoInput, characterOrientation, video_path, resolution, seed, reference_images, reference_videos, reference_audios, video_reference_type, keep_original_sound, generate_audio } = await req.json();
 
             // Calculate cost based on duration
             let cost = 4;
@@ -298,6 +298,12 @@ export default async (req, context) => {
                 }
                 if (video_reference_type) {
                     input.video_reference_type = video_reference_type;
+                }
+                if (keep_original_sound !== undefined) {
+                    input.keep_original_sound = keep_original_sound;
+                }
+                if (generate_audio !== undefined) {
+                    input.generate_audio = generate_audio;
                 }
                 if (aspectRatio !== "Match Input Image") {
                     input.output_video_ratio = aspectRatio || "16:9";

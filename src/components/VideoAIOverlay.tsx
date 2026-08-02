@@ -49,6 +49,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [pendingVideoId, setPendingVideoId] = useState<string | null>(null);
   const [generationMode, setGenerationMode] = useState<'imageToVideo' | 'textToVideo'>('imageToVideo');
   const [videoReferenceType, setVideoReferenceType] = useState('feature');
+  const [keepOriginalSound, setKeepOriginalSound] = useState(true);
+  const [generateAudio, setGenerateAudio] = useState(false);
 
   const { userId } = useAuth();
 
@@ -521,7 +523,9 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
             reference_images: referenceImages.filter(img => img.base64).map(img => img.base64),
             reference_videos: uploadedRefVideos,
             reference_audios: uploadedRefAudios,
-            video_reference_type: videoReferenceType
+            video_reference_type: videoReferenceType,
+            keep_original_sound: keepOriginalSound,
+            generate_audio: generateAudio
           })
       });
 
@@ -1219,7 +1223,36 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                         </div>
                       )}
                     </div>
-                    <div className="flex flex-col gap-4">
+                    {selectedModel === 'kwaivgi/kling-v3-omni-video' && (
+                        <div className="flex gap-4 mt-4">
+                            <label className="flex items-center gap-2 cursor-pointer group">
+                                <input 
+                                    type="checkbox" 
+                                    checked={keepOriginalSound} 
+                                    onChange={(e) => setKeepOriginalSound(e.target.checked)}
+                                    className="accent-blue-500 w-4 h-4 rounded border-zinc-700 bg-black"
+                                />
+                                <div className="flex flex-col">
+                                    <span className="text-xs font-bold text-zinc-300 group-hover:text-blue-400 transition-colors uppercase tracking-wider">Keep Original Sound</span>
+                                    <span className="text-[9px] text-zinc-500">Keep original sound from reference video.</span>
+                                </div>
+                            </label>
+
+                            <label className="flex items-center gap-2 cursor-pointer group">
+                                <input 
+                                    type="checkbox" 
+                                    checked={generateAudio} 
+                                    onChange={(e) => setGenerateAudio(e.target.checked)}
+                                    className="accent-blue-500 w-4 h-4 rounded border-zinc-700 bg-black"
+                                />
+                                <div className="flex flex-col">
+                                    <span className="text-xs font-bold text-zinc-300 group-hover:text-blue-400 transition-colors uppercase tracking-wider">Generate Audio</span>
+                                    <span className="text-[9px] text-zinc-500">Generate native audio.</span>
+                                </div>
+                            </label>
+                        </div>
+                    )}
+                    <div className="flex flex-col gap-4 mt-4">
                       <div className="flex-1">
                         <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Reference Images (Optional)</label>
                         <p className="text-[10px] text-zinc-500 mb-2">Reference images (up to 9) for character consistency, style guidance, and scene composition. Cannot be used together with first/last frame images. You can reference them in your prompt as [Image1], [Image2], etc.</p>

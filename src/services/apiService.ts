@@ -267,7 +267,8 @@ export const generateTextToImage = async (
   aspectRatio: '9:16' | '16:9' | 'Match Input Image' = 'Match Input Image',
   model: string = 'bytedance/seedream-4.5',
   size: string = '4K',
-  outputFormat: string = 'jpeg'
+  outputFormat: string = 'jpeg',
+  signal?: AbortSignal
 ) => {
   try {
   let resizedImages = [];
@@ -295,6 +296,7 @@ export const generateTextToImage = async (
     size,
     outputFormat
     }),
+    signal
   });
 
   if (!startResponse.ok) {
@@ -317,12 +319,31 @@ export const generateTextToImage = async (
   const maxConsecutiveFetchErrors = 5;
 
   while (attempts < maxAttempts) {
+    if (signal?.aborted) {
+        // Cancel the generation on the server
+        await fetch(`/api/text-to-image?id=${encodeURIComponent(predictionId)}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        }).catch(console.error);
+        throw new Error("Generation canceled by user");
+    }
+
     attempts++;
     await new Promise(r => setTimeout(r, pollInterval));
 
+    if (signal?.aborted) {
+        // Cancel the generation on the server
+        await fetch(`/api/text-to-image?id=${encodeURIComponent(predictionId)}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        }).catch(console.error);
+        throw new Error("Generation canceled by user");
+    }
+
     try {
       const statusResponse = await fetch(`/api/text-to-image?id=${encodeURIComponent(predictionId)}`, {
-         headers: { 'Authorization': `Bearer ${token}` }
+         headers: { 'Authorization': `Bearer ${token}` },
+         signal
       });
           
       // Reset error counter on successful fetch
@@ -342,6 +363,14 @@ export const generateTextToImage = async (
         throw new Error(statusData.error || "Generation failed.");
       }
     } catch (fetchErr: any) {
+      if (fetchErr.name === 'AbortError') {
+          // If aborted during fetch, it's a cancellation
+          await fetch(`/api/text-to-image?id=${encodeURIComponent(predictionId)}`, {
+              method: 'DELETE',
+              headers: { 'Authorization': `Bearer ${token}` }
+          }).catch(console.error);
+          throw new Error("Generation canceled by user");
+      }
       consecutiveFetchErrors++;
       console.warn(`Fetch attempt ${attempts} failed (${consecutiveFetchErrors}/${maxConsecutiveFetchErrors}):`, fetchErr);
       if (consecutiveFetchErrors >= maxConsecutiveFetchErrors) {
@@ -353,6 +382,9 @@ export const generateTextToImage = async (
   throw new Error("Timeout waiting for generation.");
 
   } catch (err: any) {
+    if (err.name === 'AbortError' || err.message === 'Generation canceled by user') {
+        throw new Error("Generation canceled by user");
+    }
     console.error("TextToImage Error:", err);
     throw err;
   }

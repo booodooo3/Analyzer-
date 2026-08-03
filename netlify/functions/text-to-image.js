@@ -12,7 +12,7 @@ export default async (req, context) => {
   const headers = {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+    "Access-Control-Allow-Methods": "POST, GET, OPTIONS, DELETE",
   };
 
   if (req.method === "OPTIONS") {
@@ -45,6 +45,38 @@ export default async (req, context) => {
       } else {
          return new Response(JSON.stringify({ status: prediction.status }), { headers });
       }
+    } catch (error) {
+      return new Response(JSON.stringify({ error: error.message }), { status: 500, headers });
+    }
+  }
+
+  // --- DELETE Request: Cancel Generation ---
+  if (req.method === "DELETE" && predictionId) {
+    try {
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+      }
+      const token = authHeader.split(" ")[1];
+      const verified = await clerkClient.verifyToken(token);
+      const userId = verified.sub;
+
+      const prediction = await replicate.predictions.cancel(predictionId);
+      
+      // Refund credits if canceled successfully
+      if (prediction && (prediction.status === "canceled" || prediction.status === "failed")) {
+        const user = await clerkClient.users.getUser(userId);
+        const currentCredits = typeof user.publicMetadata.credits === 'number' ? user.publicMetadata.credits : 3;
+        
+        await clerkClient.users.updateUserMetadata(userId, {
+            publicMetadata: {
+                credits: currentCredits + 0.5
+            }
+        });
+        console.log(`✅ TextToImage: Refunded 0.5. New balance: ${currentCredits + 0.5}`);
+      }
+
+      return new Response(JSON.stringify({ status: "canceled" }), { headers });
     } catch (error) {
       return new Response(JSON.stringify({ error: error.message }), { status: 500, headers });
     }

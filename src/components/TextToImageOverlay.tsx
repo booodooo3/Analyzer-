@@ -29,6 +29,7 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
     const [error, setError] = useState<string | null>(null);
     const [generations, setGenerations] = useState<GeneratedImage[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const abortControllerRef = useRef<AbortController | null>(null);
 
   // Timer to clean up expired images and trigger re-render
   useEffect(() => {
@@ -89,6 +90,15 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
         }
     };
 
+  const handleCancel = () => {
+    if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+    }
+    setIsGenerating(false);
+    setError("Generation canceled by user.");
+  };
+
   const handleGenerate = async (overridePrompt?: string) => {
     const finalPrompt = overridePrompt || prompt;
     // Only require at least one image
@@ -103,6 +113,7 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
 
     setIsGenerating(true);
     setError(null);
+    abortControllerRef.current = new AbortController();
 
     try {
         const token = await getToken();
@@ -116,7 +127,8 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
             aspectRatio,
             model,
             size,
-            outputFormat
+            outputFormat,
+            abortControllerRef.current.signal
         );
         // Add to generations list
         const newImage: GeneratedImage = {
@@ -127,9 +139,12 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
         setGenerations(prev => [newImage, ...prev]);
 
     } catch (err: any) {
-        setError(err.message || "Failed to generate image.");
+        if (err.message !== "Generation canceled by user") {
+            setError(err.message || "Failed to generate image.");
+        }
     } finally {
         setIsGenerating(false);
+        abortControllerRef.current = null;
     }
   };
 
@@ -293,27 +308,28 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
 
             {error && <p className="text-red-500 text-xs text-center">{error}</p>}
 
-            <button
-                onClick={() => handleGenerate()}
-                disabled={isGenerating || userImages.length === 0 || !prompt}
-                className={`w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
-                    isGenerating || userImages.length === 0 || !prompt
-                    ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98]'
-                }`}
-            >
-                {isGenerating ? (
-                    <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Generating...
-                    </>
-                ) : (
-                    <>
+            {!isGenerating ? (
+                <button
+                    onClick={() => handleGenerate()}
+                    disabled={userImages.length === 0 || !prompt}
+                    className={`w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
+                        userImages.length === 0 || !prompt
+                        ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98]'
+                    }`}
+                >
                     <Wand2 className="w-4 h-4" />
                     Generate Image
-                    </>
-                )}
-            </button>
+                </button>
+            ) : (
+                <button
+                    onClick={handleCancel}
+                    className="w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all bg-red-600/20 text-red-500 border border-red-500/50 hover:bg-red-600 hover:text-white"
+                >
+                    <X className="w-4 h-4" />
+                    Cancel Generation
+                </button>
+            )}
 
             {/* Quick Virtual Try-On Options */}
             <div className="mt-4 pt-4 border-t border-white/10">

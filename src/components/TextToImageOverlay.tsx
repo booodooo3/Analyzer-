@@ -331,6 +331,29 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
                 </button>
             )}
 
+            {/* Face & Expression Transfer */}
+            <div className="mt-4 pt-4 border-t border-white/10">
+                <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Face & Expression</h3>
+                <button
+                    disabled={isGenerating || userImages.length < 2}
+                    onClick={() => {
+                        const newPrompt = "Copy the facial expressions, emotions, and head pose from the person in Image 2 and apply them to the person in Image 1, highly detailed, realistic, 4k";
+                        setPrompt(newPrompt);
+                        handleGenerate(newPrompt);
+                    }}
+                    className={`w-full p-3 rounded-lg text-xs font-bold transition-all border flex items-center justify-center text-center ${
+                        isGenerating || userImages.length < 2
+                        ? 'bg-zinc-900/50 border-zinc-800 text-zinc-600 cursor-not-allowed'
+                        : 'bg-yellow-500/10 border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black shadow-[0_0_10px_rgba(234,179,8,0.3)]'
+                    }`}
+                >
+                    Expressions
+                </button>
+                <p className="text-[10px] text-zinc-500 mt-3 text-center leading-relaxed">
+                    Upload <strong>Image 1 (Base)</strong> and <strong>Image 2 (Expression)</strong>, then click to copy expressions.
+                </p>
+            </div>
+
             {/* Quick Virtual Try-On Options */}
             <div className="mt-4 pt-4 border-t border-white/10">
                 <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Quick Try-On Options</h3>

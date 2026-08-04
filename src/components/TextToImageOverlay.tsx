@@ -335,39 +335,37 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
             <div className="mt-4 pt-4 border-t border-white/10">
                 <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Face & Expression</h3>
                 <div className="grid grid-cols-2 gap-2">
-                    <button
-                        disabled={isGenerating || userImages.length < 2}
-                        onClick={() => {
-                            const newPrompt = "Copy ONLY the facial expressions and emotions from the person in Image 2 and apply them to the person in Image 1, keeping the original body and pose intact, highly detailed, realistic, 4k";
-                            setPrompt(newPrompt);
-                            handleGenerate(newPrompt);
-                        }}
-                        className={`p-2 rounded-lg text-[10px] font-bold transition-all border flex items-center justify-center text-center h-12 ${
-                            isGenerating || userImages.length < 2
-                            ? 'bg-zinc-900/50 border-zinc-800 text-zinc-600 cursor-not-allowed'
-                            : 'bg-yellow-500/10 border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black shadow-[0_0_10px_rgba(234,179,8,0.3)]'
-                        }`}
-                    >
-                        تعابير الوجه فقط
-                    </button>
-                    <button
-                        disabled={isGenerating || userImages.length < 2}
-                        onClick={() => {
-                            const newPrompt = "Copy ONLY the body pose, body movements, and gesture from the person in Image 2 and apply them to the person in Image 1, keeping the original face intact, highly detailed, realistic, 4k";
-                            setPrompt(newPrompt);
-                            handleGenerate(newPrompt);
-                        }}
-                        className={`p-2 rounded-lg text-[10px] font-bold transition-all border flex items-center justify-center text-center h-12 ${
-                            isGenerating || userImages.length < 2
-                            ? 'bg-zinc-900/50 border-zinc-800 text-zinc-600 cursor-not-allowed'
-                            : 'bg-yellow-500/10 border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black shadow-[0_0_10px_rgba(234,179,8,0.3)]'
-                        }`}
-                    >
-                        حركات الجسد
-                    </button>
+                    {[
+                        { label: 'فتحه الفم', prompt: 'Modify the face in the image to have an open mouth, highly detailed, realistic, 4k' },
+                        { label: 'اخرج للسان الى الاسفل', prompt: 'Modify the face in the image to stick the tongue out pointing downwards, highly detailed, realistic, 4k' },
+                        { label: 'رفع اللسان الى اعلى', prompt: 'Modify the face in the image to stick the tongue out pointing upwards, highly detailed, realistic, 4k' },
+                        { label: 'اغلاق العين', prompt: 'Modify the face in the image to have closed eyes, highly detailed, realistic, 4k' },
+                        { label: 'النظر يمين', prompt: 'Modify the face in the image to look to the right, highly detailed, realistic, 4k' },
+                        { label: 'النظر اليسار', prompt: 'Modify the face in the image to look to the left, highly detailed, realistic, 4k' },
+                        { label: 'بقبقه العين', prompt: 'Modify the face in the image to have widened, bulging eyes, highly detailed, realistic, 4k' },
+                        { label: 'عضه الشفه السفليه', prompt: 'Modify the face in the image to bite the lower lip, highly detailed, realistic, 4k' },
+                        { label: 'الراس اسفل', prompt: 'Modify the person in the image to tilt their head downwards, highly detailed, realistic, 4k' },
+                        { label: 'الراس اعلى', prompt: 'Modify the person in the image to tilt their head upwards, highly detailed, realistic, 4k' }
+                    ].map((exp) => (
+                        <button
+                            key={exp.label}
+                            disabled={isGenerating || userImages.length === 0}
+                            onClick={() => {
+                                setPrompt(exp.prompt);
+                                handleGenerate(exp.prompt);
+                            }}
+                            className={`p-1.5 rounded-lg text-[10px] font-bold transition-all border flex items-center justify-center text-center min-h-[40px] ${
+                                isGenerating || userImages.length === 0
+                                ? 'bg-zinc-900/50 border-zinc-800 text-zinc-600 cursor-not-allowed'
+                                : 'bg-yellow-500/10 border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black shadow-[0_0_10px_rgba(234,179,8,0.3)]'
+                            }`}
+                        >
+                            {exp.label}
+                        </button>
+                    ))}
                 </div>
                 <p className="text-[10px] text-zinc-500 mt-3 text-center leading-relaxed">
-                    Upload <strong>Image 1 (Base)</strong> and <strong>Image 2 (Reference)</strong>, then click to copy.
+                    Upload <strong>Image 1 (Base)</strong>, then click a category to apply the expression.
                 </p>
             </div>
 

@@ -159,7 +159,11 @@ export default async (req, context) => {
 
             // Append AI Filter Style
             if (aiFilter && aiFilter !== 'No Filter') {
-                enhancedPrompt += `, ${aiFilter} style`;
+                if (model === 'kwaivgi/kling-v3-omni-video') {
+                    enhancedPrompt = `Apply a strong ${aiFilter} art style to the video. The entire visual aesthetic, colors, and textures must strictly match the ${aiFilter} style. ` + (enhancedPrompt || "");
+                } else {
+                    enhancedPrompt += `, ${aiFilter} style`;
+                }
             }
 
             // Determine Model Version
@@ -297,12 +301,12 @@ export default async (req, context) => {
                 }
                 if (reference_videos && reference_videos.length > 0) {
                     input.reference_video = reference_videos[0];
+                    if (keep_original_sound !== undefined) {
+                        input.keep_original_sound = keep_original_sound;
+                    }
                 }
                 if (video_reference_type) {
                     input.video_reference_type = video_reference_type;
-                }
-                if (keep_original_sound !== undefined) {
-                    input.keep_original_sound = keep_original_sound;
                 }
                 if (generate_audio !== undefined) {
                     input.generate_audio = generate_audio;

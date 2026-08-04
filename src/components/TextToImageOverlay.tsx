@@ -336,16 +336,16 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
                 <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Face & Expression</h3>
                 <div className="grid grid-cols-2 gap-2">
                     {[
-                        { label: 'فتحه الفم', prompt: 'Modify the face in the image to have an open mouth, highly detailed, realistic, 4k' },
-                        { label: 'اخرج للسان الى الاسفل', prompt: 'Modify the face in the image to stick the tongue out pointing downwards, highly detailed, realistic, 4k' },
-                        { label: 'رفع اللسان الى اعلى', prompt: 'Modify the face in the image to stick the tongue out pointing upwards, highly detailed, realistic, 4k' },
-                        { label: 'اغلاق العين', prompt: 'Modify the face in the image to have closed eyes, highly detailed, realistic, 4k' },
-                        { label: 'النظر يمين', prompt: 'Modify the face in the image to look to the right, highly detailed, realistic, 4k' },
-                        { label: 'النظر اليسار', prompt: 'Modify the face in the image to look to the left, highly detailed, realistic, 4k' },
-                        { label: 'بقبقه العين', prompt: 'Modify the face in the image to have widened, bulging eyes, highly detailed, realistic, 4k' },
-                        { label: 'عضه الشفه السفليه', prompt: 'Modify the face in the image to bite the lower lip, highly detailed, realistic, 4k' },
-                        { label: 'الراس اسفل', prompt: 'Modify the person in the image to tilt their head downwards, highly detailed, realistic, 4k' },
-                        { label: 'الراس اعلى', prompt: 'Modify the person in the image to tilt their head upwards, highly detailed, realistic, 4k' }
+                        { label: 'Open Mouth', prompt: 'Modify the face in the image to have an open mouth, highly detailed, realistic, 4k' },
+                        { label: 'Tongue Down', prompt: 'Modify the face in the image to stick the tongue out pointing downwards, highly detailed, realistic, 4k' },
+                        { label: 'Tongue Up', prompt: 'Modify the face in the image to stick the tongue out pointing upwards, highly detailed, realistic, 4k' },
+                        { label: 'Close Eyes', prompt: 'Modify the face in the image to have closed eyes, highly detailed, realistic, 4k' },
+                        { label: 'Look Right', prompt: 'Modify the face in the image to look to the right, highly detailed, realistic, 4k' },
+                        { label: 'Look Left', prompt: 'Modify the face in the image to look to the left, highly detailed, realistic, 4k' },
+                        { label: 'Bulging Eyes', prompt: 'Modify the face in the image to have widened, bulging eyes, highly detailed, realistic, 4k' },
+                        { label: 'Bite Lower Lip', prompt: 'Modify the face in the image to bite the lower lip, highly detailed, realistic, 4k' },
+                        { label: 'Head Down', prompt: 'Modify the person in the image to tilt their head downwards, highly detailed, realistic, 4k' },
+                        { label: 'Head Up', prompt: 'Modify the person in the image to tilt their head upwards, highly detailed, realistic, 4k' }
                     ].map((exp) => (
                         <button
                             key={exp.label}

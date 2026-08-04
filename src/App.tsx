@@ -1223,13 +1223,19 @@ const App: React.FC = () => {
                             </p>
                         </div>
 
-
+                        <div className="border-l-2 border-blue-500 pl-3">
+                            <h4 className="text-blue-400 font-semibold text-sm">Kling V3 Omni Video</h4>
+                            <p className="text-xs text-zinc-400 mt-1">
+                                <strong>Best for:</strong> Advanced image-to-video generation with specific reference types.
+                                <br/><strong>Features:</strong> Uses <code>kwaivgi/kling-v3-omni-video</code>. Includes <code>video_reference_type</code> (feature or base) to give you precise control over how the reference image influences the video.
+                            </p>
+                        </div>
 
                         <div className="border-l-2 border-emerald-500 pl-3">
                             <h4 className="text-emerald-400 font-semibold text-sm">Seedream 4.5 & 5 Pro (Tex 2 Img)</h4>
                             <p className="text-xs text-zinc-400 mt-1">
                                 <strong>Best for:</strong> High-end text-to-image generation and image manipulation.
-                                <br/><strong>Features:</strong> Upload up to 14 reference images to guide generation. Advanced image synthesis using <code>bytedance/seedream-4.5</code> or <code>bytedance/seedream-5-pro</code>.
+                                <br/><strong>Features:</strong> Upload up to 14 reference images. Includes a new <strong>Face & Expression</strong> tool to instantly apply various facial expressions (e.g., Kiss, Laugh, Angry, Look Forward) to a single base image.
                             </p>
                         </div>
                     </div>
@@ -1242,6 +1248,7 @@ const App: React.FC = () => {
                     </h3>
                     <div className="text-sm text-zinc-400 leading-relaxed">
                         <ul className="list-disc pl-5 space-y-2">
+                            <li><strong>New Features:</strong> Added <code>kwaivgi/kling-v3-omni-video</code> to Video AI, and introduced the <strong>Face & Expression</strong> modifier for Seedream models in Tex 2 Img.</li>
                             <li><strong>Seedance 2.0 Pricing Update:</strong> Adjusted credit system to provide flexible options (5s for 3 credits, 8s for 5 credits, 10s for 7 credits).</li>
                             <li><strong>Hair Styler Upgrades:</strong> Generations are now rendered in stunning <strong>2K Resolution</strong>. Results are cached locally for <strong>5 minutes</strong> even if you close the window, and a new <strong>Direct Save</strong> button has been added.</li>
                             <li><strong>Tex 2 Img Tweaks:</strong> We removed the double-click image description feature to streamline the interface and prevent accidental popups.</li>

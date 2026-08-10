@@ -54,10 +54,10 @@ export default async (req, context) => {
                             if (model === 'bytedance/omni-human' || model === 'kwaivgi/kling-lip-sync' || model === 'pixverse/lipsync') {
                                 cost = 2;
                             }
-                            if (!image && model === 'bytedance/seedance-2.0' && !prediction.input?.reference_images && !prediction.input?.reference_videos) {
+                            if (!image && model.includes('seedance') && !prediction.input?.reference_images && !prediction.input?.reference_videos) {
                                 cost = 5;
                             }
-                            if (model === 'bytedance/seedance-2.0') {
+                            if (model.includes('seedance')) {
                                 if (duration === 5) cost = 3;
                                 else if (duration === 8) cost = 5;
                                 else if (duration === 10) cost = 7;
@@ -123,12 +123,12 @@ export default async (req, context) => {
             if (model === 'bytedance/omni-human' || model === 'kwaivgi/kling-lip-sync' || model === 'pixverse/lipsync') {
                 cost = 2;
             }
-            if (!image && model === 'bytedance/seedance-2.0' && !reference_images && !reference_videos) {
+            if (!image && model.includes('seedance') && !reference_images && !reference_videos) {
                 cost = 5; // Cost for text to video
             }
 
-            // Custom cost for seedance-2.0 based on duration
-            if (model === 'bytedance/seedance-2.0') {
+            // Custom cost for seedance based on duration
+            if (model.includes('seedance')) {
                 if (duration === 5) {
                     cost = 3;
                 } else if (duration === 8) {
@@ -173,7 +173,9 @@ export default async (req, context) => {
             if (model === 'bytedance/seedance-2.0') {
                 modelOwner = "bytedance";
                 modelName = "seedance-2.0";
-
+            } else if (model === 'bytedance/seedance-2.5') {
+                modelOwner = "bytedance";
+                modelName = "seedance-2.5";
             } else if (model === 'kwaivgi/kling-v3-omni-video') {
                 modelOwner = "kwaivgi";
                 modelName = "kling-v3-omni-video";
@@ -212,8 +214,8 @@ export default async (req, context) => {
             // Also, some replicate models fail with 400 Bad Request if the payload is too large or base64 is improperly formatted.
             // Netlify functions have a strict 6MB payload limit. If we exceed it, Netlify blocks it before it reaches Replicate.
 
-            // دعم video_path و resolution فقط لموديل bytedance/seedance-2.0
-            if (model === 'bytedance/seedance-2.0') {
+            // دعم video_path و resolution فقط لموديل bytedance/seedance
+            if (model.includes('seedance')) {
                 if (video_path) {
                     input.video_path = video_path;
                 }

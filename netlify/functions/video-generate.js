@@ -314,7 +314,7 @@ export default async (req, context) => {
                     input.generate_audio = generate_audio;
                 }
                 if (aspectRatio !== "Match Input Image") {
-                    input.output_video_ratio = aspectRatio || "16:9";
+                    input.aspect_ratio = aspectRatio || "16:9";
                 }
             } else if (modelOwner === "kwaivgi") {
                 input = {

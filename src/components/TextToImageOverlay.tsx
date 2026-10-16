@@ -424,6 +424,24 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
                         </button>
                     ))}
                 </div>
+                {['bytedance/seedream-4.5', 'bytedance/seedream-5-pro'].includes(model) && (
+                    <button
+                        type="button"
+                        disabled={isGenerating || userImages.length < 2}
+                        onClick={() => {
+                            const fittedPrompt = '(Image 2) is fitted onto the person (Image 1), with precise detail, matching the exact body posture and movement.';
+                            setPrompt(fittedPrompt);
+                            handleGenerate(fittedPrompt);
+                        }}
+                        className={`w-full mt-2 p-2 rounded-lg text-xs font-bold transition-all border ${
+                            isGenerating || userImages.length < 2
+                                ? 'bg-zinc-900/50 border-zinc-800 text-zinc-600 cursor-not-allowed'
+                                : 'bg-orange-600/20 border-orange-500 text-orange-400 hover:bg-orange-600 hover:text-white'
+                        }`}
+                    >
+                        fitted
+                    </button>
+                )}
                 <p className="text-[10px] text-zinc-500 mt-3 text-center leading-relaxed">
                     Upload <strong>Image 1 (Model)</strong> and <strong>Image 2 (Garment)</strong>, then click a category to auto-generate.
                 </p>

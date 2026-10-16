@@ -368,8 +368,26 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
                         </button>
                     ))}
                 </div>
+                {['bytedance/seedream-4.5', 'bytedance/seedream-5-pro'].includes(model) && (
+                    <button
+                        type="button"
+                        disabled={isGenerating || userImages.length < 2}
+                        onClick={() => {
+                            const swapPrompt = 'Swap the face with his hair, his hairstyle, and his hair color from Image 1 onto the person in Image 2, highly detailed, realistic, 4k';
+                            setPrompt(swapPrompt);
+                            handleGenerate(swapPrompt);
+                        }}
+                        className={`w-full mt-2 p-2 rounded-lg text-xs font-bold transition-all border ${
+                            isGenerating || userImages.length < 2
+                                ? 'bg-zinc-900/50 border-zinc-800 text-zinc-600 cursor-not-allowed'
+                                : 'bg-green-600/20 border-green-500 text-green-400 hover:bg-green-600 hover:text-white'
+                        }`}
+                    >
+                        swap1 to 2
+                    </button>
+                )}
                 <p className="text-[10px] text-zinc-500 mt-3 text-center leading-relaxed">
-                    Upload <strong>Image 1 (Base)</strong>, then click a category to apply the expression.
+                    Upload <strong>Image 1 (Base)</strong> for expressions. For <strong>swap1 to 2</strong>, upload Image 1 as the source and Image 2 as the target.
                 </p>
             </div>
 

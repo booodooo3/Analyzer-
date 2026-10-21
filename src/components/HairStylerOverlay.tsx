@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Camera, Image as ImageIcon, Loader2, Wand2, X } from 'lucide-react';
+import { Camera, Loader2, Upload, Wand2, X } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import { generateTextToImage } from '../services/apiService';
 
@@ -8,59 +8,224 @@ interface HairStylerOverlayProps {
   onClose: () => void;
 }
 
-const styleGroups = [
+type Language = 'en' | 'ar';
+type Choice = { id: string; en: string; ar: string; prompt?: string };
+type ChoiceGroup = {
+  id: string;
+  title: { en: string; ar: string };
+  options: Choice[];
+  layout?: 'cards';
+};
+
+const groups: ChoiceGroup[] = [
   {
-    title: 'Photo Style',
-    color: 'blue',
-    options: ['Photorealistic', 'Cinematic', 'Professional Portrait', 'Anime', 'Cartoon', 'Oil Painting'],
+    id: 'brows',
+    title: { en: 'Eyebrow Expression', ar: 'تعبير الحاجبين' },
+    options: [
+      { id: 'original', en: 'Original Brows', ar: 'الحاجبان الأصليان' },
+      { id: 'raised', en: 'Raised', ar: 'مرفوعان', prompt: 'raised eyebrows' },
+      { id: 'connected', en: 'Connected / Unibrow', ar: 'حاجبان متصلان' },
+      { id: 'happy', en: 'Happy / Relaxed', ar: 'سعيدان / مسترخيان' },
+      { id: 'angry', en: 'Angry / Furrowed', ar: 'غاضبان / مقطبان' },
+      { id: 'amazed', en: 'Amazed / Astonished', ar: 'مندهشان' },
+    ],
   },
   {
-    title: 'Hair & Appearance',
-    color: 'pink',
-    options: ['Modern Hairstyle', 'Long Hair', 'Short Hair', 'Wavy Hair', 'Groomed Beard', 'Natural Look'],
+    id: 'mouth',
+    title: { en: 'Mouth & Smile Expression', ar: 'تعبير الفم والابتسامة' },
+    options: [
+      { id: 'original', en: 'Original Mouth', ar: 'الفم الأصلي' },
+      { id: 'smiling', en: 'Smiling', ar: 'ابتسامة', prompt: 'smiling naturally' },
+      { id: 'not-smiling', en: 'Not Smiling', ar: 'بدون ابتسامة', prompt: 'a neutral closed-mouth expression' },
+      { id: 'laughing', en: 'Laughing', ar: 'ضحك', prompt: 'laughing' },
+      { id: 'slightly-open', en: 'Slightly Open (Visible Teeth)', ar: 'مفتوح قليلاً (أسنان ظاهرة)' },
+      { id: 'teeth', en: 'Teeth Edges / Tips Showing', ar: 'ظهور أطراف الأسنان' },
+    ],
   },
   {
-    title: 'Clothing',
-    color: 'amber',
-    options: ['Formal', 'Casual', 'Sporty', 'Traditional', 'Elegant Suit', 'Modern Outfit'],
+    id: 'gaze',
+    title: { en: 'Eye Gaze & Look', ar: 'نظرة العينين' },
+    options: [
+      { id: 'original', en: 'Original Gaze', ar: 'النظرة الأصلية' },
+      { id: 'normal', en: 'Normal Look', ar: 'نظرة طبيعية' },
+      { id: 'happy', en: 'Happy Look', ar: 'نظرة سعيدة', prompt: 'a happy expression in the eyes' },
+      { id: 'angry', en: 'Angry Glare', ar: 'نظرة غاضبة' },
+      { id: 'sunlight', en: 'Sunlight Protection', ar: 'حماية من ضوء الشمس' },
+      { id: 'smirk', en: 'Mocking / Smirk', ar: 'نظرة ساخرة' },
+    ],
   },
   {
-    title: 'Background',
-    color: 'cyan',
-    options: ['Studio', 'Modern City', 'Nature', 'Beach', 'Elegant Office', 'Simple Background'],
+    id: 'pose',
+    title: { en: 'Pose', ar: 'الوضعية' },
+    options: [
+      { id: 'automatic', en: 'Automatic', ar: 'تلقائي' },
+      { id: 'standing', en: 'Standing', ar: 'وقوف', prompt: 'standing pose' },
+      { id: 'sitting', en: 'Sitting', ar: 'جلوس', prompt: 'sitting pose' },
+      { id: 'lying', en: 'Lying Down', ar: 'استلقاء', prompt: 'lying down pose' },
+    ],
   },
   {
-    title: 'Lighting & Colors',
-    color: 'violet',
-    options: ['Soft Lighting', 'Cinematic Lighting', 'Warm Colors', 'Cool Colors', 'Vibrant Colors', 'Black & White'],
+    id: 'clothing',
+    title: { en: 'Clothing', ar: 'الملابس' },
+    options: [
+      { id: 'modern', en: 'Modern', ar: 'عصري', prompt: 'modern clothing' },
+      { id: 'classic', en: 'Classic', ar: 'كلاسيكي', prompt: 'classic clothing' },
+      { id: '60s', en: '60s', ar: 'الستينيات', prompt: '1960s clothing' },
+      { id: '70s', en: '70s', ar: 'السبعينيات', prompt: '1970s clothing' },
+      { id: '80s', en: '80s', ar: 'الثمانينيات', prompt: '1980s clothing' },
+      { id: 'y2k', en: 'Y2K', ar: 'أزياء الألفينات', prompt: 'early 2000s clothing' },
+      { id: 'formal', en: 'Formal', ar: 'رسمي', prompt: 'formal clothing' },
+      { id: 'casual', en: 'Casual', ar: 'كاجوال', prompt: 'casual clothing' },
+    ],
   },
   {
-    title: 'Camera Angle',
-    color: 'green',
-    options: ['Front View', 'Side View', 'Close-up', 'Half-body', 'Full-body', 'Candid Shot'],
+    id: 'beard',
+    title: { en: 'Beard & Facial Hair', ar: 'اللحية وشعر الوجه' },
+    layout: 'cards',
+    options: [
+      { id: 'original', en: 'Original Beard (Auto)', ar: 'اللحية الأصلية (تلقائي)', prompt: 'preserve the original facial hair' },
+      { id: 'goatee', en: 'Dirty Goatee', ar: 'سكسوكة خفيفة', prompt: 'a subtle goatee and chin beard' },
+      { id: 'defined', en: 'Heavy Defined', ar: 'لحية كثيفة ومحددة', prompt: 'a thick, sharply defined full beard' },
+      { id: 'natural', en: 'Heavy Natural (Unlined)', ar: 'لحية كثيفة طبيعية', prompt: 'a thick, natural unlined beard' },
+      { id: 'stubble', en: 'Machine #1 (Stubble)', ar: 'ماكينة رقم 1 (خفيفة)', prompt: 'very light stubble' },
+      { id: 'medium-stubble', en: 'Machine #3 (Medium Stubble)', ar: 'ماكينة رقم 3 (متوسطة)', prompt: 'neatly trimmed medium stubble' },
+      { id: 'clean', en: 'Clean Shaven (No Beard)', ar: 'حلاقة كاملة بدون لحية', prompt: 'a clean-shaven face with no beard' },
+    ],
+  },
+  {
+    id: 'hair',
+    title: { en: 'Hairstyles & Cuts', ar: 'تسريحات وقصات الشعر' },
+    options: [
+      { id: 'automatic', en: 'Automatic (Original)', ar: 'تلقائي (الأصلي)' },
+      { id: 'uncombed', en: 'Uncombed', ar: 'غير ممشط', prompt: 'an intentionally uncombed hairstyle' },
+      { id: 'spiky', en: 'Spiky', ar: 'شائك', prompt: 'spiky hair' },
+      { id: 'messy', en: 'Messy / Tousled', ar: 'فوضوي / منكوش', prompt: 'messy tousled hair' },
+      { id: '60s', en: '60s Vintage', ar: 'ستايل الستينيات', prompt: 'a 1960s vintage hairstyle' },
+      { id: '70s', en: '70s Retro', ar: 'ستايل السبعينيات', prompt: 'a 1970s retro hairstyle' },
+      { id: '80s', en: '80s Big Hair', ar: 'شعر كثيف من الثمانينيات', prompt: 'voluminous 1980s hair' },
+      { id: '90s', en: '90s Layers', ar: 'طبقات التسعينيات', prompt: 'a layered 1990s haircut' },
+      { id: 'y2k', en: '2000s / Y2K', ar: 'ستايل الألفينات', prompt: 'a Y2K-era hairstyle' },
+    ],
+  },
+  {
+    id: 'hairColor',
+    title: { en: 'Hair Color', ar: 'لون الشعر' },
+    options: [
+      { id: 'original', en: 'Original', ar: 'الأصلي' },
+      { id: 'black', en: 'Black', ar: 'أسود', prompt: 'natural black hair' },
+      { id: 'brown', en: 'Brown', ar: 'بني', prompt: 'natural brown hair' },
+      { id: 'blonde', en: 'Blonde', ar: 'أشقر', prompt: 'blonde hair' },
+      { id: 'gray', en: 'Gray', ar: 'رمادي', prompt: 'gray hair' },
+      { id: 'red', en: 'Red', ar: 'أحمر', prompt: 'red hair' },
+    ],
+  },
+  {
+    id: 'age',
+    title: { en: 'Age', ar: 'العمر' },
+    options: [
+      { id: 'original', en: 'Original Age', ar: 'العمر الأصلي' },
+      { id: 'younger', en: 'Younger', ar: 'أصغر سناً', prompt: 'slightly younger appearance' },
+      { id: 'older', en: 'Older', ar: 'أكبر سناً', prompt: 'slightly older appearance' },
+    ],
+  },
+  {
+    id: 'accessories',
+    title: { en: 'Accessories', ar: 'الإكسسوارات' },
+    options: [
+      { id: 'none', en: 'No Accessories', ar: 'بدون إكسسوارات' },
+      { id: 'glasses', en: 'Glasses', ar: 'نظارات', prompt: 'wearing stylish glasses' },
+      { id: 'sunglasses', en: 'Sunglasses', ar: 'نظارات شمسية', prompt: 'wearing sunglasses' },
+      { id: 'hat', en: 'Hat', ar: 'قبعة', prompt: 'wearing a hat' },
+      { id: 'earrings', en: 'Earrings', ar: 'أقراط', prompt: 'wearing subtle earrings' },
+      { id: 'watch', en: 'Watch', ar: 'ساعة يد', prompt: 'wearing a wristwatch' },
+    ],
   },
 ];
 
-const selectedStyles: Record<string, string> = {
-  blue: 'border-cyan-500 bg-sky-500 text-white',
-  pink: 'border-pink-500 bg-pink-600 text-white',
-  amber: 'border-amber-500 bg-amber-500 text-white',
-  cyan: 'border-cyan-500 bg-cyan-600 text-white',
-  violet: 'border-violet-500 bg-violet-600 text-white',
-  green: 'border-emerald-500 bg-emerald-600 text-white',
+const initialSelections: Record<string, string> = {
+  brows: 'original',
+  mouth: 'original',
+  gaze: 'original',
+  pose: 'automatic',
+  clothing: 'modern',
+  beard: 'original',
+  hair: 'automatic',
+  hairColor: 'original',
+  age: 'original',
+  accessories: 'none',
+};
+
+const text = {
+  en: {
+    title: 'Smart Style Changer',
+    choosePhoto: 'Choose Photo',
+    upload: 'Upload from Gallery',
+    camera: 'Take a Photo',
+    changePhoto: 'Change Photo',
+    removePhoto: 'Remove photo',
+    customize: 'Customize Look',
+    identity: 'Face Identity Preservation',
+    identityDescription: 'Preserves the person’s identity and facial features while applying your selected changes.',
+    locked: '100% Locked Identity',
+    flexible: 'Flexible',
+    exactMatch: '100% Exact Match',
+    prompt: 'Describe the changes you want',
+    promptPlaceholder: 'Describe your desired look...',
+    extraDetails: 'Additional Details',
+    generate: 'Generate New Look',
+    generating: 'Generating...',
+    result: 'Generated Result',
+    credits: '0.5 credits per generation',
+    uploadError: 'Could not read the image. Please choose another photo.',
+    imageRequired: 'Please upload a photo first.',
+    optionsRequired: 'Choose at least one change or describe the look you want.',
+    signIn: 'Please sign in first.',
+    generationError: 'Could not generate the image.',
+    close: 'Close',
+  },
+  ar: {
+    title: 'مغيّر المظهر الذكي',
+    choosePhoto: 'اختر الصورة',
+    upload: 'رفع من المعرض',
+    camera: 'التقط صورة',
+    changePhoto: 'تغيير الصورة',
+    removePhoto: 'إزالة الصورة',
+    customize: 'تخصيص المظهر',
+    identity: 'الحفاظ على هوية الوجه',
+    identityDescription: 'يحافظ على هوية الشخص وملامح الوجه أثناء تطبيق التغييرات التي اخترتها.',
+    locked: 'تثبيت الهوية 100%',
+    flexible: 'مرن',
+    exactMatch: 'تطابق 100%',
+    prompt: 'صف التغييرات التي تريدها',
+    promptPlaceholder: 'اكتب وصف المظهر الذي تريده...',
+    extraDetails: 'تفاصيل إضافية',
+    generate: 'إنشاء المظهر الجديد',
+    generating: 'جارٍ الإنشاء...',
+    result: 'النتيجة',
+    credits: '0.5 رصيد لكل عملية إنشاء',
+    uploadError: 'تعذرت قراءة الصورة. اختر صورة أخرى.',
+    imageRequired: 'ارفع صورة أولاً.',
+    optionsRequired: 'اختر تغييراً واحداً على الأقل أو اكتب وصفاً للمظهر.',
+    signIn: 'يرجى تسجيل الدخول أولاً.',
+    generationError: 'تعذر إنشاء الصورة.',
+    close: 'إغلاق',
+  },
 };
 
 export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, onClose }) => {
   const { getToken } = useAuth();
+  const [language, setLanguage] = useState<Language>('en');
   const [userImage, setUserImage] = useState<string | null>(null);
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [prompt, setPrompt] = useState('');
-  const [selections, setSelections] = useState<Record<string, string[]>>({});
-  const [preserveIdentity, setPreserveIdentity] = useState(true);
+  const [selections, setSelections] = useState<Record<string, string>>(initialSelections);
+  const [identityMatch, setIdentityMatch] = useState(100);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const uploadInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const copy = text[language];
+  const isArabic = language === 'ar';
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -75,32 +240,62 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
         setError(null);
       }
     };
-    reader.onerror = () => setError('Could not read the image. Please choose another photo.');
+    reader.onerror = () => setError(copy.uploadError);
     reader.readAsDataURL(file);
   };
 
-  const toggleOption = (group: string, option: string) => {
-    setSelections(current => {
-      const selected = current[group] || [];
-      return {
-        ...current,
-        [group]: selected.includes(option)
-          ? selected.filter(item => item !== option)
-          : [...selected, option],
-      };
-    });
+  const selectOption = (groupId: string, optionId: string) => {
+    setSelections(current => ({ ...current, [groupId]: optionId }));
     setResultImage(null);
   };
 
+  const getChoice = (group: ChoiceGroup) => group.options.find(option => option.id === selections[group.id]);
+
+  const renderChoiceGroup = (group: ChoiceGroup) => (
+    <section key={group.id} className="min-w-0 rounded-lg border border-[#282d38] bg-[#191c24] p-2.5">
+      <h3 className="mb-2 text-[9px] font-bold uppercase tracking-wide text-zinc-400">{group.title[language]}</h3>
+      <div className={`grid ${group.layout === 'cards' ? 'grid-cols-1' : 'grid-cols-2'} gap-1.5`}>
+        {group.options.map(option => {
+          const selected = selections[group.id] === option.id;
+          return (
+            <button
+              key={option.id}
+              type="button"
+              onClick={() => selectOption(group.id, option.id)}
+              aria-pressed={selected}
+              className={`min-h-9 rounded-lg border px-1.5 py-1.5 text-[8px] leading-tight transition sm:text-[9px] ${
+                selected
+                  ? 'border-zinc-500 bg-zinc-500/70 font-semibold text-white'
+                  : 'border-[#2a2e38] bg-[#1d2029] text-zinc-400 hover:border-zinc-500 hover:text-zinc-200'
+              } ${group.layout === 'cards' ? 'text-start' : 'text-center'}`}
+            >
+              {option[language]}
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+
   const handleGenerate = async () => {
     if (!userImage) {
-      setError('Please upload a portrait first.');
+      setError(copy.imageRequired);
       return;
     }
 
-    const selectedOptions = styleGroups.flatMap(group => selections[group.title] || []);
-    if (!prompt.trim() && selectedOptions.length === 0) {
-      setError('Enter a description or select some style options.');
+    const selectedPrompts = groups
+      .filter(group => !['brows', 'mouth', 'gaze'].includes(group.id))
+      .map(group => getChoice(group))
+      .filter((choice): choice is Choice => Boolean(choice?.prompt))
+      .map(choice => choice.prompt as string);
+    const expressionPrompts = groups
+      .filter(group => ['brows', 'mouth', 'gaze'].includes(group.id))
+      .map(group => getChoice(group))
+      .filter((choice): choice is Choice => Boolean(choice?.prompt))
+      .map(choice => choice.prompt as string);
+    const hasChanges = selectedPrompts.length > 0 || expressionPrompts.length > 0 || prompt.trim().length > 0;
+    if (!hasChanges) {
+      setError(copy.optionsRequired);
       return;
     }
 
@@ -108,20 +303,18 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
     setError(null);
     try {
       const token = await getToken();
-      if (!token) throw new Error('Please sign in first.');
+      if (!token) throw new Error(copy.signIn);
 
-      const styleDescription = selectedOptions.length
-        ? `Apply these appearance choices: ${selectedOptions.join(', ')}.`
-        : '';
-      const identityInstruction = preserveIdentity
-        ? 'Preserve the person’s identity, face, and facial features. '
+      const identityInstruction = identityMatch > 0
+        ? `Preserve the person's identity and facial features with ${identityMatch}% facial identity similarity. `
         : '';
       const fullPrompt = [
-        'Edit the uploaded portrait according to the following instructions.',
-        identityInstruction,
-        styleDescription,
+        'Edit the uploaded portrait. Apply only these requested changes:',
+        ...selectedPrompts,
+        ...expressionPrompts,
         prompt.trim(),
-        'Create a polished, high-quality image with natural details.',
+        identityInstruction,
+        'Keep the result photorealistic, detailed, and consistent with the input image.',
       ].filter(Boolean).join(' ');
 
       const output = await generateTextToImage(
@@ -135,7 +328,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
       );
       setResultImage(output);
     } catch (generationError) {
-      setError(generationError instanceof Error ? generationError.message : 'Could not generate the image.');
+      setError(generationError instanceof Error ? generationError.message : copy.generationError);
     } finally {
       setIsGenerating(false);
     }
@@ -144,63 +337,75 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] overflow-y-auto bg-[#111827] text-white" dir="ltr">
+    <div className="fixed inset-0 z-[100] overflow-y-auto bg-[#111827] text-white" dir={isArabic ? 'rtl' : 'ltr'}>
       <header className="sticky top-0 z-20 border-b border-white/5 bg-[#1f2937]">
-        <div className="mx-auto flex h-14 max-w-[980px] items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-2 text-sm font-bold">
-            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-violet-600"><Wand2 className="h-4 w-4" /></span>
-            <span>Smart Style Changer</span>
+        <div className="mx-auto flex h-[30px] w-full max-w-[464px] items-center justify-between px-3">
+          <div className="flex items-center gap-1.5 text-[10px] font-bold">
+            <span className="flex h-5 w-5 items-center justify-center rounded bg-violet-600"><Wand2 className="h-3 w-3" /></span>
+            <span>{copy.title}</span>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="rounded-full bg-slate-700 px-3 py-1 text-[10px] text-slate-200">EN</span>
-            <button onClick={onClose} aria-label="Close" className="rounded-full p-2 text-slate-400 hover:bg-slate-700 hover:text-white">
-              <X className="h-4 w-4" />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setLanguage(current => current === 'en' ? 'ar' : 'en')}
+              className="rounded-full border border-slate-600 bg-slate-700 px-3 py-1 text-[9px] text-slate-200 hover:bg-slate-600"
+            >
+              {isArabic ? 'English' : 'العربية'}
+            </button>
+            <button onClick={onClose} aria-label={copy.close} className="rounded-full p-1 text-slate-400 hover:bg-slate-700 hover:text-white">
+              <X className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-[980px] flex-col gap-4 px-3 py-5 sm:px-6">
-        <section className="rounded-xl border border-slate-700 bg-[#1f2937] p-4 sm:p-5">
-          <div className="mb-3 flex items-center gap-2 text-[13px] font-bold">
-            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-indigo-500 text-[9px]">1</span>
-            <span>Choose Photo</span>
+      <main className="mx-auto flex w-full max-w-[464px] flex-col gap-2.5 px-3 py-3">
+        <section className="rounded-lg border border-slate-700 bg-[#1f2937] p-2.5">
+          <div className="mb-2 flex items-center justify-between text-[9px] font-bold">
+            <span className="flex items-center gap-1.5">
+              <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-indigo-500 text-[8px]">1</span>
+              {copy.choosePhoto}
+            </span>
           </div>
           {userImage ? (
-            <div className="relative mx-auto h-32 w-32 overflow-hidden rounded-lg border border-slate-600 sm:h-36 sm:w-36">
-              <img src={userImage} alt="Portrait preview" className="h-full w-full object-cover" />
+            <div className="relative mx-auto h-24 w-24 overflow-hidden rounded-md border border-slate-600">
+              <img src={userImage} alt={copy.choosePhoto} className="h-full w-full object-cover" />
               <button
+                type="button"
                 onClick={() => {
                   setUserImage(null);
                   setResultImage(null);
                 }}
-                aria-label="Remove image"
+                aria-label={copy.removePhoto}
                 className="absolute right-1 top-1 rounded-full bg-red-500 p-1 text-white hover:bg-red-400"
               >
                 <X className="h-3 w-3" />
               </button>
               <button
+                type="button"
                 onClick={() => uploadInputRef.current?.click()}
-                className="absolute inset-x-0 bottom-0 bg-black/65 py-1.5 text-[10px] font-semibold"
+                className="absolute inset-x-0 bottom-0 bg-black/70 py-1 text-[8px] font-semibold"
               >
-                Change Photo
+                {copy.changePhoto}
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-1.5">
               <button
-                onClick={() => uploadInputRef.current?.click()}
-                className="flex h-24 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-600 text-xs text-slate-300 transition hover:border-indigo-400 hover:bg-slate-800 sm:h-28"
+                type="button"
+                onClick={() => cameraInputRef.current?.click()}
+                className="flex h-[58px] flex-col items-center justify-center gap-1 rounded-md border border-dashed border-slate-600 text-[8px] text-slate-300 transition hover:border-indigo-400 hover:bg-slate-800"
               >
-                <ImageIcon className="h-4 w-4 text-indigo-400" />
-                Upload from Gallery
+                <Upload className="h-3.5 w-3.5 text-indigo-400" />
+                {copy.upload}
               </button>
               <button
-                onClick={() => cameraInputRef.current?.click()}
-                className="flex h-24 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-600 text-xs text-slate-300 transition hover:border-pink-400 hover:bg-slate-800 sm:h-28"
+                type="button"
+                onClick={() => uploadInputRef.current?.click()}
+                className="flex h-[58px] flex-col items-center justify-center gap-1 rounded-md border border-dashed border-slate-600 text-[8px] text-slate-300 transition hover:border-pink-400 hover:bg-slate-800"
               >
-                <Camera className="h-4 w-4 text-pink-400" />
-                Take a Photo
+                <Camera className="h-3.5 w-3.5 text-pink-400" />
+                {copy.camera}
               </button>
             </div>
           )}
@@ -208,83 +413,92 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
           <input ref={cameraInputRef} type="file" accept="image/*" capture="user" onChange={handleImageUpload} className="hidden" />
         </section>
 
-        <section className="rounded-xl border border-slate-700 bg-[#1f2937] p-3">
-          <div className="mb-4 flex items-center justify-between text-[13px] font-bold">
-            <span className="flex items-center gap-2">
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-indigo-500 text-[9px]">2</span>
-              Customize Look
+        <section className="rounded-lg border border-slate-700 bg-[#1b1e27] p-2.5">
+          <div className="mb-2 flex items-center justify-between text-[9px] font-bold">
+            <span className="flex items-center gap-1.5">
+              <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-indigo-500 text-[8px]">2</span>
+              {copy.customize}
             </span>
-            <span className="rounded-full border border-slate-700 px-2 py-1 text-[9px] text-slate-400">✓ 100% Exact Match</span>
+            <span className="rounded-full border border-slate-700 px-2 py-0.5 text-[7px] text-slate-400">✓ {copy.exactMatch}</span>
           </div>
 
-          <div className={`mb-3 rounded-lg border p-3 transition ${preserveIdentity ? 'border-emerald-700 bg-emerald-950/30' : 'border-slate-700 bg-slate-900/50'}`}>
-            <button
-              onClick={() => setPreserveIdentity(value => !value)}
-              aria-pressed={preserveIdentity}
-              className="flex w-full items-center justify-between gap-3 text-left"
-            >
-              <span className={`flex h-5 w-5 items-center justify-center rounded border ${preserveIdentity ? 'border-emerald-400 bg-emerald-500' : 'border-slate-600'}`}>
-                {preserveIdentity && <span className="text-xs font-bold">✓</span>}
-              </span>
-              <span className="flex-1 text-[11px] font-bold">Face Identity Preservation</span>
-              <span className="text-[9px] text-emerald-300">{preserveIdentity ? '100% Locked Identity' : 'Disabled'}</span>
-            </button>
-            <p className="mt-2 text-[9px] leading-4 text-slate-400">
-              Preserves the person’s identity and facial features while applying your selected changes.
-            </p>
-          </div>
+          <section className="mb-2.5 rounded-lg border border-slate-700/70 bg-[#171a22] p-2">
+            <div className="flex items-center gap-2">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded border border-emerald-500 bg-emerald-500 text-[10px] font-bold">✓</span>
+              <span className="flex-1 text-[8px] font-bold">{copy.identity}</span>
+              <span className="rounded border border-slate-600 px-1.5 py-0.5 text-[7px] text-slate-400">{copy.locked}</span>
+            </div>
+            <p className="my-1.5 text-[7px] leading-3 text-slate-500">{copy.identityDescription}</p>
+            <div className="flex items-center gap-2">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={identityMatch}
+                onChange={event => setIdentityMatch(Number(event.target.value))}
+                aria-label={copy.identity}
+                className="h-1 flex-1 cursor-pointer accent-emerald-500"
+              />
+              <span className="w-7 text-right text-[8px] font-bold text-slate-300">{identityMatch}%</span>
+            </div>
+            <div className="mt-1 flex justify-between text-[6px] text-slate-600">
+              <span>0% ({copy.flexible})</span>
+              <span>100% ({copy.locked})</span>
+            </div>
+          </section>
 
-          <label htmlFor="style-description" className="mb-1 block text-[10px] font-bold text-slate-300">Describe the changes you want</label>
+          <section className="mb-2.5 rounded-lg border border-slate-700/70 bg-[#171a22] p-2">
+            <h3 className="mb-2 text-[9px] font-bold text-slate-300">
+              {isArabic ? 'تعابير الوجه (الحواجب والفم ونظرة العين)' : 'Facial Expressions (Brows, Mouth & Eye Gaze)'}
+            </h3>
+            <div className="grid grid-cols-3 gap-1.5">
+              {groups.slice(0, 3).map(group => renderChoiceGroup(group))}
+            </div>
+          </section>
+
+          <label htmlFor="style-description" className="mb-1 block text-[8px] font-bold text-slate-300">{copy.extraDetails}</label>
           <textarea
             id="style-description"
             value={prompt}
             onChange={event => setPrompt(event.target.value)}
-            placeholder="Example: Create a professional portrait with soft lighting and a modern background..."
+            placeholder={copy.promptPlaceholder}
             rows={2}
-            className="mb-3 w-full resize-y rounded-lg border border-slate-700 bg-[#111827] p-2.5 text-[10px] leading-5 text-white placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none"
+            className="mb-2 w-full resize-y rounded-md border border-slate-700 bg-[#111827] p-2 text-[8px] leading-4 text-white placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none"
           />
 
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {styleGroups.map(group => (
-              <div key={group.title} className="rounded-lg border border-slate-700/80 bg-[#172131] p-3">
-                <h3 className="mb-2 text-[10px] font-bold text-slate-300">{group.title}</h3>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {group.options.map(option => {
-                    const selected = (selections[group.title] || []).includes(option);
-                    return (
-                      <button
-                        key={option}
-                        onClick={() => toggleOption(group.title, option)}
-                        aria-pressed={selected}
-                        className={`min-h-8 rounded-md border px-2 py-1.5 text-[9px] transition ${selected ? selectedStyles[group.color] : 'border-slate-700 bg-slate-800/80 text-slate-300 hover:border-slate-500 hover:bg-slate-700'}`}
-                      >
-                        {option}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+          <div className="grid grid-cols-3 items-stretch gap-1.5">
+            <div className="flex flex-col gap-2.5 rounded-lg border border-[#282d38] bg-[#191c24] p-2">
+              {renderChoiceGroup(groups[3])}
+              {renderChoiceGroup(groups[4])}
+            </div>
+            {renderChoiceGroup(groups[5])}
+            {renderChoiceGroup(groups[6])}
+          </div>
+          <div className="mt-2.5 grid grid-cols-3 gap-1.5">
+            {groups.slice(7).map(group => renderChoiceGroup(group))}
           </div>
         </section>
 
-        {error && <p role="alert" className="rounded-lg border border-red-500/30 bg-red-950/40 p-2 text-center text-[10px] text-red-300">{error}</p>}
+        {error && <p role="alert" className="rounded-md border border-red-500/30 bg-red-950/40 p-2 text-center text-[8px] text-red-300">{error}</p>}
 
         {resultImage && (
-          <section className="rounded-xl border border-slate-700 bg-[#1f2937] p-3">
-            <h2 className="mb-2 text-[11px] font-bold">Result</h2>
-            <img src={resultImage} alt="Generated style" className="mx-auto max-h-80 rounded-lg object-contain" />
+          <section className="rounded-lg border border-slate-700 bg-[#1f2937] p-2.5">
+            <h2 className="mb-2 text-[9px] font-bold">{copy.result}</h2>
+            <img src={resultImage} alt={copy.result} className="mx-auto max-h-72 rounded-lg object-contain" />
           </section>
         )}
 
         <button
+          type="button"
           onClick={handleGenerate}
           disabled={isGenerating || !userImage}
-          className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-pink-500 py-3 text-xs font-bold shadow-lg shadow-indigo-900/40 transition hover:brightness-110 disabled:cursor-not-allowed disabled:from-slate-600 disabled:to-slate-700 disabled:shadow-none"
+          className="mx-auto flex w-fit min-w-36 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-pink-500 px-5 py-2 text-[9px] font-bold shadow-lg shadow-indigo-900/40 transition hover:brightness-110 disabled:cursor-not-allowed disabled:from-slate-600 disabled:to-slate-700 disabled:shadow-none"
         >
-          {isGenerating ? <><Loader2 className="h-4 w-4 animate-spin" /> Generating your new look...</> : <><Wand2 className="h-4 w-4" /> Generate New Look</>}
+          {isGenerating
+            ? <><Loader2 className="h-3 w-3 animate-spin" />{copy.generating}</>
+            : <><Wand2 className="h-3 w-3" />{copy.generate}</>}
         </button>
-        <p className="pb-3 text-center text-[9px] text-slate-500">0.5 credits per generation</p>
+        <p className="pb-2 text-center text-[7px] text-slate-500">{copy.credits}</p>
       </main>
     </div>
   );

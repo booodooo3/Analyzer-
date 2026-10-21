@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Camera, Download, Loader2, Upload, Wand2, X } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import { generateTextToImage } from '../services/apiService';
@@ -10,6 +10,7 @@ interface HairStylerOverlayProps {
 
 type Language = 'en' | 'ar';
 type Choice = { id: string; en: string; ar: string; prompt?: string };
+type GeneratedImage = { id: string; url: string; expiresAt: number };
 type ChoiceGroup = {
   id: string;
   title: { en: string; ar: string };
@@ -247,6 +248,8 @@ const text = {
     result: 'Generated Result',
     download: 'Download Image',
     downloadError: 'Could not download the image. Please try again.',
+    imageExpiryWarning: 'Automatically deleted 5 minutes after generation.',
+    expiresIn: 'Expires in',
     credits: '0.5 credits per generation',
     uploadError: 'Could not read the image. Please choose another photo.',
     imageRequired: 'Please upload a photo first.',
@@ -276,6 +279,8 @@ const text = {
     result: 'النتيجة',
     download: 'تنزيل الصورة',
     downloadError: 'تعذر تنزيل الصورة. حاول مرة أخرى.',
+    imageExpiryWarning: 'تحذف الصورة تلقائياً بعد 5 دقائق من إنشائها.',
+    expiresIn: 'الوقت المتبقي',
     credits: '0.5 رصيد لكل عملية إنشاء',
     uploadError: 'تعذرت قراءة الصورة. اختر صورة أخرى.',
     imageRequired: 'ارفع صورة أولاً.',
@@ -290,7 +295,9 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
   const { getToken } = useAuth();
   const [language, setLanguage] = useState<Language>('en');
   const [userImage, setUserImage] = useState<string | null>(null);
-  const [resultImage, setResultImage] = useState<string | null>(null);
+  const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
+  const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
+  const [currentTime, setCurrentTime] = useState(Date.now());
   const [prompt, setPrompt] = useState('');
   const [selections, setSelections] = useState<Record<string, string>>(initialSelections);
   const [identityMatch, setIdentityMatch] = useState(100);
@@ -300,6 +307,22 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const copy = text[language];
   const isArabic = language === 'ar';
+  const activeImage = generatedImages.find(image => image.id === selectedImageId) || generatedImages[0] || null;
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      const now = Date.now();
+      setCurrentTime(now);
+      setGeneratedImages(images => images.filter(image => image.expiresAt > now));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (selectedImageId && !generatedImages.some(image => image.id === selectedImageId)) {
+      setSelectedImageId(generatedImages[0]?.id || null);
+    }
+  }, [generatedImages, selectedImageId]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -310,7 +333,6 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
     reader.onload = () => {
       if (typeof reader.result === 'string') {
         setUserImage(reader.result);
-        setResultImage(null);
         setError(null);
       }
     };
@@ -319,10 +341,10 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
   };
 
   const handleDownload = async () => {
-    if (!resultImage) return;
+    if (!activeImage) return;
 
     try {
-      const response = await fetch(resultImage);
+      const response = await fetch(activeImage.url);
       if (!response.ok) throw new Error(`Image download failed: ${response.status}`);
 
       const imageBlob = await response.blob();
@@ -343,7 +365,6 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
 
   const selectOption = (groupId: string, optionId: string) => {
     setSelections(current => ({ ...current, [groupId]: optionId }));
-    setResultImage(null);
   };
 
   const getChoice = (group: ChoiceGroup) => group.options.find(option => option.id === selections[group.id]);
@@ -376,6 +397,13 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
       </div>
     </section>
   );
+
+  const formatTimeRemaining = (expiresAt: number) => {
+    const secondsRemaining = Math.max(0, Math.ceil((expiresAt - currentTime) / 1000));
+    const minutes = Math.floor(secondsRemaining / 60);
+    const seconds = secondsRemaining % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
 
   const handleGenerate = async () => {
     if (!userImage) {
@@ -426,7 +454,13 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
         '1K',
         'jpg'
       );
-      setResultImage(output);
+      const generatedImage = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        url: output,
+        expiresAt: Date.now() + 5 * 60 * 1000,
+      };
+      setGeneratedImages(images => [generatedImage, ...images].slice(0, 3));
+      setSelectedImageId(generatedImage.id);
     } catch (generationError) {
       setError(generationError instanceof Error ? generationError.message : copy.generationError);
     } finally {
@@ -593,9 +627,9 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
 
         {error && <p role="alert" className="rounded-md border border-red-500/30 bg-red-950/40 p-2 text-center text-[8px] text-red-300">{error}</p>}
 
-        {resultImage && (
-          <section className="rounded-xl border border-zinc-800 bg-black p-4">
-            <div className="mb-3 flex items-center justify-between gap-3">
+        {activeImage && (
+          <section className="rounded-xl border border-zinc-800 bg-black p-4 sm:p-5">
+            <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-sm font-bold">{copy.result}</h2>
               <button
                 type="button"
@@ -606,7 +640,43 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
                 {copy.download}
               </button>
             </div>
-            <img src={resultImage} alt={copy.result} className="mx-auto max-h-[32rem] rounded-lg object-contain" />
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
+              <div className="flex min-h-56 items-center justify-center rounded-lg border border-zinc-800 bg-[#050505] p-2 sm:min-h-80">
+                <img src={activeImage.url} alt={copy.result} className="max-h-[38rem] rounded-lg object-contain" />
+              </div>
+              <aside className="flex flex-col gap-3" aria-label={copy.result}>
+                {generatedImages.map((image, index) => {
+                  const secondsRemaining = Math.max(0, Math.ceil((image.expiresAt - currentTime) / 1000));
+                  const urgent = secondsRemaining <= 60;
+                  const active = activeImage.id === image.id;
+                  return (
+                    <div
+                      key={image.id}
+                      className={`rounded-lg border p-2 transition ${
+                        active ? 'border-red-500/70 bg-zinc-950' : 'border-zinc-800 bg-[#080808]'
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setSelectedImageId(image.id)}
+                        aria-label={`${copy.result} ${generatedImages.length - index}`}
+                        aria-pressed={active}
+                        className="block w-full"
+                      >
+                        <img src={image.url} alt="" className="h-24 w-full rounded-md object-cover sm:h-28" />
+                      </button>
+                      <div className={`mt-2 flex items-center justify-between text-[10px] ${urgent ? 'text-red-400' : 'text-zinc-400'}`}>
+                        <span>{copy.expiresIn}</span>
+                        <span className="font-mono font-bold">{formatTimeRemaining(image.expiresAt)}</span>
+                      </div>
+                      <p className={`mt-1 text-[9px] leading-4 ${urgent ? 'text-red-400' : 'text-zinc-500'}`}>
+                        {copy.imageExpiryWarning}
+                      </p>
+                    </div>
+                  );
+                })}
+              </aside>
+            </div>
           </section>
         )}
 
@@ -614,7 +684,11 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
           type="button"
           onClick={handleGenerate}
           disabled={isGenerating || !userImage}
-          className="mx-auto flex w-fit min-w-48 items-center justify-center gap-2 rounded-full border border-zinc-700 bg-zinc-900 px-7 py-3 text-xs font-bold text-zinc-300 transition hover:border-zinc-500 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:border-zinc-800 disabled:bg-zinc-950 disabled:text-zinc-600"
+          className={`mx-auto flex w-fit min-w-48 items-center justify-center gap-2 rounded-full border px-7 py-3 text-xs font-bold transition-all duration-300 ${
+            isGenerating
+              ? 'border-emerald-400 bg-emerald-950 text-emerald-200 shadow-[0_0_10px_rgba(52,211,153,0.8),0_0_28px_rgba(16,185,129,0.45),inset_0_0_16px_rgba(16,185,129,0.2)]'
+              : 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:border-zinc-500 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:border-zinc-800 disabled:bg-zinc-950 disabled:text-zinc-600'
+          }`}
         >
           {isGenerating
             ? <><Loader2 className="h-4 w-4 animate-spin" />{copy.generating}</>

@@ -1177,7 +1177,7 @@ const App: React.FC = () => {
                                 <span>0.5 Credits per generation</span>
                             </div>
                             <div className="bg-black/20 p-2 rounded border border-white/5">
-                                <span className="text-pink-400 font-bold block">Hair Styler (2K Res)</span>
+                                <span className="text-pink-400 font-bold block">Smart Style Changer (1K)</span>
                                 <span>0.5 Credits per generation</span>
                             </div>
                         </div>
@@ -1243,7 +1243,7 @@ const App: React.FC = () => {
                         <ul className="list-disc pl-5 space-y-2">
                             <li><strong>New Features:</strong> Added <code>kwaivgi/kling-v3-omni-video</code> to Video AI, and introduced the <strong>Face & Expression</strong> modifier for Seedream models in Tex 2 Img.</li>
                             <li><strong>Seedance 2.0 Pricing Update:</strong> Adjusted credit system to provide flexible options (5s for 3 credits, 8s for 5 credits, 10s for 7 credits).</li>
-                            <li><strong>Hair Styler Upgrades:</strong> Generations are now rendered in stunning <strong>2K Resolution</strong>. Results are cached locally for <strong>5 minutes</strong> even if you close the window, and a new <strong>Direct Save</strong> button has been added.</li>
+                            <li><strong>Smart Style Changer:</strong> Upload a portrait and customize its style with Google Nano Banana 2.1 at 1K resolution.</li>
                             <li><strong>Tex 2 Img Tweaks:</strong> We removed the double-click image description feature to streamline the interface and prevent accidental popups.</li>
                         </ul>
                     </div>

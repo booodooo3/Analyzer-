@@ -127,17 +127,26 @@ export default async (req, context) => {
         return new Response(JSON.stringify({ error: "Unauthorized: Please login first." }), { status: 401, headers });
     }
 
-    // 2. Prepare Input for bytedance/seedream-4.5
+    // 2. Prepare input for the selected Replicate model
     // Accept aspectRatio from frontend, fallback to match_input_image
     let aspect = body.aspectRatio || "match_input_image";
     if (aspect === "Match Input Image") aspect = "match_input_image";
-    const input = {
-      prompt: prompt || "A creative image",
-      size: size,
-      aspect_ratio: aspect,
-      output_format: outputFormat,
-      disable_safety_checker: true,
-    };
+    const input = model === "google/nano-banana-2.1"
+      ? {
+          prompt: prompt || "A creative image",
+          resolution: size,
+          aspect_ratio: aspect,
+          output_format: outputFormat === "jpeg" ? "jpg" : outputFormat,
+          google_search: false,
+          image_search: false,
+        }
+      : {
+          prompt: prompt || "A creative image",
+          size: size,
+          aspect_ratio: aspect,
+          output_format: outputFormat,
+          disable_safety_checker: true,
+        };
 
     if (images && images.length > 0) {
       input.image_input = images; // Pass array of images directly

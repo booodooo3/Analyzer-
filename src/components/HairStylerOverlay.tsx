@@ -275,8 +275,8 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
 
   const renderChoiceGroup = (group: ChoiceGroup) => (
     <section key={group.id} className="min-w-0 rounded-lg border border-[#282d38] bg-[#191c24] p-2.5">
-      <h3 className={`mb-2 text-[9px] font-bold uppercase tracking-wide ${userImage ? group.accent : 'text-zinc-400'}`}>{group.title[language]}</h3>
-      <div className={`grid ${group.layout === 'cards' ? 'grid-cols-1' : 'grid-cols-2'} gap-1.5`}>
+      <h3 className={`mb-3 text-[10px] font-bold uppercase tracking-wide sm:text-xs ${userImage ? group.accent : 'text-zinc-400'}`}>{group.title[language]}</h3>
+      <div className={`grid ${group.layout === 'cards' ? 'grid-cols-1' : 'grid-cols-2'} gap-2`}>
         {group.options.map(option => {
           const selected = selections[group.id] === option.id;
           return (
@@ -285,7 +285,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
               type="button"
               onClick={() => selectOption(group.id, option.id)}
               aria-pressed={selected}
-              className={`min-h-9 rounded-lg border px-1.5 py-1.5 text-[8px] leading-tight transition sm:text-[9px] ${
+              className={`min-h-11 rounded-lg border px-2 py-2 text-[10px] leading-snug transition sm:min-h-12 sm:px-3 sm:text-[11px] ${
                 selected && userImage
                   ? `${group.selectedStyle} font-semibold`
                   : selected
@@ -363,9 +363,9 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
   return (
     <div className="fixed inset-0 z-[100] overflow-y-auto bg-[#111827] text-white" dir={isArabic ? 'rtl' : 'ltr'}>
       <header className="sticky top-0 z-20 border-b border-white/5 bg-[#1f2937]">
-        <div className="mx-auto flex h-[30px] w-full max-w-[464px] items-center justify-between px-3">
-          <div className="flex items-center gap-1.5 text-[10px] font-bold">
-            <span className="flex h-5 w-5 items-center justify-center rounded bg-violet-600"><Wand2 className="h-3 w-3" /></span>
+        <div className="mx-auto flex h-12 w-full max-w-[1040px] items-center justify-between px-4 sm:px-6">
+          <div className="flex items-center gap-2 text-sm font-bold">
+            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-violet-600"><Wand2 className="h-4 w-4" /></span>
             <span>{copy.title}</span>
           </div>
           <div className="flex items-center gap-2">
@@ -383,22 +383,22 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-[464px] flex-col gap-2.5 px-3 py-3">
-        <section className={`rounded-lg border p-2.5 transition-all duration-500 ${
+      <main className="mx-auto flex w-full max-w-[1040px] flex-col gap-4 px-4 py-5 sm:px-6">
+        <section className={`rounded-xl border p-4 transition-all duration-500 sm:p-5 ${
           userImage
             ? 'border-emerald-500/50 bg-gradient-to-br from-emerald-950/30 via-[#1f2937] to-cyan-950/20 shadow-[0_0_20px_rgba(16,185,129,0.12)]'
             : 'border-slate-700 bg-[#1f2937]'
         }`}>
-          <div className="mb-2 flex items-center justify-between text-[9px] font-bold">
+          <div className="mb-3 flex items-center justify-between text-xs font-bold sm:text-sm">
             <span className="flex items-center gap-1.5">
-              <span className={`flex h-3.5 w-3.5 items-center justify-center rounded-full text-[8px] transition-colors ${
+              <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] transition-colors ${
                 userImage ? 'bg-emerald-500 text-white' : 'bg-indigo-500'
               }`}>{userImage ? '✓' : '1'}</span>
               {copy.choosePhoto}
             </span>
           </div>
           {userImage ? (
-            <div className="relative mx-auto h-24 w-24 overflow-hidden rounded-md border border-slate-600">
+            <div className="relative mx-auto h-32 w-32 overflow-hidden rounded-lg border border-slate-600 sm:h-36 sm:w-36">
               <img src={userImage} alt={copy.choosePhoto} className="h-full w-full object-cover" />
               <button
                 type="button"
@@ -414,27 +414,27 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
               <button
                 type="button"
                 onClick={() => uploadInputRef.current?.click()}
-                className="absolute inset-x-0 bottom-0 bg-black/70 py-1 text-[8px] font-semibold"
+                className="absolute inset-x-0 bottom-0 bg-black/70 py-2 text-xs font-semibold"
               >
                 {copy.changePhoto}
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => uploadInputRef.current?.click()}
-                className="flex h-[58px] flex-col items-center justify-center gap-1 rounded-md border border-dashed border-slate-600 text-[8px] text-slate-300 transition hover:border-indigo-400 hover:bg-slate-800"
+                className="flex h-24 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-600 text-xs text-slate-300 transition hover:border-indigo-400 hover:bg-slate-800 sm:h-28 sm:text-sm"
               >
-                <Upload className="h-3.5 w-3.5 text-indigo-400" />
+                <Upload className="h-5 w-5 text-indigo-400" />
                 {copy.upload}
               </button>
               <button
                 type="button"
                 onClick={() => cameraInputRef.current?.click()}
-                className="flex h-[58px] flex-col items-center justify-center gap-1 rounded-md border border-dashed border-slate-600 text-[8px] text-slate-300 transition hover:border-pink-400 hover:bg-slate-800"
+                className="flex h-24 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-600 text-xs text-slate-300 transition hover:border-pink-400 hover:bg-slate-800 sm:h-28 sm:text-sm"
               >
-                <Camera className="h-3.5 w-3.5 text-pink-400" />
+                <Camera className="h-5 w-5 text-pink-400" />
                 {copy.camera}
               </button>
             </div>
@@ -443,30 +443,30 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
           <input ref={cameraInputRef} type="file" accept="image/*" capture="user" onChange={handleImageUpload} className="hidden" />
         </section>
 
-        <section className={`rounded-lg border p-2.5 transition-all duration-500 ${
+        <section className={`rounded-xl border p-4 transition-all duration-500 sm:p-5 ${
           userImage
             ? 'border-violet-500/50 bg-gradient-to-br from-[#211d32] via-[#1b1e27] to-[#20212d] shadow-[0_0_24px_rgba(139,92,246,0.16)]'
             : 'border-slate-700 bg-[#1b1e27]'
         }`}>
-          <div className="mb-2 flex items-center justify-between text-[9px] font-bold">
+          <div className="mb-4 flex items-center justify-between text-xs font-bold sm:text-sm">
             <span className="flex items-center gap-1.5">
-              <span className={`flex h-3.5 w-3.5 items-center justify-center rounded-full text-[8px] transition-colors ${
+              <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] transition-colors ${
                 userImage ? 'bg-gradient-to-br from-violet-500 to-pink-500 text-white shadow-[0_0_10px_rgba(217,70,239,0.6)]' : 'bg-indigo-500'
               }`}>2</span>
               {copy.customize}
             </span>
-            <span className="rounded-full border border-slate-700 px-2 py-0.5 text-[7px] text-slate-400">✓ {copy.exactMatch}</span>
+            <span className="rounded-full border border-slate-700 px-3 py-1 text-[9px] text-slate-400 sm:text-[10px]">✓ {copy.exactMatch}</span>
           </div>
 
-          <section className={`mb-2.5 rounded-lg border p-2 transition-all duration-500 ${
+          <section className={`mb-4 rounded-xl border p-4 transition-all duration-500 ${
             userImage ? 'border-emerald-500/40 bg-gradient-to-r from-emerald-950/30 to-cyan-950/20' : 'border-slate-700/70 bg-[#171a22]'
           }`}>
             <div className="flex items-center gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded border border-emerald-500 bg-emerald-500 text-[10px] font-bold">✓</span>
-              <span className="flex-1 text-[8px] font-bold">{copy.identity}</span>
-              <span className="rounded border border-slate-600 px-1.5 py-0.5 text-[7px] text-slate-400">{copy.locked}</span>
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-emerald-500 bg-emerald-500 text-xs font-bold">✓</span>
+              <span className="flex-1 text-[11px] font-bold sm:text-xs">{copy.identity}</span>
+              <span className="rounded border border-slate-600 px-2 py-1 text-[8px] text-slate-400 sm:text-[9px]">{copy.locked}</span>
             </div>
-            <p className="my-1.5 text-[7px] leading-3 text-slate-500">{copy.identityDescription}</p>
+            <p className="my-2 text-[9px] leading-4 text-slate-500 sm:text-[10px]">{copy.identityDescription}</p>
             <div className="flex items-center gap-2">
               <input
                 type="range"
@@ -477,58 +477,58 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
                 aria-label={copy.identity}
                 className="h-1 flex-1 cursor-pointer accent-emerald-500"
               />
-              <span className="w-7 text-right text-[8px] font-bold text-slate-300">{identityMatch}%</span>
+              <span className="w-9 text-right text-[10px] font-bold text-slate-300">{identityMatch}%</span>
             </div>
-            <div className="mt-1 flex justify-between text-[6px] text-slate-600">
+            <div className="mt-1 flex justify-between text-[8px] text-slate-600">
               <span>0% ({copy.flexible})</span>
               <span>100% ({copy.locked})</span>
             </div>
           </section>
 
-          <section className={`mb-2.5 rounded-lg border p-2 transition-all duration-500 ${
+          <section className={`mb-4 rounded-xl border p-4 transition-all duration-500 ${
             userImage
               ? 'border-amber-500/40 bg-gradient-to-r from-amber-950/20 via-[#171a22] to-orange-950/20'
               : 'border-slate-700/70 bg-[#171a22]'
           }`}>
-            <h3 className={`mb-2 text-[9px] font-bold ${userImage ? 'text-amber-200' : 'text-slate-300'}`}>
+            <h3 className={`mb-3 text-[11px] font-bold sm:text-xs ${userImage ? 'text-amber-200' : 'text-slate-300'}`}>
               {isArabic ? 'تعابير الوجه (الحواجب والفم ونظرة العين)' : 'Facial Expressions (Brows, Mouth & Eye Gaze)'}
             </h3>
-            <div className="grid grid-cols-3 gap-1.5">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
               {groups.slice(0, 3).map(group => renderChoiceGroup(group))}
             </div>
           </section>
 
-          <label htmlFor="style-description" className="mb-1 block text-[8px] font-bold text-slate-300">{copy.extraDetails}</label>
+          <label htmlFor="style-description" className="mb-2 block text-[10px] font-bold text-slate-300 sm:text-xs">{copy.extraDetails}</label>
           <textarea
             id="style-description"
             value={prompt}
             onChange={event => setPrompt(event.target.value)}
             placeholder={copy.promptPlaceholder}
-            rows={2}
-            className="mb-2 w-full resize-y rounded-md border border-slate-700 bg-[#111827] p-2 text-[8px] leading-4 text-white placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none"
+            rows={3}
+            className="mb-4 w-full resize-y rounded-lg border border-slate-700 bg-[#111827] p-3 text-[10px] leading-5 text-white placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none sm:text-xs"
           />
 
-          <div className="grid grid-cols-3 items-stretch gap-1.5">
-            <div className={`flex flex-col gap-2.5 rounded-lg border p-2 ${
+          <div className="grid grid-cols-1 items-stretch gap-3 md:grid-cols-3">
+            <div className={`flex flex-col gap-3 rounded-xl border p-3 ${
               userImage ? 'border-cyan-500/40 bg-gradient-to-b from-cyan-950/30 to-[#191c24]' : 'border-[#282d38] bg-[#191c24]'
             }`}>
               {renderChoiceGroup(groups[3])}
               {renderChoiceGroup(groups[4])}
             </div>
-            <div className={`rounded-lg border p-2 ${
+            <div className={`rounded-xl border p-3 ${
               userImage ? 'border-violet-500/40 bg-gradient-to-b from-violet-950/30 to-[#191c24]' : 'border-[#282d38] bg-[#191c24]'
             }`}>
               {renderChoiceGroup(groups[5])}
             </div>
-            <div className={`rounded-lg border p-2 ${
+            <div className={`rounded-xl border p-3 ${
               userImage ? 'border-pink-500/40 bg-gradient-to-b from-pink-950/30 to-[#191c24]' : 'border-[#282d38] bg-[#191c24]'
             }`}>
               {renderChoiceGroup(groups[6])}
             </div>
           </div>
-          <div className="mt-2.5 grid grid-cols-3 gap-1.5">
+          <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
             {groups.slice(7).map(group => (
-              <div key={group.id} className={`rounded-lg border p-2 ${
+              <div key={group.id} className={`rounded-xl border p-3 ${
                 !userImage
                   ? 'border-[#282d38] bg-[#191c24]'
                   : group.id === 'hairColor'
@@ -556,13 +556,13 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
           type="button"
           onClick={handleGenerate}
           disabled={isGenerating || !userImage}
-          className="mx-auto flex w-fit min-w-36 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-pink-500 px-5 py-2 text-[9px] font-bold shadow-lg shadow-indigo-900/40 transition hover:brightness-110 disabled:cursor-not-allowed disabled:from-slate-600 disabled:to-slate-700 disabled:shadow-none"
+          className="mx-auto flex w-fit min-w-48 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-pink-500 px-7 py-3 text-xs font-bold shadow-lg shadow-indigo-900/40 transition hover:brightness-110 disabled:cursor-not-allowed disabled:from-slate-600 disabled:to-slate-700 disabled:shadow-none"
         >
           {isGenerating
-            ? <><Loader2 className="h-3 w-3 animate-spin" />{copy.generating}</>
-            : <><Wand2 className="h-3 w-3" />{copy.generate}</>}
+            ? <><Loader2 className="h-4 w-4 animate-spin" />{copy.generating}</>
+            : <><Wand2 className="h-4 w-4" />{copy.generate}</>}
         </button>
-        <p className="pb-2 text-center text-[7px] text-slate-500">{copy.credits}</p>
+        <p className="pb-2 text-center text-[9px] text-slate-500">{copy.credits}</p>
       </main>
     </div>
   );

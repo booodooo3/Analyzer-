@@ -162,6 +162,51 @@ const groups: ChoiceGroup[] = [
       { id: 'watch', en: 'Watch', ar: 'ساعة يد', prompt: 'wearing a wristwatch' },
     ],
   },
+  {
+    id: 'makeup',
+    title: { en: "Women's Makeup", ar: 'مكياج النساء' },
+    accent: 'text-zinc-400',
+    selectedStyle: 'border-red-500 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.14)_0%,#050505_78%)] text-red-100 shadow-[0_0_5px_rgba(239,68,68,0.85),0_0_18px_rgba(239,68,68,0.4),inset_0_0_14px_rgba(239,68,68,0.1)]',
+    options: [
+      { id: 'original', en: 'Original Makeup', ar: 'المكياج الأصلي' },
+      { id: 'none', en: 'No Makeup', ar: 'بدون مكياج', prompt: 'no makeup, natural bare face' },
+      { id: 'natural', en: 'Natural Makeup', ar: 'مكياج طبيعي', prompt: 'subtle natural makeup' },
+      { id: 'soft', en: 'Soft Glam', ar: 'مكياج ناعم', prompt: 'soft glam makeup' },
+      { id: 'full', en: 'Full Glam', ar: 'مكياج كامل', prompt: 'full glam makeup' },
+      { id: 'eyes', en: 'Eye Makeup', ar: 'مكياج عيون', prompt: 'tasteful eye makeup' },
+    ],
+  },
+  {
+    id: 'skinTexture',
+    title: { en: 'Skin Texture', ar: 'ملمس البشرة' },
+    accent: 'text-zinc-400',
+    selectedStyle: 'border-red-500 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.14)_0%,#050505_78%)] text-red-100 shadow-[0_0_5px_rgba(239,68,68,0.85),0_0_18px_rgba(239,68,68,0.4),inset_0_0_14px_rgba(239,68,68,0.1)]',
+    options: [
+      { id: 'original', en: 'Original Texture', ar: 'الملمس الأصلي' },
+      { id: 'smooth', en: 'Clear & Smooth', ar: 'صافية وناعمة', prompt: 'clear, smooth natural-looking skin, gently even the complexion without changing facial features' },
+      { id: 'natural', en: 'Natural Pores', ar: 'مسام طبيعية', prompt: 'natural realistic skin texture with visible pores' },
+      { id: 'bumps', en: 'Bumps & Blemishes', ar: 'نتوءات وعيوب البشرة', prompt: 'natural-looking skin with mild visible bumps and blemishes' },
+      { id: 'pitted', en: 'Pitted Acne Scars', ar: 'ندبات وحفر البشرة', prompt: 'visible pitted acne scars and uneven skin texture, realistic and natural' },
+      { id: 'freckles', en: 'Freckles', ar: 'نمش', prompt: 'natural facial freckles' },
+    ],
+  },
+  {
+    id: 'lipColor',
+    title: { en: 'Lip Color & Gloss', ar: 'لون الشفاه والقلوس' },
+    accent: 'text-zinc-400',
+    selectedStyle: 'border-red-500 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.14)_0%,#050505_78%)] text-red-100 shadow-[0_0_5px_rgba(239,68,68,0.85),0_0_18px_rgba(239,68,68,0.4),inset_0_0_14px_rgba(239,68,68,0.1)]',
+    options: [
+      { id: 'original', en: 'Original Lips', ar: 'لون الشفاه الأصلي' },
+      { id: 'none', en: 'No Lipstick', ar: 'بدون أحمر شفاه', prompt: 'natural bare lips without lipstick' },
+      { id: 'red', en: 'Red', ar: 'أحمر', prompt: 'classic red lipstick' },
+      { id: 'pink', en: 'Pink', ar: 'وردي', prompt: 'pink lipstick' },
+      { id: 'nude', en: 'Nude', ar: 'نيود', prompt: 'natural nude lipstick' },
+      { id: 'berry', en: 'Berry', ar: 'توتي', prompt: 'berry lipstick' },
+      { id: 'clear-gloss', en: 'Clear Lip Gloss', ar: 'قلوس شفاف', prompt: 'clear glossy lip gloss' },
+      { id: 'red-gloss', en: 'Red Gloss', ar: 'قلوس أحمر', prompt: 'red glossy lip gloss' },
+      { id: 'pink-gloss', en: 'Pink Gloss', ar: 'قلوس وردي', prompt: 'pink glossy lip gloss' },
+    ],
+  },
 ];
 
 const initialSelections: Record<string, string> = {
@@ -175,6 +220,9 @@ const initialSelections: Record<string, string> = {
   hairColor: 'original',
   age: 'original',
   accessories: 'none',
+  makeup: 'original',
+  skinTexture: 'original',
+  lipColor: 'original',
 };
 
 const text = {

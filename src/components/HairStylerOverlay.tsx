@@ -82,7 +82,7 @@ const groups: ChoiceGroup[] = [
     selectedStyle: 'border-red-500 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.14)_0%,#050505_78%)] text-red-100 shadow-[0_0_5px_rgba(239,68,68,0.85),0_0_18px_rgba(239,68,68,0.4),inset_0_0_14px_rgba(239,68,68,0.1)]',
     options: [
       { id: 'modern', en: 'Modern', ar: 'عصري', prompt: 'modern clothing' },
-      { id: 'classic', en: 'Classic', ar: 'كلاسيكي', prompt: 'classic clothing' },
+      { id: 'original', en: 'Original Clothes', ar: 'الملابس الأصلية', prompt: 'preserve the original clothing exactly as shown in the input image' },
       { id: '60s', en: '60s', ar: 'الستينيات', prompt: '1960s clothing' },
       { id: '70s', en: '70s', ar: 'السبعينيات', prompt: '1970s clothing' },
       { id: '80s', en: '80s', ar: 'الثمانينيات', prompt: '1980s clothing' },

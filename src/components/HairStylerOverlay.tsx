@@ -10,34 +10,34 @@ interface HairStylerOverlayProps {
 
 const styleGroups = [
   {
-    title: 'ستايل الصورة',
+    title: 'Photo Style',
     color: 'blue',
-    options: ['واقعي', 'سينمائي', 'بورتريه احترافي', 'أنمي', 'كرتوني', 'رسم زيتي'],
+    options: ['Photorealistic', 'Cinematic', 'Professional Portrait', 'Anime', 'Cartoon', 'Oil Painting'],
   },
   {
-    title: 'الشعر والمظهر',
+    title: 'Hair & Appearance',
     color: 'pink',
-    options: ['تسريحة عصرية', 'شعر طويل', 'شعر قصير', 'شعر مموج', 'لحية مرتبة', 'مظهر طبيعي'],
+    options: ['Modern Hairstyle', 'Long Hair', 'Short Hair', 'Wavy Hair', 'Groomed Beard', 'Natural Look'],
   },
   {
-    title: 'الملابس',
+    title: 'Clothing',
     color: 'amber',
-    options: ['رسمي', 'كاجوال', 'رياضي', 'تقليدي', 'بدلة أنيقة', 'ملابس عصرية'],
+    options: ['Formal', 'Casual', 'Sporty', 'Traditional', 'Elegant Suit', 'Modern Outfit'],
   },
   {
-    title: 'الخلفية',
+    title: 'Background',
     color: 'cyan',
-    options: ['استوديو', 'مدينة عصرية', 'طبيعة', 'شاطئ', 'مكتب أنيق', 'خلفية بسيطة'],
+    options: ['Studio', 'Modern City', 'Nature', 'Beach', 'Elegant Office', 'Simple Background'],
   },
   {
-    title: 'الإضاءة والألوان',
+    title: 'Lighting & Colors',
     color: 'violet',
-    options: ['إضاءة ناعمة', 'إضاءة سينمائية', 'ألوان دافئة', 'ألوان باردة', 'ألوان زاهية', 'أبيض وأسود'],
+    options: ['Soft Lighting', 'Cinematic Lighting', 'Warm Colors', 'Cool Colors', 'Vibrant Colors', 'Black & White'],
   },
   {
-    title: 'زاوية التصوير',
+    title: 'Camera Angle',
     color: 'green',
-    options: ['أمامية', 'من الجانب', 'لقطة قريبة', 'نصف الجسم', 'صورة كاملة', 'لقطة عفوية'],
+    options: ['Front View', 'Side View', 'Close-up', 'Half-body', 'Full-body', 'Candid Shot'],
   },
 ];
 
@@ -75,7 +75,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
         setError(null);
       }
     };
-    reader.onerror = () => setError('تعذر قراءة الصورة. حاول اختيار صورة أخرى.');
+    reader.onerror = () => setError('Could not read the image. Please choose another photo.');
     reader.readAsDataURL(file);
   };
 
@@ -94,13 +94,13 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
 
   const handleGenerate = async () => {
     if (!userImage) {
-      setError('ارفع صورة شخصية أولاً.');
+      setError('Please upload a portrait first.');
       return;
     }
 
     const selectedOptions = styleGroups.flatMap(group => selections[group.title] || []);
     if (!prompt.trim() && selectedOptions.length === 0) {
-      setError('اكتب وصفاً أو اختر بعض خيارات المظهر.');
+      setError('Enter a description or select some style options.');
       return;
     }
 
@@ -108,7 +108,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
     setError(null);
     try {
       const token = await getToken();
-      if (!token) throw new Error('يرجى تسجيل الدخول أولاً.');
+      if (!token) throw new Error('Please sign in first.');
 
       const styleDescription = selectedOptions.length
         ? `Apply these appearance choices: ${selectedOptions.join(', ')}.`
@@ -135,7 +135,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
       );
       setResultImage(output);
     } catch (generationError) {
-      setError(generationError instanceof Error ? generationError.message : 'تعذر إنشاء الصورة.');
+      setError(generationError instanceof Error ? generationError.message : 'Could not generate the image.');
     } finally {
       setIsGenerating(false);
     }
@@ -144,33 +144,37 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] overflow-y-auto bg-[#111827] text-white" dir="rtl">
-      <header className="sticky top-0 z-20 flex h-12 items-center justify-between border-b border-white/5 bg-[#1f2937] px-4 sm:px-8">
-        <span className="rounded-full bg-slate-700 px-3 py-1 text-[10px] text-slate-200">English</span>
-        <div className="flex items-center gap-2 text-xs font-bold">
-          <span># Smart Style Changer</span>
-          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-600"><Wand2 className="h-3.5 w-3.5" /></span>
+    <div className="fixed inset-0 z-[100] overflow-y-auto bg-[#111827] text-white" dir="ltr">
+      <header className="sticky top-0 z-20 border-b border-white/5 bg-[#1f2937]">
+        <div className="mx-auto flex h-14 max-w-[980px] items-center justify-between px-4 sm:px-6">
+          <div className="flex items-center gap-2 text-sm font-bold">
+            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-violet-600"><Wand2 className="h-4 w-4" /></span>
+            <span>Smart Style Changer</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="rounded-full bg-slate-700 px-3 py-1 text-[10px] text-slate-200">EN</span>
+            <button onClick={onClose} aria-label="Close" className="rounded-full p-2 text-slate-400 hover:bg-slate-700 hover:text-white">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
-        <button onClick={onClose} aria-label="إغلاق" className="rounded-full p-2 text-slate-400 hover:bg-slate-700 hover:text-white">
-          <X className="h-4 w-4" />
-        </button>
       </header>
 
-      <main className="mx-auto flex w-full max-w-[500px] flex-col gap-3 px-3 py-4 sm:px-4">
-        <section className="rounded-xl border border-slate-700 bg-[#1f2937] p-3">
-          <div className="mb-2 flex items-center justify-between text-[11px] font-bold">
-            <span>اختيار الصورة الشخصية</span>
+      <main className="mx-auto flex w-full max-w-[980px] flex-col gap-4 px-3 py-5 sm:px-6">
+        <section className="rounded-xl border border-slate-700 bg-[#1f2937] p-4 sm:p-5">
+          <div className="mb-3 flex items-center gap-2 text-[13px] font-bold">
             <span className="flex h-4 w-4 items-center justify-center rounded-full bg-indigo-500 text-[9px]">1</span>
+            <span>Choose Photo</span>
           </div>
           {userImage ? (
             <div className="relative mx-auto h-32 w-32 overflow-hidden rounded-lg border border-slate-600 sm:h-36 sm:w-36">
-              <img src={userImage} alt="الصورة الشخصية" className="h-full w-full object-cover" />
+              <img src={userImage} alt="Portrait preview" className="h-full w-full object-cover" />
               <button
                 onClick={() => {
                   setUserImage(null);
                   setResultImage(null);
                 }}
-                aria-label="إزالة الصورة"
+                aria-label="Remove image"
                 className="absolute right-1 top-1 rounded-full bg-red-500 p-1 text-white hover:bg-red-400"
               >
                 <X className="h-3 w-3" />
@@ -179,24 +183,24 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
                 onClick={() => uploadInputRef.current?.click()}
                 className="absolute inset-x-0 bottom-0 bg-black/65 py-1.5 text-[10px] font-semibold"
               >
-                تغيير الصورة
+                Change Photo
               </button>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-2">
               <button
-                onClick={() => cameraInputRef.current?.click()}
-                className="flex h-14 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-slate-600 text-[10px] text-slate-300 transition hover:border-pink-400 hover:bg-slate-800"
-              >
-                <Camera className="h-4 w-4 text-pink-400" />
-                التقاط بالكاميرا
-              </button>
-              <button
                 onClick={() => uploadInputRef.current?.click()}
-                className="flex h-14 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-slate-600 text-[10px] text-slate-300 transition hover:border-indigo-400 hover:bg-slate-800"
+                className="flex h-24 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-600 text-xs text-slate-300 transition hover:border-indigo-400 hover:bg-slate-800 sm:h-28"
               >
                 <ImageIcon className="h-4 w-4 text-indigo-400" />
-                رفع من الجهاز
+                Upload from Gallery
+              </button>
+              <button
+                onClick={() => cameraInputRef.current?.click()}
+                className="flex h-24 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-600 text-xs text-slate-300 transition hover:border-pink-400 hover:bg-slate-800 sm:h-28"
+              >
+                <Camera className="h-4 w-4 text-pink-400" />
+                Take a Photo
               </button>
             </div>
           )}
@@ -205,43 +209,46 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
         </section>
 
         <section className="rounded-xl border border-slate-700 bg-[#1f2937] p-3">
-          <div className="mb-3 flex items-center justify-between text-[11px] font-bold">
-            <span>تخصيص المظهر</span>
-            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-indigo-500 text-[9px]">2</span>
+          <div className="mb-4 flex items-center justify-between text-[13px] font-bold">
+            <span className="flex items-center gap-2">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-indigo-500 text-[9px]">2</span>
+              Customize Look
+            </span>
+            <span className="rounded-full border border-slate-700 px-2 py-1 text-[9px] text-slate-400">✓ 100% Exact Match</span>
           </div>
 
           <div className={`mb-3 rounded-lg border p-3 transition ${preserveIdentity ? 'border-emerald-700 bg-emerald-950/30' : 'border-slate-700 bg-slate-900/50'}`}>
             <button
               onClick={() => setPreserveIdentity(value => !value)}
               aria-pressed={preserveIdentity}
-              className="flex w-full items-center justify-between gap-3 text-right"
+              className="flex w-full items-center justify-between gap-3 text-left"
             >
               <span className={`flex h-5 w-5 items-center justify-center rounded border ${preserveIdentity ? 'border-emerald-400 bg-emerald-500' : 'border-slate-600'}`}>
                 {preserveIdentity && <span className="text-xs font-bold">✓</span>}
               </span>
-              <span className="flex-1 text-[11px] font-bold">حفظ ملامح الوجه</span>
-              <span className="text-[9px] text-emerald-300">{preserveIdentity ? 'مفعل 100%' : 'غير مفعل'}</span>
+              <span className="flex-1 text-[11px] font-bold">Face Identity Preservation</span>
+              <span className="text-[9px] text-emerald-300">{preserveIdentity ? '100% Locked Identity' : 'Disabled'}</span>
             </button>
             <p className="mt-2 text-[9px] leading-4 text-slate-400">
-              يحافظ على هوية الشخص وملامح الوجه أثناء تطبيق التغييرات المطلوبة.
+              Preserves the person’s identity and facial features while applying your selected changes.
             </p>
           </div>
 
-          <label htmlFor="style-description" className="mb-1 block text-[10px] font-bold text-slate-300">صف التغييرات التي تريدها</label>
+          <label htmlFor="style-description" className="mb-1 block text-[10px] font-bold text-slate-300">Describe the changes you want</label>
           <textarea
             id="style-description"
             value={prompt}
             onChange={event => setPrompt(event.target.value)}
-            placeholder="مثال: اجعل الصورة احترافية بإضاءة ناعمة وخلفية عصرية..."
+            placeholder="Example: Create a professional portrait with soft lighting and a modern background..."
             rows={2}
             className="mb-3 w-full resize-y rounded-lg border border-slate-700 bg-[#111827] p-2.5 text-[10px] leading-5 text-white placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none"
           />
 
-          <div className="space-y-2.5">
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {styleGroups.map(group => (
-              <div key={group.title} className="rounded-lg border border-slate-700/80 bg-[#172131] p-2">
+              <div key={group.title} className="rounded-lg border border-slate-700/80 bg-[#172131] p-3">
                 <h3 className="mb-2 text-[10px] font-bold text-slate-300">{group.title}</h3>
-                <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+                <div className="grid grid-cols-2 gap-1.5">
                   {group.options.map(option => {
                     const selected = (selections[group.title] || []).includes(option);
                     return (
@@ -265,8 +272,8 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
 
         {resultImage && (
           <section className="rounded-xl border border-slate-700 bg-[#1f2937] p-3">
-            <h2 className="mb-2 text-[11px] font-bold">النتيجة</h2>
-            <img src={resultImage} alt="الصورة بعد تعديل المظهر" className="mx-auto max-h-80 rounded-lg object-contain" />
+            <h2 className="mb-2 text-[11px] font-bold">Result</h2>
+            <img src={resultImage} alt="Generated style" className="mx-auto max-h-80 rounded-lg object-contain" />
           </section>
         )}
 
@@ -275,9 +282,9 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
           disabled={isGenerating || !userImage}
           className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-pink-500 py-3 text-xs font-bold shadow-lg shadow-indigo-900/40 transition hover:brightness-110 disabled:cursor-not-allowed disabled:from-slate-600 disabled:to-slate-700 disabled:shadow-none"
         >
-          {isGenerating ? <><Loader2 className="h-4 w-4 animate-spin" /> جارٍ إنشاء المظهر...</> : <><Wand2 className="h-4 w-4" /> توليد المظهر الجديد</>}
+          {isGenerating ? <><Loader2 className="h-4 w-4 animate-spin" /> Generating your new look...</> : <><Wand2 className="h-4 w-4" /> Generate New Look</>}
         </button>
-        <p className="pb-3 text-center text-[9px] text-slate-500">0.5 رصيد لكل عملية توليد</p>
+        <p className="pb-3 text-center text-[9px] text-slate-500">0.5 credits per generation</p>
       </main>
     </div>
   );

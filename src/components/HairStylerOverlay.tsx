@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Camera, Loader2, Upload, Wand2, X } from 'lucide-react';
+import { Camera, Download, Loader2, Upload, Wand2, X } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import { generateTextToImage } from '../services/apiService';
 
@@ -197,6 +197,8 @@ const text = {
     generate: 'Generate New Look',
     generating: 'Generating...',
     result: 'Generated Result',
+    download: 'Download Image',
+    downloadError: 'Could not download the image. Please try again.',
     credits: '0.5 credits per generation',
     uploadError: 'Could not read the image. Please choose another photo.',
     imageRequired: 'Please upload a photo first.',
@@ -224,6 +226,8 @@ const text = {
     generate: 'إنشاء المظهر الجديد',
     generating: 'جارٍ الإنشاء...',
     result: 'النتيجة',
+    download: 'تنزيل الصورة',
+    downloadError: 'تعذر تنزيل الصورة. حاول مرة أخرى.',
     credits: '0.5 رصيد لكل عملية إنشاء',
     uploadError: 'تعذرت قراءة الصورة. اختر صورة أخرى.',
     imageRequired: 'ارفع صورة أولاً.',
@@ -264,6 +268,29 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
     };
     reader.onerror = () => setError(copy.uploadError);
     reader.readAsDataURL(file);
+  };
+
+  const handleDownload = async () => {
+    if (!resultImage) return;
+
+    try {
+      const response = await fetch(resultImage);
+      if (!response.ok) throw new Error(`Image download failed: ${response.status}`);
+
+      const imageBlob = await response.blob();
+      const downloadUrl = URL.createObjectURL(imageBlob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `smart-style-${Date.now()}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+      setError(null);
+    } catch (downloadError) {
+      console.error('Smart Style Changer download failed:', downloadError);
+      setError(copy.downloadError);
+    }
   };
 
   const selectOption = (groupId: string, optionId: string) => {
@@ -363,7 +390,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
   return (
     <div className="fixed inset-0 z-[100] overflow-y-auto bg-[#111827] text-white" dir={isArabic ? 'rtl' : 'ltr'}>
       <header className="sticky top-0 z-20 border-b border-white/5 bg-[#1f2937]">
-        <div className="mx-auto flex h-12 w-full max-w-[1040px] items-center justify-between px-4 sm:px-6">
+        <div className="mx-auto flex h-12 w-full max-w-[1280px] items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-2 text-sm font-bold">
             <span className="flex h-7 w-7 items-center justify-center rounded-md bg-violet-600"><Wand2 className="h-4 w-4" /></span>
             <span>{copy.title}</span>
@@ -383,7 +410,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-[1040px] flex-col gap-4 px-4 py-5 sm:px-6">
+      <main className="mx-auto flex w-full max-w-[1280px] flex-col gap-5 px-4 py-6 sm:px-8">
         <section className={`rounded-xl border p-4 transition-all duration-500 sm:p-5 ${
           userImage
             ? 'border-emerald-500/50 bg-gradient-to-br from-emerald-950/30 via-[#1f2937] to-cyan-950/20 shadow-[0_0_20px_rgba(16,185,129,0.12)]'
@@ -493,7 +520,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
             <h3 className={`mb-3 text-[11px] font-bold sm:text-xs ${userImage ? 'text-amber-200' : 'text-slate-300'}`}>
               {isArabic ? 'تعابير الوجه (الحواجب والفم ونظرة العين)' : 'Facial Expressions (Brows, Mouth & Eye Gaze)'}
             </h3>
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               {groups.slice(0, 3).map(group => renderChoiceGroup(group))}
             </div>
           </section>
@@ -508,7 +535,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
             className="mb-4 w-full resize-y rounded-lg border border-slate-700 bg-[#111827] p-3 text-[10px] leading-5 text-white placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none sm:text-xs"
           />
 
-          <div className="grid grid-cols-1 items-stretch gap-3 md:grid-cols-3">
+          <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-3">
             <div className={`flex flex-col gap-3 rounded-xl border p-3 ${
               userImage ? 'border-cyan-500/40 bg-gradient-to-b from-cyan-950/30 to-[#191c24]' : 'border-[#282d38] bg-[#191c24]'
             }`}>
@@ -526,7 +553,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
               {renderChoiceGroup(groups[6])}
             </div>
           </div>
-          <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
             {groups.slice(7).map(group => (
               <div key={group.id} className={`rounded-xl border p-3 ${
                 !userImage
@@ -546,9 +573,19 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
         {error && <p role="alert" className="rounded-md border border-red-500/30 bg-red-950/40 p-2 text-center text-[8px] text-red-300">{error}</p>}
 
         {resultImage && (
-          <section className="rounded-lg border border-slate-700 bg-[#1f2937] p-2.5">
-            <h2 className="mb-2 text-[9px] font-bold">{copy.result}</h2>
-            <img src={resultImage} alt={copy.result} className="mx-auto max-h-72 rounded-lg object-contain" />
+          <section className="rounded-xl border border-slate-700 bg-[#1f2937] p-4">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="text-sm font-bold">{copy.result}</h2>
+              <button
+                type="button"
+                onClick={handleDownload}
+                className="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-pink-500 px-4 py-2 text-xs font-bold text-white shadow-lg transition hover:brightness-110"
+              >
+                <Download className="h-4 w-4" />
+                {copy.download}
+              </button>
+            </div>
+            <img src={resultImage} alt={copy.result} className="mx-auto max-h-[32rem] rounded-lg object-contain" />
           </section>
         )}
 

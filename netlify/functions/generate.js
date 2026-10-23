@@ -159,7 +159,7 @@ export default async (req, context) => {
     }
 
     const effectivePlusMode = isPlusModeBool;
-    const preservation = !effectivePlusMode && identityPreservation && typeof identityPreservation === 'object'
+    const preservation = identityPreservation && typeof identityPreservation === 'object'
       ? identityPreservation
       : {};
     const preservationTarget = (value) => Number.isFinite(value)
@@ -250,9 +250,10 @@ export default async (req, context) => {
     const faceTarget = preservationTarget(preservation.face);
     const hairTarget = preservationTarget(preservation.hair);
     const expressionTarget = preservationTarget(preservation.expression);
+    const preservationInstruction = `Preserve the person's facial identity and features with a target strength of ${faceTarget}%, preserve the original hairstyle, hair color, and hairline with a target strength of ${hairTarget}%, and keep the original facial expression unchanged with a target strength of ${expressionTarget}%. These percentages are guidance targets, not guaranteed output measurements.`;
     let promptText = effectivePlusMode
-      ? `Part 1: Reference Person (First Image). Part 2: Target Garment (Second Image). Part 3: A photo of a person wearing ${desc}. Preserve the original person's face and identity, perform the swap only on the garment regions.`
-      : `Part 1: Reference Person (First Image). Part 2: Target Garment (Second Image). Part 3: A photo of a person wearing ${desc}. Change only the clothing. Preserve the person's facial identity and features with a target strength of ${faceTarget}%, preserve the original hairstyle, hair color, and hairline with a target strength of ${hairTarget}%, and keep the original facial expression unchanged with a target strength of ${expressionTarget}%. These percentages are guidance targets, not guaranteed output measurements.`;
+      ? `Part 1: Reference Person (First Image). Part 2: Target Garment (Second Image). Part 3: A photo of a person wearing ${desc}. Perform the swap only on the garment regions. ${preservationInstruction}`
+      : `Part 1: Reference Person (First Image). Part 2: Target Garment (Second Image). Part 3: A photo of a person wearing ${desc}. Change only the clothing. ${preservationInstruction}`;
 
     if (isMakeoverMode) {
         promptText += " IMPORTANT: The user wants a complete makeover. REMOVE any existing pants, trousers, or bottom garments the person is wearing and show bare legs if the new garment is a dress or skirt. CHANGE the shoes to be fashionable and matching the new outfit.";
@@ -310,7 +311,7 @@ export default async (req, context) => {
                 version: versionId,
                 input: {
                     ...inputPayload,
-                    prompt: p.text
+                    prompt: `${p.text} ${preservationInstruction}`
                 }
             })
          ));

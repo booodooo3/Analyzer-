@@ -330,9 +330,10 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
         const faceTarget = preservationTarget(preservation.face);
         const hairTarget = preservationTarget(preservation.hair);
         const expressionTarget = preservationTarget(preservation.expression);
+        const preservationInstruction = `Preserve the person's facial identity and features with a target strength of ${faceTarget}%, preserve the original hairstyle, hair color, and hairline with a target strength of ${hairTarget}%, and keep the original facial expression unchanged with a target strength of ${expressionTarget}%. These percentages are guidance targets, not guaranteed output measurements.`;
         let promptText = isPlusModeBool
-            ? `A photo of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. MANDATORY: Preserve the person's identity, facial features, and hairstyle from the first image EXACTLY. Do not alter the face, skin tone, or hair. Only modify the clothing area.`
-            : `A photo of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. Change only the clothing. Preserve the person's facial identity and features with a target strength of ${faceTarget}%, preserve the original hairstyle, hair color, and hairline with a target strength of ${hairTarget}%, and keep the original facial expression unchanged with a target strength of ${expressionTarget}%. These percentages are guidance targets, not guaranteed output measurements.`;
+            ? `A photo of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. Modify only the clothing area. ${preservationInstruction}`
+            : `A photo of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. Change only the clothing. ${preservationInstruction}`;
 
         if (isMakeoverMode) {
             promptText += " IMPORTANT: The user wants a complete makeover. REMOVE any existing pants, trousers, or bottom garments the person is wearing and show bare legs if the new garment is a dress or skirt. CHANGE the shoes to be fashionable and matching the new outfit.";
@@ -363,9 +364,9 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
              console.log("🚀 Starting Plus Mode Prediction (3 views)...");
              
              const prompts = [
-                { type: 'front', text: `Half-body portrait of a person wearing ${desc}. FRAMING: From the top of the head down to the mid-thighs only. The camera is CLOSE to the subject. DO NOT show the lower legs or feet. The bottom of the image MUST end at the thighs. This is a ZOOMED-IN view, significantly closer than a full body shot. High quality, realistic. Preserve the original person's face and identity with 100% accuracy, perform the swap only on the garment regions. The face, eyes, nose, lips, and hair are reference-locked. They must be a 1:1 match with the input photo.` },
-                { type: 'side', text: `Side profile view of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. Preserve the original person's face and identity with 100% accuracy, perform the swap only on the garment regions. The face, eyes, nose, lips, and hair are reference-locked. They must be a 1:1 match with the input photo.` },
-               { type: 'full', text: `Full body, head-to-toe shot of a person wearing ${desc}. The full body must be visible from head to feet, including legs and shoes, not cropped. The person is wearing the garment shown in the second image. High quality, realistic. Preserve the original person's face and identity with 100% accuracy, perform the swap only on the garment regions. The face, eyes, nose, lips, and hair are reference-locked. They must be a 1:1 match with the input photo.` }
+                { type: 'front', text: `Half-body portrait of a person wearing ${desc}. FRAMING: From the top of the head down to the mid-thighs only. The camera is CLOSE to the subject. DO NOT show the lower legs or feet. The bottom of the image MUST end at the thighs. This is a ZOOMED-IN view, significantly closer than a full body shot. High quality, realistic. ${preservationInstruction}` },
+                { type: 'side', text: `Side profile view of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. ${preservationInstruction}` },
+               { type: 'full', text: `Full body, head-to-toe shot of a person wearing ${desc}. The full body must be visible from head to feet, including legs and shoes, not cropped. The person is wearing the garment shown in the second image. High quality, realistic. ${preservationInstruction}` }
              ];
 
              // Create 3 predictions in parallel

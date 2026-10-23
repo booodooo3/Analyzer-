@@ -83,7 +83,7 @@ export const performVirtualTryOn = async (person: ImageData, cloth: ImageData, t
         isMakeoverMode: isMakeoverMode,
         makeup: makeup,
         lipstick: lipstick,
-        identityPreservation: isPlusMode ? undefined : identityPreservation
+        identityPreservation
       }),
     });
 

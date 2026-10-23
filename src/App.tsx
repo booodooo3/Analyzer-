@@ -579,7 +579,7 @@ const App: React.FC = () => {
                       <span className="text-[10px] font-bold text-white uppercase tracking-widest">
                         One Settings
                       </span>
-                      <div className={`w-40 flex-1 min-h-0 bg-zinc-950 border border-zinc-800 rounded-[2.5rem] relative overflow-hidden shadow-2xl flex flex-col justify-center gap-3 px-3 py-4 shrink-0 ${isPlusMode ? 'opacity-50' : ''}`}>
+                      <div className="w-40 flex-1 min-h-0 bg-zinc-950 border border-zinc-800 rounded-[2.5rem] relative overflow-hidden shadow-2xl flex flex-col justify-center gap-3 px-3 py-4 shrink-0">
                         <div className="absolute inset-y-0 left-1/2 w-px bg-zinc-900" />
                         <div className="relative z-10 flex flex-col gap-3">
                           {[
@@ -598,7 +598,6 @@ const App: React.FC = () => {
                                 max={100}
                                 step={1}
                                 value={setting.value}
-                                disabled={isPlusMode}
                                 onChange={(event) => setting.setValue(Number(event.target.value))}
                                 aria-label={`${setting.label} preservation target`}
                                 className="w-full h-1 accent-amber-400 disabled:cursor-not-allowed"
@@ -607,7 +606,7 @@ const App: React.FC = () => {
                           ))}
                         </div>
                         <p className="relative z-10 text-center text-[8px] leading-tight text-zinc-500">
-                          {isPlusMode ? 'Available in ONE mode' : 'Target only, not guaranteed'}
+                          Target only, not guaranteed
                         </p>
                       </div>
                     </div>

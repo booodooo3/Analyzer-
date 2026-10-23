@@ -240,7 +240,7 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
         }
 
         const body = req.body;
-        const { personImage, clothImage, garmentDescription, isPlusMode, type, isMakeoverMode } = body;
+        const { personImage, clothImage, garmentDescription, isPlusMode, type, isMakeoverMode, identityPreservation } = body;
 
         console.log("📥 Received Request Body Keys:", Object.keys(body));
         
@@ -321,7 +321,18 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
         const personDataURI = personBase64.startsWith('data:') ? personBase64 : `data:image/png;base64,${personBase64}`;
         const clothDataURI = clothBase64.startsWith('data:') ? clothBase64 : `data:image/png;base64,${clothBase64}`;
 
-        let promptText = `A photo of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. MANDATORY: Preserve the person's identity, facial features, and hairstyle from the first image EXACTLY. Do not alter the face, skin tone, or hair. Only modify the clothing area.`;
+        const preservation = identityPreservation && typeof identityPreservation === 'object'
+            ? identityPreservation as Record<string, unknown>
+            : {};
+        const preservationTarget = (value: unknown): number => typeof value === 'number' && Number.isFinite(value)
+            ? Math.min(100, Math.max(80, Math.round(value)))
+            : 100;
+        const faceTarget = preservationTarget(preservation.face);
+        const hairTarget = preservationTarget(preservation.hair);
+        const expressionTarget = preservationTarget(preservation.expression);
+        let promptText = isPlusModeBool
+            ? `A photo of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. MANDATORY: Preserve the person's identity, facial features, and hairstyle from the first image EXACTLY. Do not alter the face, skin tone, or hair. Only modify the clothing area.`
+            : `A photo of a person wearing ${desc}. The person is wearing the garment shown in the second image. High quality, realistic. Change only the clothing. Preserve the person's facial identity and features with a target strength of ${faceTarget}%, preserve the original hairstyle, hair color, and hairline with a target strength of ${hairTarget}%, and keep the original facial expression unchanged with a target strength of ${expressionTarget}%. These percentages are guidance targets, not guaranteed output measurements.`;
 
         if (isMakeoverMode) {
             promptText += " IMPORTANT: The user wants a complete makeover. REMOVE any existing pants, trousers, or bottom garments the person is wearing and show bare legs if the new garment is a dress or skirt. CHANGE the shoes to be fashionable and matching the new outfit.";

@@ -148,7 +148,7 @@ export default async (req, context) => {
 
   try {
     const body = await req.json();
-    const { personImage, clothImage, garmentDescription, isPlusMode, type, isMakeoverMode, makeup, lipstick } = body;
+    const { personImage, clothImage, garmentDescription, isPlusMode, type, isMakeoverMode, makeup, lipstick, identityPreservation } = body;
 
     // Robust parsing of isPlusMode
     let isPlusModeBool = false;
@@ -159,6 +159,12 @@ export default async (req, context) => {
     }
 
     const effectivePlusMode = isPlusModeBool;
+    const preservation = !effectivePlusMode && identityPreservation && typeof identityPreservation === 'object'
+      ? identityPreservation
+      : {};
+    const preservationTarget = (value) => Number.isFinite(value)
+      ? Math.min(100, Math.max(80, Math.round(value)))
+      : 100;
 
     console.log("📥 Received Request Body Keys:", Object.keys(body));
     console.log("👉 isPlusMode raw:", isPlusMode, "Parsed:", isPlusModeBool);
@@ -241,7 +247,12 @@ export default async (req, context) => {
     const modelData = await replicate.models.get(modelOwner, modelName);
     const versionId = modelData.latest_version.id;
 
-    let promptText = `Part 1: Reference Person (First Image). Part 2: Target Garment (Second Image). Part 3: A photo of a person wearing ${desc}. Preserve the original person's face and identity with 100% accuracy, perform the swap only on the garment regions.`;
+    const faceTarget = preservationTarget(preservation.face);
+    const hairTarget = preservationTarget(preservation.hair);
+    const expressionTarget = preservationTarget(preservation.expression);
+    let promptText = effectivePlusMode
+      ? `Part 1: Reference Person (First Image). Part 2: Target Garment (Second Image). Part 3: A photo of a person wearing ${desc}. Preserve the original person's face and identity, perform the swap only on the garment regions.`
+      : `Part 1: Reference Person (First Image). Part 2: Target Garment (Second Image). Part 3: A photo of a person wearing ${desc}. Change only the clothing. Preserve the person's facial identity and features with a target strength of ${faceTarget}%, preserve the original hairstyle, hair color, and hairline with a target strength of ${hairTarget}%, and keep the original facial expression unchanged with a target strength of ${expressionTarget}%. These percentages are guidance targets, not guaranteed output measurements.`;
 
     if (isMakeoverMode) {
         promptText += " IMPORTANT: The user wants a complete makeover. REMOVE any existing pants, trousers, or bottom garments the person is wearing and show bare legs if the new garment is a dress or skirt. CHANGE the shoes to be fashionable and matching the new outfit.";

@@ -53,7 +53,7 @@ const resizeImage = (input: File | string, maxWidth = 1024): Promise<string> => 
   });
 };
 
-export const performVirtualTryOn = async (person: ImageData, cloth: ImageData, type: GarmentType, token: string, garmentDescription?: string, isPlusMode: boolean = false, isMakeoverMode: boolean = false, makeup: string = 'default', lipstick: string = 'default') => {
+export const performVirtualTryOn = async (person: ImageData, cloth: ImageData, type: GarmentType, token: string, garmentDescription?: string, isPlusMode: boolean = false, isMakeoverMode: boolean = false, makeup: string = 'default', lipstick: string = 'default', identityPreservation = { face: 100, hair: 100, expression: 100 }) => {
   try {
     // 0. Resize images before sending to avoid Netlify timeout (10s limit) and Payload Too Large errors
     // Ensure we handle File, Base64, or URL
@@ -82,7 +82,8 @@ export const performVirtualTryOn = async (person: ImageData, cloth: ImageData, t
         isPlusMode: isPlusMode,
         isMakeoverMode: isMakeoverMode,
         makeup: makeup,
-        lipstick: lipstick
+        lipstick: lipstick,
+        identityPreservation: isPlusMode ? undefined : identityPreservation
       }),
     });
 

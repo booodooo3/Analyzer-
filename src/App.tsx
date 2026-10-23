@@ -33,64 +33,6 @@ interface AnalysisResult {
   tips: string[];
 }
 
-interface ClothingSample {
-  id: string;
-  name: string;
-  type: GarmentType;
-  url: string;
-}
-
-const CLOTHING_SAMPLES: ClothingSample[] = [
-  { 
-    id: 'mens-suit-classic', 
-    name: 'Classic Mens Suit', 
-    type: 'jacket', 
-    url: 'https://media.alshaya.com/adobe/assets/urn:aaid:aem:c25ec5aa-1275-4fa6-a99f-ea651c765391/as/EID-b23b17624ba58e6ef254783aabe1506f45a66951.jpg?preferwebp=true&&auto=webp&width=960' 
-  },
-  { 
-    id: 'chiffon-seamed-blouse', 
-    name: 'Chiffon Seamed Blouse', 
-    type: 'shirt', 
-    url: 'https://media.alshaya.com/adobe/assets/urn:aaid:aem:22d952e5-353c-4d06-b868-1f7d10e692c3/as/EID-3d686024ff8b472a33b1000a82b88584f79afd20.jpg?preferwebp=true&width=1920&auto=webp' 
-  },
-  { 
-    id: 'elegant-blue-patterned', 
-    name: 'Elegant Patterned Shirt', 
-    type: 'shirt', 
-    url: 'https://media.alshaya.com/adobe/assets/urn:aaid:aem:1e10c2d1-6bc9-403d-8947-afcabf028707/as/EID-6c86442f168d579d8fcb0ceffa2df42a636c4a6b.jpg?preferwebp=true&width=1920&auto=webp' 
-  },
-  { 
-    id: 'royal-red-dress', 
-    name: 'Wide Sport Pants', 
-    type: 'pants', 
-    url: 'https://media.alshaya.com/adobe/assets/urn:aaid:aem:eb66fc0a-948b-4e5a-8fa0-6b53b09c3304/as/EID-672a43a479f4f10ff8d564eb44086ed6acbbd2ed.jpg?preferwebp=true&width=1920&auto=webp' 
-  },
-  { 
-    id: 'boho-chic-dress', 
-    name: 'Boho Chic Dress', 
-    type: 'long_dress', 
-    url: 'https://media.alshaya.com/adobe/assets/urn:aaid:aem:8a4bf0bb-855e-423f-88c3-9b52446e4e23/as/EID-dc1dccd77cc851bbde5ac37555247844bd237f89.jpg?preferwebp=true&width=1920&auto=webp' 
-  },
-  { 
-    id: 'classic-elegant-dress', 
-    name: 'Sport Tracksuit', 
-    type: 'other', 
-    url: 'https://media.alshaya.com/adobe/assets/urn:aaid:aem:26773462-c8e5-459a-9e22-036c022e9a98/as/EID-49827a42c05a4a93d83b184f1f8d310af5e56447.jpg?preferwebp=true&width=1920&auto=webp' 
-  },
-  { 
-    id: 'patterned-elegant-dress', 
-    name: 'Cotton Pants', 
-    type: 'pants', 
-    url: 'https://media.alshaya.com/adobe/assets/urn:aaid:aem:3d6a722e-89b1-4c42-9831-e237f816d7cf/as/EID-68bd8dab7afea82792aa1ceaa66e2746b4264615.jpg?preferwebp=true&auto=webp&width=960' 
-  },
-  { 
-    id: 'formal-elegant-gown', 
-    name: 'Luxury Evening Gown', 
-    type: 'long_dress', 
-    url: 'https://media.alshaya.com/adobe/assets/urn:aaid:aem:b38ddb67-4525-4802-b0f1-f275e70c1d33/as/EID-35ef66eb61d951aba0405929a6152403d022ae63.jpg?preferwebp=true&width=1920&auto=webp' 
-  }
-];
-
 const App: React.FC = () => {
   const [personImage, setPersonImage] = useState<ImageData | null>(null);
   const [clothImage, setClothImage] = useState<ImageData | null>(null);
@@ -100,7 +42,6 @@ const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.IDLE);
   const [error, setError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
-  const [isClosetOpen, setIsClosetOpen] = useState(false);
   const [isHairStylerOpen, setIsHairStylerOpen] = useState(false);
   const [isTextToImageOpen, setIsTextToImageOpen] = useState(false);
   const [isVideoAIOpen, setIsVideoAIOpen] = useState(false);
@@ -114,6 +55,9 @@ const App: React.FC = () => {
   // New State for Makeup and Lipstick
   const [makeup, setMakeup] = useState<string>('default');
   const [lipstick, setLipstick] = useState<string>('default');
+  const [facePreservation, setFacePreservation] = useState(100);
+  const [hairPreservation, setHairPreservation] = useState(100);
+  const [expressionPreservation, setExpressionPreservation] = useState(100);
 
   const [generatedResults, setGeneratedResults] = useState<GeneratedResult[]>([]);
 
@@ -261,9 +205,6 @@ const App: React.FC = () => {
       label: 'Step 2: Choose Garment', 
       desc: 'Upload the item you want to try',
       typeLabel: 'Select Garment Type:',
-      samplesLabel: 'Smart Closet',
-      openCloset: 'Open Closet',
-      closeCloset: 'Close',
       garmentDescLabel: 'Garment Description (Optional)',
       garmentDescPlaceholder: 'Enter description e.g. Red dress, blue shirt...',
       types: {
@@ -363,16 +304,6 @@ const App: React.FC = () => {
     }
   }, [appState, t.steps.length]);
 
-  const handleSampleClick = (sample: ClothingSample) => {
-    setGarmentType(sample.type);
-    setClothImage({
-      base64: '',
-      mimeType: 'image/png',
-      url: sample.url
-    });
-    setIsClosetOpen(false); // Close closet after selection
-  };
-
   const [isPlusMode, setIsPlusMode] = useState(false);
   const [isMakeoverMode, setIsMakeoverMode] = useState(false);
 
@@ -389,7 +320,11 @@ const App: React.FC = () => {
       if (!token) {
         throw new Error('Please sign in to continue');
       }
-      const resultData = await performVirtualTryOn(personImage, clothImage, garmentType, token, garmentDescription, isPlusMode, isMakeoverMode, makeup, lipstick);
+      const resultData = await performVirtualTryOn(personImage, clothImage, garmentType, token, garmentDescription, isPlusMode, isMakeoverMode, makeup, lipstick, {
+        face: facePreservation,
+        hair: hairPreservation,
+        expression: expressionPreservation
+      });
       setResults(resultData);
 
       // Add to generated results playlist
@@ -639,35 +574,42 @@ const App: React.FC = () => {
                       />
                     </div>
 
-                    {/* Vertical Closet Strip */}
+                    {/* One Mode preservation settings */}
                     <div className="flex flex-col items-center gap-2 h-full">
-                      <span className="text-xs font-bold text-white uppercase tracking-widest">
-                        {t.step2.samplesLabel}
+                      <span className="text-[10px] font-bold text-white uppercase tracking-widest">
+                        One Settings
                       </span>
-                      <button 
-                        onClick={() => setIsClosetOpen(true)}
-                        className="w-40 flex-1 bg-zinc-950 border border-zinc-800 rounded-[2.5rem] relative overflow-hidden group hover:border-white/20 transition-all shadow-2xl flex flex-col items-center justify-center gap-4 shrink-0"
-                      >
-                        {/* Vertical Line */}
-                        <div className="absolute inset-y-0 left-1/2 w-px bg-zinc-900 group-hover:bg-zinc-800 transition-colors" />
-                        
-                        {/* Handles */}
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 w-1.5 h-8 rounded-full bg-zinc-800 group-hover:bg-zinc-700 transition-colors" />
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 w-1.5 h-8 rounded-full bg-zinc-800 group-hover:bg-zinc-700 transition-colors" />
-
-                        <div className="relative z-10 flex flex-col items-center gap-3">
-                            <div className="w-12 h-12 rounded-full bg-zinc-900 flex items-center justify-center border border-zinc-800 group-hover:scale-110 transition-transform duration-500 shadow-lg">
-                              <svg viewBox="0 0 24 24" className="w-6 h-6 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5V2m0 2.5a2.5 2.5 0 00-2.5 2.5h5a2.5 2.5 0 00-2.5-2.5zM4 11.5c0-1.1.9-2 2-2h12a2 2 0 012 2l1 7c.1.6-.4 1.2-1 1.2H4a1 1 0 01-1-1.2l1-7z" />
-                                <path d="M7 9.5L12 6.5L17 9.5" strokeLinecap="round" />
-                              </svg>
-                            </div>
-                            
-                            <span className="text-[10px] font-bold text-zinc-500 group-hover:text-white uppercase tracking-widest transition-colors whitespace-nowrap">
-                              {t.step2.openCloset}
-                            </span>
+                      <div className={`w-40 flex-1 min-h-0 bg-zinc-950 border border-zinc-800 rounded-[2.5rem] relative overflow-hidden shadow-2xl flex flex-col justify-center gap-3 px-3 py-4 shrink-0 ${isPlusMode ? 'opacity-50' : ''}`}>
+                        <div className="absolute inset-y-0 left-1/2 w-px bg-zinc-900" />
+                        <div className="relative z-10 flex flex-col gap-3">
+                          {[
+                            { label: 'Face', value: facePreservation, setValue: setFacePreservation },
+                            { label: 'Hair', value: hairPreservation, setValue: setHairPreservation },
+                            { label: 'Expression', value: expressionPreservation, setValue: setExpressionPreservation }
+                          ].map((setting) => (
+                            <label key={setting.label} className="block space-y-1">
+                              <span className="flex items-center justify-between gap-1 text-[9px] font-bold uppercase tracking-wide text-zinc-300">
+                                <span>{setting.label}</span>
+                                <span className="text-amber-400">{setting.value}%</span>
+                              </span>
+                              <input
+                                type="range"
+                                min={80}
+                                max={100}
+                                step={1}
+                                value={setting.value}
+                                disabled={isPlusMode}
+                                onChange={(event) => setting.setValue(Number(event.target.value))}
+                                aria-label={`${setting.label} preservation target`}
+                                className="w-full h-1 accent-amber-400 disabled:cursor-not-allowed"
+                              />
+                            </label>
+                          ))}
                         </div>
-                      </button>
+                        <p className="relative z-10 text-center text-[8px] leading-tight text-zinc-500">
+                          {isPlusMode ? 'Available in ONE mode' : 'Target only, not guaranteed'}
+                        </p>
+                      </div>
                     </div>
                   </div>
 
@@ -934,56 +876,6 @@ const App: React.FC = () => {
           </div>
         )}
       </main>
-
-      {/* CLOSET MODAL/OVERLAY */}
-      {isClosetOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
-           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsClosetOpen(false)} />
-           
-           <div className="relative glass-effect w-full max-w-4xl p-8 rounded-[40px] border border-white/10 shadow-2xl space-y-8 overflow-hidden animate-in zoom-in-95 duration-500">
-              <div className="flex justify-between items-center">
-                 <div className="space-y-1">
-                    <h2 className="text-3xl font-bold tracking-tight">{t.step2.samplesLabel}</h2>
-                    <p className="text-zinc-500 text-sm italic">Collection 2026 • AI Recommended</p>
-                 </div>
-                 <button 
-                  onClick={() => setIsClosetOpen(false)}
-                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
-                 >
-                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                   </svg>
-                 </button>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                {CLOTHING_SAMPLES.map((sample) => (
-                  <button
-                    key={sample.id}
-                    onClick={() => handleSampleClick(sample)}
-                    className={`aspect-[3/4] rounded-3xl overflow-hidden border-2 transition-all duration-300 relative group flex items-center justify-center bg-zinc-950 ${
-                      clothImage?.url === sample.url
-                      ? 'border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)] scale-95' 
-                      : 'border-white/5 hover:border-white/40'
-                    }`}
-                  >
-                    <img src={sample.url} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={sample.name} />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
-                      <span className="text-xs font-bold text-white uppercase tracking-wider">{sample.name}</span>
-                      <span className="text-[8px] text-zinc-400 mt-1">{t.step2.types[sample.type]}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-              
-              <div className="text-center pt-4">
-                <Button variant="outline" onClick={() => setIsClosetOpen(false)} className="px-8">
-                  {t.step2.closeCloset}
-                </Button>
-              </div>
-           </div>
-        </div>
-      )}
 
       {/* Video AI Overlay */}
       <VideoAIOverlay 

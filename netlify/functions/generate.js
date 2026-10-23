@@ -233,10 +233,7 @@ export default async (req, context) => {
 
     // Select Model
     const modelOwner = "google";
-    let modelName = "nano-banana";
-    if (effectivePlusMode) {
-        modelName = "nano-banana-pro";
-    }
+    const modelName = effectivePlusMode ? "nano-banana-pro" : "nano-banana-2.1";
     
     console.log(`🚀 Starting Replicate prediction (${modelOwner}/${modelName})... [Plus Mode: ${effectivePlusMode}]`);
 
@@ -265,16 +262,26 @@ export default async (req, context) => {
         promptText += ` Apply ${lipstick} to the person's lips.`;
     }
 
-    const inputPayload = {
+    const inputPayload = effectivePlusMode
+      ? {
           prompt: promptText,
           negative_prompt: negativePrompt,
           image_input: [personDataURI, clothDataURI],
           aspect_ratio: "match_input_image",
-          output_format: "jpg", // Force jpg as requested for plus mode
-          resolution: effectivePlusMode ? "4K" : "1K", // Force 4K for plus mode (Capital K required by Replicate)
+          output_format: "jpg",
+          resolution: "4K",
           safety_filter_level: "block_only_high",
           num_inference_steps: 25
-    };
+        }
+      : {
+          prompt: promptText,
+          image_input: [personDataURI, clothDataURI],
+          aspect_ratio: "match_input_image",
+          resolution: "1K",
+          google_search: false,
+          image_search: false,
+          output_format: "jpg"
+        };
 
     // If Plus Mode, we generate 3 distinct views
     if (effectivePlusMode) {

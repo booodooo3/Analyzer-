@@ -1195,8 +1195,8 @@ const App: React.FC = () => {
                             <h4 className="text-yellow-400 font-semibold text-sm">Virtual Try-On Models</h4>
                             <div className="text-xs text-zinc-400 mt-1 space-y-2">
                                 <p>
-                                    <strong>One Mode (Standard):</strong> Uses the <code className="text-white bg-black/30 px-1 rounded">google/nano-banana</code> model.
-                                    <br/>Generates a single high-quality image.
+                                    <strong>One Mode (Standard):</strong> Uses the <code className="text-white bg-black/30 px-1 rounded">google/nano-banana-2.1</code> model at 1K resolution.
+                                    <br/>Generates a single high-quality image with the input image aspect ratio.
                                     <br/><strong>Cost:</strong> 0.5 Credits.
                                 </p>
                                 <p>

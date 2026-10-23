@@ -288,16 +288,16 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
 
         // 1. Start Prediction
         // Define Models
-        // Standard Mode uses "Pro" (Gemini 3 Pro Image)
-        // Plus Mode uses "Nano Banana" (Gemini 2.5 Flash Image)
+        // Standard Mode uses Nano Banana 2.1.
+        // Plus Mode keeps the existing Nano Banana model.
         const modelOwner = "google";
-        let modelName = "nano-banana"; // Default
+        let modelName = "nano-banana-2.1";
 
         if (isPlusModeBool) {
             modelName = "nano-banana";
             console.log("➕ PLUS MODE DETECTED: Switching to google/nano-banana");
         } else {
-            console.log("🍌 STANDARD MODE: Using google/nano-banana");
+            console.log("🍌 STANDARD MODE: Using google/nano-banana-2.1");
         }
         
         console.log(`🚀 Starting Replicate prediction (${modelOwner}/${modelName})...`);
@@ -327,15 +327,25 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
             promptText += " IMPORTANT: The user wants a complete makeover. REMOVE any existing pants, trousers, or bottom garments the person is wearing and show bare legs if the new garment is a dress or skirt. CHANGE the shoes to be fashionable and matching the new outfit.";
         }
 
-        const inputPayload = {
-            prompt: promptText,
-            image_input: [personDataURI, clothDataURI],
-            aspect_ratio: "match_input_image",
-            output_format: isPlusModeBool ? "png" : "jpg",
-            resolution: isPlusModeBool ? "2K" : "1K",
-            safety_filter_level: "block_only_high",
-            num_inference_steps: 25
-        };
+        const inputPayload = isPlusModeBool
+            ? {
+                prompt: promptText,
+                image_input: [personDataURI, clothDataURI],
+                aspect_ratio: "match_input_image",
+                output_format: "png",
+                resolution: "2K",
+                safety_filter_level: "block_only_high",
+                num_inference_steps: 25
+            }
+            : {
+                prompt: promptText,
+                image_input: [personDataURI, clothDataURI],
+                aspect_ratio: "match_input_image",
+                resolution: "1K",
+                google_search: false,
+                image_search: false,
+                output_format: "jpg"
+            };
         
         // If Plus Mode, we generate 3 distinct views
         if (isPlusModeBool) {

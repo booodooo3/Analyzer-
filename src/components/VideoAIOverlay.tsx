@@ -312,6 +312,12 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         setError("Video file is too large. Max 200MB.");
         return;
       }
+
+      if (selectedModel === 'google/gemini-omni-1.1') {
+        setImages([null, null]);
+        setReferenceImages([]);
+        setReferenceVideos([]);
+      }
       
       setVideoInput({
         base64: URL.createObjectURL(file),
@@ -322,6 +328,11 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   };
 
   const handleReferenceImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (selectedModel === 'google/gemini-omni-1.1' && videoInput) {
+      setError('Remove the video before adding reference images. Gemini cannot edit a video and use images in the same request.');
+      return;
+    }
+
     const files = Array.from(e.target.files || []);
     const currentCount = referenceImages.length;
     
@@ -1008,6 +1019,12 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
                       {generationMode === 'imageToVideo' ? (
                         <>
+                        {selectedModel === 'google/gemini-omni-1.1' && videoInput ? (
+                          <div className="flex flex-col gap-2 rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 text-sm">
+                            <span className="font-bold text-yellow-400">Video editing mode</span>
+                            <span className="text-zinc-400">Remove the video below to use images, keyframes, or reference images instead.</span>
+                          </div>
+                        ) : (
                         <div className={`grid gap-4 ${supportsTwoImages ? 'grid-cols-2 relative' : 'grid-cols-1'}`}>
                             {supportsTwoImages && (
                                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden sm:flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 border border-white/10 shadow-xl">
@@ -1048,6 +1065,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                 </div>
                             )}
                         </div>
+                        )}
                         </>
                       ) : (
                         <div className="w-full aspect-video bg-zinc-950/50 border border-red-500/20 rounded-xl flex flex-col items-center justify-center p-8 text-center space-y-4 relative overflow-hidden group">
@@ -1098,6 +1116,10 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                   onChange={(e) => {
                                     const newModel = e.target.value;
                                     setSelectedModel(newModel);
+                                    if (newModel === 'google/gemini-omni-1.1') {
+                                      setVideoInput(null);
+                                      setReferenceVideos([]);
+                                    }
                                     if (!newModel.includes('seedance') && newModel !== 'google/gemini-omni-1.1') {
                                         setGenerationMode('imageToVideo');
                                     }
@@ -1296,7 +1318,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                             </label>
                         </div>
                     )}
-                    <div className="flex flex-col gap-4 mt-4">
+                    {!(selectedModel === 'google/gemini-omni-1.1' && videoInput) && <div className="flex flex-col gap-4 mt-4">
                       <div className="flex-1">
                         <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Reference Images (Optional)</label>
                         <p className="text-[10px] text-zinc-500 mb-2">
@@ -1346,6 +1368,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                           </div>
                         )}
                       </div>
+                    </div>}
 
                       {selectedModel === 'google/gemini-omni-1.1' && (
                         <div className="flex-1">
@@ -1459,7 +1482,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                         )}
                       </div>
                       )}
-                    </div>
                   </>
                 )}
                   <div className="space-y-2">

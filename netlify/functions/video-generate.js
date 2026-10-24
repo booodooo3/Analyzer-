@@ -365,18 +365,19 @@ export default async (req, context) => {
                     resolution: resolution === "4k" ? "4k" : (resolution || "720p")
                 };
 
-                if (image) {
-                    input.image = image;
-                }
-                if (image2) {
-                    input.last_frame = image2;
-                }
-                if (reference_images && reference_images.length > 0) {
-                    input.reference_images = reference_images;
-                }
-                const editVideo = videoInput || (reference_videos && reference_videos[0]);
+                const editVideo = videoInput;
                 if (editVideo) {
                     input.video = editVideo;
+                } else {
+                    if (image) {
+                        input.image = image;
+                    }
+                    if (image2) {
+                        input.last_frame = image2;
+                    }
+                    if (reference_images && reference_images.length > 0) {
+                        input.reference_images = reference_images;
+                    }
                 }
             } else if (model === 'sync/lipsync-2') {
                 modelOwner = "sync";

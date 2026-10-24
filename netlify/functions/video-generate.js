@@ -62,6 +62,9 @@ export default async (req, context) => {
                                 else if (duration === 8) cost = 5;
                                 else if (duration === 10) cost = 7;
                             }
+                            if (model === 'google/gemini-omni-1.1') {
+                                cost = 4;
+                            }
                             
                             const currentCredits = typeof user.publicMetadata.credits === 'number' ? user.publicMetadata.credits : 3;
                             const newDeducted = [...deductedPredictions, predictionId].slice(-50);
@@ -137,6 +140,9 @@ export default async (req, context) => {
                     cost = 7;
                 }
             }
+            if (model === 'google/gemini-omni-1.1') {
+                cost = 4;
+            }
 
 
             if (currentCredits < cost) {
@@ -194,6 +200,9 @@ export default async (req, context) => {
             } else if (model === 'pixverse/lipsync') {
                 modelOwner = "pixverse";
                 modelName = "lipsync";
+            } else if (model === 'google/gemini-omni-1.1') {
+                modelOwner = "google";
+                modelName = "gemini-omni-1.1";
             }
 
             let input = {
@@ -342,6 +351,28 @@ export default async (req, context) => {
 
                 if (image2) {
                     input.end_image = image2;
+                }
+            } else if (model === 'google/gemini-omni-1.1') {
+                modelOwner = "google";
+                modelName = "gemini-omni-1.1";
+                input = {
+                    prompt: enhancedPrompt || "",
+                    aspect_ratio: aspectRatio === "9:16" ? "9:16" : "16:9",
+                    resolution: resolution === "4k" ? "4k" : (resolution || "720p")
+                };
+
+                if (image) {
+                    input.image = image;
+                }
+                if (image2) {
+                    input.last_frame = image2;
+                }
+                if (reference_images && reference_images.length > 0) {
+                    input.reference_images = reference_images;
+                }
+                const editVideo = videoInput || (reference_videos && reference_videos[0]);
+                if (editVideo) {
+                    input.video = editVideo;
                 }
             } else if (model === 'sync/lipsync-2') {
                 modelOwner = "sync";

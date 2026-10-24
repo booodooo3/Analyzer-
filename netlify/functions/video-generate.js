@@ -120,7 +120,7 @@ export default async (req, context) => {
             
             const currentCredits = typeof user.publicMetadata.credits === 'number' ? user.publicMetadata.credits : 3;
             
-            const { image, image2, description, duration, cameraEffect, aiFilter, model, aspectRatio, audioFile, videoInput, characterOrientation, video_path, resolution, seed, reference_images, reference_videos, reference_audios, video_reference_type, keep_original_sound, generate_audio } = await req.json();
+            const { image, image2, description, duration, cameraEffect, aiFilter, model, aspectRatio, audioFile, videoInput, characterOrientation, video_path, resolution, seed, reference_images, reference_image_count, reference_videos, reference_audios, video_reference_type, keep_original_sound, generate_audio } = await req.json();
 
             // Calculate cost based on duration
             let cost = 4;
@@ -360,7 +360,7 @@ export default async (req, context) => {
                 modelOwner = "google";
                 modelName = "gemini-omni-1.1";
                 input = {
-                    prompt: `${enhancedPrompt || ""}\n\nTarget duration: ${duration || 10} seconds.`,
+                    prompt: `${enhancedPrompt || ""}${videoInput && reference_image_count ? `\n\nThe first ${reference_image_count * 1.2} seconds of the input video are reference images, followed by the original video. Use the opening images as visual guidance for editing the following video, not as content to preserve unless requested.` : ""}\n\nTarget duration: ${duration || 10} seconds.`,
                     aspect_ratio: aspectRatio === "9:16" ? "9:16" : "16:9",
                     resolution: resolution === "4k" ? "4k" : (resolution || "720p")
                 };

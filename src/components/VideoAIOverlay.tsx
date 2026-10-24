@@ -6,6 +6,7 @@ import { Button } from './Button';
 import { ImageData } from '../types';
 import HelpModal from './HelpModal';
 import { uploadToCloudinary } from '../utils/cloudinary';
+import { composeVideoWithReferenceImages } from '../utils/composeVideoWithReferenceImages';
 
 interface VideoAIOverlayProps {
   isOpen: boolean;
@@ -315,10 +316,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
       if (selectedModel === 'google/gemini-omni-1.1') {
         setImages([null, null]);
-        setReferenceImages([]);
-        setReferenceVideos([]);
       }
-      
+
       setVideoInput({
         base64: URL.createObjectURL(file),
         name: file.name,
@@ -328,11 +327,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   };
 
   const handleReferenceImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (selectedModel === 'google/gemini-omni-1.1' && videoInput) {
-      setError('Remove the video before adding reference images. Gemini cannot edit a video and use images in the same request.');
-      return;
-    }
-
     const files = Array.from(e.target.files || []);
     const currentCount = referenceImages.length;
     
@@ -487,7 +481,13 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       }
       
       if (videoInput?.file) {
-          uploadedVideoUrl = await uploadToCloudinary(videoInput.file);
+          let videoToUpload = videoInput.file;
+          if (selectedModel === 'google/gemini-omni-1.1' && referenceImages.length > 0) {
+              setStatusMessage('Preparing video with reference images...');
+              const referenceFiles = referenceImages.map(image => image.file);
+              videoToUpload = await composeVideoWithReferenceImages(videoToUpload, referenceFiles);
+          }
+          uploadedVideoUrl = await uploadToCloudinary(videoToUpload);
       } else if (uploadedVideoUrl?.startsWith('blob:')) {
           uploadedVideoUrl = undefined;
       }
@@ -513,7 +513,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       }
 
       const uploadedRefImages: string[] = [];
-      for (const img of referenceImages) {
+      for (const img of selectedModel === 'google/gemini-omni-1.1' && videoInput ? [] : referenceImages) {
           if (selectedModel === 'google/gemini-omni-1.1' && img.file) {
               uploadedRefImages.push(await uploadToCloudinary(img.file));
           } else if (img.base64 && !img.base64.startsWith('blob:')) {
@@ -545,6 +545,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
             videoInput: uploadedVideoUrl,
             characterOrientation,
             reference_images: uploadedRefImages,
+            reference_image_count: selectedModel === 'google/gemini-omni-1.1' && videoInput ? referenceImages.length : 0,
             reference_videos: uploadedRefVideos,
             reference_audios: uploadedRefAudios,
             video_reference_type: videoReferenceType,
@@ -1022,7 +1023,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                         {selectedModel === 'google/gemini-omni-1.1' && videoInput ? (
                           <div className="flex flex-col gap-2 rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 text-sm">
                             <span className="font-bold text-yellow-400">Video editing mode</span>
-                            <span className="text-zinc-400">Remove the video below to use images, keyframes, or reference images instead.</span>
+                            <span className="text-zinc-400">Reference images below are added as opening frames before the video so Gemini can use both.</span>
                           </div>
                         ) : (
                         <div className={`grid gap-4 ${supportsTwoImages ? 'grid-cols-2 relative' : 'grid-cols-1'}`}>
@@ -1318,14 +1319,16 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                             </label>
                         </div>
                     )}
-                    {!(selectedModel === 'google/gemini-omni-1.1' && videoInput) && <div className="flex flex-col gap-4 mt-4">
+                    <div className="flex flex-col gap-4 mt-4">
                       <div className="flex-1">
                         <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Reference Images (Optional)</label>
                         <p className="text-[10px] text-zinc-500 mb-2">
                           {selectedModel === 'kwaivgi/kling-v3-omni-video' 
                             ? 'Reference images for elements, scenes, or styles. Supports .jpg/.jpeg/.png. Max 7 without video, 4 with video.'
                             : selectedModel === 'google/gemini-omni-1.1'
-                            ? 'Reference images guide the subject and style of the video; they are not used as literal frames.'
+                            ? videoInput
+                              ? 'Reference images are added as brief opening frames to the video so Gemini can use both.'
+                              : 'Reference images guide the subject and style of the video; they are not used as literal frames.'
                             : 'Reference images (up to 9) for character consistency, style guidance, and scene composition. Cannot be used together with first/last frame images. You can reference them in your prompt as [Image1], [Image2], etc.'}
                         </p>
                         <div className="relative group mt-1">
@@ -1368,7 +1371,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                           </div>
                         )}
                       </div>
-                    </div>}
+                    </div>
 
                       {selectedModel === 'google/gemini-omni-1.1' && (
                         <div className="flex-1">

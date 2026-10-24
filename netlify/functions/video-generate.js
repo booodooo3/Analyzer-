@@ -45,6 +45,10 @@ export default async (req, context) => {
                             // Calculate cost
                             let model = prediction.model;
                             let duration = prediction.input?.duration || 10;
+                            if (model === 'google/gemini-omni-1.1') {
+                                const durationMatch = prediction.input?.prompt?.match(/Target duration: (5|8|10) seconds/i);
+                                duration = durationMatch ? Number(durationMatch[1]) : 10;
+                            }
                             let image = prediction.input?.image || prediction.input?.video_url || prediction.input?.video || prediction.input?.start_image;
                             
                             let cost = 4;
@@ -63,7 +67,7 @@ export default async (req, context) => {
                                 else if (duration === 10) cost = 7;
                             }
                             if (model === 'google/gemini-omni-1.1') {
-                                cost = 4;
+                                cost = duration === 5 ? 2 : duration === 8 ? 3 : 4;
                             }
                             
                             const currentCredits = typeof user.publicMetadata.credits === 'number' ? user.publicMetadata.credits : 3;
@@ -141,7 +145,7 @@ export default async (req, context) => {
                 }
             }
             if (model === 'google/gemini-omni-1.1') {
-                cost = 4;
+                cost = duration === 5 ? 2 : duration === 8 ? 3 : 4;
             }
 
 
@@ -356,7 +360,7 @@ export default async (req, context) => {
                 modelOwner = "google";
                 modelName = "gemini-omni-1.1";
                 input = {
-                    prompt: enhancedPrompt || "",
+                    prompt: `${enhancedPrompt || ""}\n\nTarget duration: ${duration || 10} seconds.`,
                     aspect_ratio: aspectRatio === "9:16" ? "9:16" : "16:9",
                     resolution: resolution === "4k" ? "4k" : (resolution || "720p")
                 };

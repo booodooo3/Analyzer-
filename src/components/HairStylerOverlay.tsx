@@ -29,6 +29,7 @@ interface HairStylerOverlayProps {
 }
 
 type Language = 'en' | 'ar';
+type OutputResolution = '1K' | '4K';
 type Choice = { id: string; en: string; ar: string; prompt?: string };
 type GeneratedImage = { id: string; url: string; expiresAt: number };
 type ChoiceGroup = {
@@ -279,6 +280,11 @@ const text = {
     prompt: 'Describe the changes you want',
     promptPlaceholder: 'Describe your desired look...',
     extraDetails: 'Additional Details',
+    resolution: 'Output Quality',
+    standardResolution: 'Standard · 1K',
+    goldResolution: 'Gold · 4K',
+    standardCost: '0.5 credits',
+    goldCost: '1 credit',
     generate: 'Generate New Look',
     generating: 'Generating...',
     result: 'Generated Result',
@@ -286,7 +292,6 @@ const text = {
     downloadError: 'Could not download the image. Please try again.',
     imageExpiryWarning: 'Automatically deleted 5 minutes after generation.',
     expiresIn: 'Expires in',
-    credits: '0.5 credits per generation',
     uploadError: 'Could not read the image. Please choose another photo.',
     imageRequired: 'Please upload a photo first.',
     optionsRequired: 'Choose at least one change or describe the look you want.',
@@ -310,6 +315,11 @@ const text = {
     prompt: 'صف التغييرات التي تريدها',
     promptPlaceholder: 'اكتب وصف المظهر الذي تريده...',
     extraDetails: 'تفاصيل إضافية',
+    resolution: 'جودة الصورة',
+    standardResolution: 'عادي · 1K',
+    goldResolution: 'ذهبي · 4K',
+    standardCost: 'نصف نقطة',
+    goldCost: 'نقطة واحدة',
     generate: 'إنشاء المظهر الجديد',
     generating: 'جارٍ الإنشاء...',
     result: 'النتيجة',
@@ -317,7 +327,6 @@ const text = {
     downloadError: 'تعذر تنزيل الصورة. حاول مرة أخرى.',
     imageExpiryWarning: 'تحذف الصورة تلقائياً بعد 5 دقائق من إنشائها.',
     expiresIn: 'الوقت المتبقي',
-    credits: '0.5 رصيد لكل عملية إنشاء',
     uploadError: 'تعذرت قراءة الصورة. اختر صورة أخرى.',
     imageRequired: 'ارفع صورة أولاً.',
     optionsRequired: 'اختر تغييراً واحداً على الأقل أو اكتب وصفاً للمظهر.',
@@ -337,6 +346,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
   const [prompt, setPrompt] = useState('');
   const [selections, setSelections] = useState<Record<string, string>>(initialSelections);
   const [identityMatch, setIdentityMatch] = useState(100);
+  const [outputResolution, setOutputResolution] = useState<OutputResolution>('1K');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const uploadInputRef = useRef<HTMLInputElement>(null);
@@ -493,8 +503,10 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
         token,
         'Match Input Image',
         'google/nano-banana-2.1',
-        '1K',
-        'jpg'
+        outputResolution,
+        'jpg',
+        undefined,
+        'smart-style-changer'
       );
       const generatedImage = {
         id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -627,6 +639,37 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
             </div>
           </section>
 
+          <section className="mb-5 rounded-xl border border-[#303441] bg-[#191c25] p-4 sm:p-5">
+            <h3 className="mb-3 flex items-center gap-2 text-xs font-bold text-[#b1b5c1] sm:text-sm">
+              <Sparkles className="h-4 w-4 text-[#9da3b2]" aria-hidden="true" />
+              {copy.resolution}
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              {([
+                { value: '1K', label: copy.standardResolution, cost: copy.standardCost },
+                { value: '4K', label: copy.goldResolution, cost: copy.goldCost },
+              ] as const).map(option => {
+                const selected = outputResolution === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setOutputResolution(option.value)}
+                    aria-pressed={selected}
+                    className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-lg border px-3 py-2 text-center text-xs font-semibold transition sm:text-sm ${
+                      selected
+                        ? 'border-[#626675] bg-[#393c46] text-zinc-100'
+                        : 'border-[#303441] bg-[#1a1c25] text-[#aeb2bf] hover:border-[#555a69] hover:text-zinc-100'
+                    }`}
+                  >
+                    <span>{option.label}</span>
+                    <span className="text-[10px] font-normal opacity-75 sm:text-xs">{option.cost}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
           <section className="mb-5 rounded-xl border border-[#303441] bg-[#191c25] p-5 transition-all duration-500 sm:p-6">
             <h3 className="mb-3 text-[11px] font-bold text-zinc-400 sm:text-xs">
               {isArabic ? 'تعابير الوجه (الحواجب والفم ونظرة العين)' : 'Facial Expressions (Brows, Mouth & Eye Gaze)'}
@@ -736,7 +779,9 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
             ? <><Loader2 className="h-4 w-4 animate-spin" />{copy.generating}</>
             : <><Wand2 className="h-4 w-4" />{copy.generate}</>}
         </button>
-        <p className="pb-2 text-center text-[9px] text-slate-500">{copy.credits}</p>
+        <p className="pb-2 text-center text-[9px] text-slate-500">
+          {outputResolution === '1K' ? copy.standardCost : copy.goldCost}
+        </p>
       </main>
     </div>
   );

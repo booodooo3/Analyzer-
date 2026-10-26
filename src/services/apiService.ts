@@ -269,9 +269,11 @@ export const generateTextToImage = async (
   model: string = 'bytedance/seedream-4.5',
   size: string = '4K',
   outputFormat: string = 'jpeg',
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  billingFeature?: 'smart-style-changer'
 ) => {
   try {
+  const apiPath = billingFeature === 'smart-style-changer' ? '/api/smart-style-changer' : '/api/text-to-image';
   let resizedImages = [];
   if (images && images.length > 0) {
     // Resize all provided images
@@ -283,7 +285,7 @@ export const generateTextToImage = async (
   if (aspectRatio === '9:16') backendAspectRatio = '9:16';
   else if (aspectRatio === '16:9') backendAspectRatio = '16:9';
 
-  const startResponse = await fetch('/api/text-to-image', {
+  const startResponse = await fetch(apiPath, {
     method: 'POST',
     headers: { 
     'Content-Type': 'application/json',
@@ -322,7 +324,7 @@ export const generateTextToImage = async (
   while (attempts < maxAttempts) {
     if (signal?.aborted) {
         // Cancel the generation on the server
-        await fetch(`/api/text-to-image?id=${encodeURIComponent(predictionId)}`, {
+        await fetch(`${apiPath}?id=${encodeURIComponent(predictionId)}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         }).catch(console.error);
@@ -334,7 +336,7 @@ export const generateTextToImage = async (
 
     if (signal?.aborted) {
         // Cancel the generation on the server
-        await fetch(`/api/text-to-image?id=${encodeURIComponent(predictionId)}`, {
+        await fetch(`${apiPath}?id=${encodeURIComponent(predictionId)}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         }).catch(console.error);
@@ -342,7 +344,7 @@ export const generateTextToImage = async (
     }
 
     try {
-      const statusResponse = await fetch(`/api/text-to-image?id=${encodeURIComponent(predictionId)}`, {
+      const statusResponse = await fetch(`${apiPath}?id=${encodeURIComponent(predictionId)}`, {
          headers: { 'Authorization': `Bearer ${token}` },
          signal
       });
@@ -366,7 +368,7 @@ export const generateTextToImage = async (
     } catch (fetchErr: any) {
       if (fetchErr.name === 'AbortError') {
           // If aborted during fetch, it's a cancellation
-          await fetch(`/api/text-to-image?id=${encodeURIComponent(predictionId)}`, {
+          await fetch(`${apiPath}?id=${encodeURIComponent(predictionId)}`, {
               method: 'DELETE',
               headers: { 'Authorization': `Bearer ${token}` }
           }).catch(console.error);

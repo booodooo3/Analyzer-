@@ -4,7 +4,7 @@ import { createClerkClient } from "@clerk/clerk-sdk-node";
 
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
-export default async (req, context) => {
+export const createTextToImageHandler = (billingFeature) => async (req, context) => {
   const replicate = new Replicate({
     auth: process.env.REPLICATE_API_TOKEN,
   });
@@ -60,20 +60,26 @@ export default async (req, context) => {
       const token = authHeader.split(" ")[1];
       const verified = await clerkClient.verifyToken(token);
       const userId = verified.sub;
+      const user = await clerkClient.users.getUser(userId);
+      const predictionCosts = user.privateMetadata?.textToImagePredictionCosts;
+      const refundCost = predictionCosts?.[predictionId];
+      if (typeof refundCost !== "number" || !Number.isFinite(refundCost)) {
+        return new Response(JSON.stringify({ error: "Prediction not found for this user." }), { status: 404, headers });
+      }
 
       const prediction = await replicate.predictions.cancel(predictionId);
-      
-      // Refund credits if canceled successfully
-      if (prediction && (prediction.status === "canceled" || prediction.status === "failed")) {
-        const user = await clerkClient.users.getUser(userId);
-        const currentCredits = typeof user.publicMetadata.credits === 'number' ? user.publicMetadata.credits : 3;
-        
-        await clerkClient.users.updateUserMetadata(userId, {
-            publicMetadata: {
-                credits: currentCredits + 0.5
-            }
-        });
-        console.log(`✅ TextToImage: Refunded 0.5. New balance: ${currentCredits + 0.5}`);
+      const currentCredits = typeof user.publicMetadata.credits === "number" ? user.publicMetadata.credits : 3;
+      const shouldRefund = prediction && (prediction.status === "canceled" || prediction.status === "failed");
+      const remainingCosts = { ...predictionCosts };
+      delete remainingCosts[predictionId];
+
+      await clerkClient.users.updateUserMetadata(userId, {
+        ...(shouldRefund ? { publicMetadata: { credits: currentCredits + refundCost } } : {}),
+        privateMetadata: { textToImagePredictionCosts: remainingCosts },
+      });
+
+      if (shouldRefund) {
+        console.log(`✅ TextToImage: Refunded ${refundCost}. New balance: ${currentCredits + refundCost}`);
       }
 
       return new Response(JSON.stringify({ status: "canceled" }), { headers });
@@ -89,11 +95,22 @@ export default async (req, context) => {
 
   try {
     const body = await req.json();
-    const { images, prompt, model = "bytedance/seedream-4.5", size = "4K", outputFormat = "jpeg" } = body; // changed from image to images
+    const {
+      images,
+      prompt,
+      model = "bytedance/seedream-4.5",
+      size = "4K",
+      outputFormat = "jpeg",
+    } = body;
+
+    if (billingFeature === "smart-style-changer" && size !== "1K" && size !== "4K") {
+      return new Response(JSON.stringify({ error: "Unsupported Smart Style Changer resolution." }), { status: 400, headers });
+    }
 
     // 1. Verify Auth & Credits
     let userId;
     let currentCredits;
+    const cost = billingFeature === "smart-style-changer" && size === "4K" ? 1 : 0.5;
     
     try {
         const authHeader = req.headers.get("Authorization");
@@ -107,9 +124,6 @@ export default async (req, context) => {
         const user = await clerkClient.users.getUser(userId);
         currentCredits = typeof user.publicMetadata.credits === 'number' ? user.publicMetadata.credits : 3;
         
-        // Cost Logic: 0.5 credits per generation
-        const cost = 0.5;
-
         if (currentCredits < cost) {
             return new Response(JSON.stringify({ error: `Insufficient credits! You need ${cost} credit for this generation.` }), { status: 403, headers });
         }
@@ -164,6 +178,17 @@ export default async (req, context) => {
       input: input
     });
 
+    const user = await clerkClient.users.getUser(userId);
+    const predictionCosts = user.privateMetadata?.textToImagePredictionCosts;
+    await clerkClient.users.updateUserMetadata(userId, {
+      privateMetadata: {
+        textToImagePredictionCosts: {
+          ...(predictionCosts && typeof predictionCosts === "object" ? predictionCosts : {}),
+          [prediction.id]: cost,
+        },
+      },
+    });
+
     return new Response(JSON.stringify({ id: prediction.id, status: prediction.status }), { headers });
 
   } catch (error) {
@@ -171,3 +196,5 @@ export default async (req, context) => {
     return new Response(JSON.stringify({ error: error.message || "Internal Server Error" }), { status: 500, headers });
   }
 };
+
+export default createTextToImageHandler();

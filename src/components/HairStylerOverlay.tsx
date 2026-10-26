@@ -1,5 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Camera, Download, Loader2, Upload, Wand2, X } from 'lucide-react';
+import {
+  CalendarDays,
+  Camera,
+  Check,
+  Download,
+  Eye,
+  Glasses,
+  Loader2,
+  Move,
+  Palette,
+  ScanFace,
+  Scissors,
+  Shirt,
+  Smile,
+  Sparkles,
+  UserRound,
+  Upload,
+  Wand2,
+  X,
+  type LucideIcon,
+} from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import { generateTextToImage } from '../services/apiService';
 
@@ -14,18 +34,20 @@ type GeneratedImage = { id: string; url: string; expiresAt: number };
 type ChoiceGroup = {
   id: string;
   title: { en: string; ar: string };
+  icon: LucideIcon;
   options: Choice[];
   layout?: 'cards';
   accent: string;
   selectedStyle: string;
 };
 
-const selectedChoiceStyle = 'border-yellow-400 bg-[radial-gradient(ellipse_at_center,rgba(250,204,21,0.14)_0%,#050505_78%)] text-yellow-100 shadow-[0_0_5px_rgba(250,204,21,0.85),0_0_18px_rgba(250,204,21,0.4),inset_0_0_14px_rgba(250,204,21,0.1)]';
+const selectedChoiceStyle = 'border-[#626675] bg-[#393c46] text-zinc-100 shadow-none';
 
 const groups: ChoiceGroup[] = [
   {
     id: 'brows',
     title: { en: 'Eyebrow Expression', ar: 'تعبير الحاجبين' },
+    icon: ScanFace,
     accent: 'text-zinc-400',
     selectedStyle: selectedChoiceStyle,
     options: [
@@ -40,6 +62,7 @@ const groups: ChoiceGroup[] = [
   {
     id: 'mouth',
     title: { en: 'Mouth & Smile Expression', ar: 'تعبير الفم والابتسامة' },
+    icon: Smile,
     accent: 'text-zinc-400',
     selectedStyle: selectedChoiceStyle,
     options: [
@@ -54,6 +77,7 @@ const groups: ChoiceGroup[] = [
   {
     id: 'gaze',
     title: { en: 'Eye Gaze & Look', ar: 'نظرة العينين' },
+    icon: Eye,
     accent: 'text-zinc-400',
     selectedStyle: selectedChoiceStyle,
     options: [
@@ -68,6 +92,7 @@ const groups: ChoiceGroup[] = [
   {
     id: 'pose',
     title: { en: 'Pose', ar: 'الوضعية' },
+    icon: Move,
     accent: 'text-zinc-400',
     selectedStyle: selectedChoiceStyle,
     options: [
@@ -80,6 +105,7 @@ const groups: ChoiceGroup[] = [
   {
     id: 'clothing',
     title: { en: 'Clothing', ar: 'الملابس' },
+    icon: Shirt,
     accent: 'text-zinc-400',
     selectedStyle: selectedChoiceStyle,
     options: [
@@ -96,6 +122,7 @@ const groups: ChoiceGroup[] = [
   {
     id: 'beard',
     title: { en: 'Beard & Facial Hair', ar: 'اللحية وشعر الوجه' },
+    icon: UserRound,
     layout: 'cards',
     accent: 'text-zinc-400',
     selectedStyle: selectedChoiceStyle,
@@ -112,6 +139,7 @@ const groups: ChoiceGroup[] = [
   {
     id: 'hair',
     title: { en: 'Hairstyles & Cuts', ar: 'تسريحات وقصات الشعر' },
+    icon: Scissors,
     accent: 'text-zinc-400',
     selectedStyle: selectedChoiceStyle,
     options: [
@@ -129,6 +157,7 @@ const groups: ChoiceGroup[] = [
   {
     id: 'hairColor',
     title: { en: 'Hair Color', ar: 'لون الشعر' },
+    icon: Palette,
     accent: 'text-zinc-400',
     selectedStyle: selectedChoiceStyle,
     options: [
@@ -143,6 +172,7 @@ const groups: ChoiceGroup[] = [
   {
     id: 'age',
     title: { en: 'Age', ar: 'العمر' },
+    icon: CalendarDays,
     accent: 'text-zinc-400',
     selectedStyle: selectedChoiceStyle,
     options: [
@@ -154,6 +184,7 @@ const groups: ChoiceGroup[] = [
   {
     id: 'accessories',
     title: { en: 'Accessories', ar: 'الإكسسوارات' },
+    icon: Glasses,
     accent: 'text-zinc-400',
     selectedStyle: selectedChoiceStyle,
     options: [
@@ -168,6 +199,7 @@ const groups: ChoiceGroup[] = [
   {
     id: 'makeup',
     title: { en: "Women's Makeup", ar: 'مكياج النساء' },
+    icon: Sparkles,
     accent: 'text-zinc-400',
     selectedStyle: selectedChoiceStyle,
     options: [
@@ -182,6 +214,7 @@ const groups: ChoiceGroup[] = [
   {
     id: 'skinTexture',
     title: { en: 'Skin Texture', ar: 'ملمس البشرة' },
+    icon: ScanFace,
     accent: 'text-zinc-400',
     selectedStyle: selectedChoiceStyle,
     options: [
@@ -196,6 +229,7 @@ const groups: ChoiceGroup[] = [
   {
     id: 'lipColor',
     title: { en: 'Lip Color & Gloss', ar: 'لون الشفاه والقلوس' },
+    icon: Smile,
     accent: 'text-zinc-400',
     selectedStyle: selectedChoiceStyle,
     options: [
@@ -372,8 +406,11 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
   const getChoice = (group: ChoiceGroup) => group.options.find(option => option.id === selections[group.id]);
 
   const renderChoiceGroup = (group: ChoiceGroup) => (
-    <section key={group.id} className="min-w-0 rounded-lg border border-zinc-800 bg-black p-3">
-      <h3 className={`mb-3 font-bold uppercase tracking-wide ${isArabic ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'} ${group.accent}`}>{group.title[language]}</h3>
+    <section key={group.id} className="min-w-0 rounded-xl border border-[#2b2f3b] bg-[#171a23] p-3 sm:p-4">
+      <h3 className={`mb-3 flex items-center gap-2 font-bold uppercase tracking-wide ${isArabic ? 'text-[13px] sm:text-sm' : 'text-xs sm:text-sm'} ${group.accent}`}>
+        <group.icon className="h-4 w-4 shrink-0 text-[#858b9a]" aria-hidden="true" />
+        {group.title[language]}
+      </h3>
       <div className={`grid ${group.layout === 'cards' ? 'grid-cols-1' : 'grid-cols-2'} gap-2`}>
         {group.options.map(option => {
           const selected = selections[group.id] === option.id;
@@ -383,17 +420,16 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
               type="button"
               onClick={() => selectOption(group.id, option.id)}
               aria-pressed={selected}
-              style={selected && userImage ? { textShadow: '0 0 8px rgba(250,204,21,0.9), 0 0 18px rgba(250,204,21,0.45)' } : undefined}
               className={`rounded-lg border leading-snug transition ${
                 isArabic
-                  ? 'min-h-10 px-2 py-2 text-sm sm:min-h-11 sm:px-3 sm:py-2.5 sm:text-base'
+                  ? 'min-h-10 px-2 py-2 text-[13px] sm:min-h-11 sm:px-3 sm:py-2.5 sm:text-sm'
                   : 'min-h-12 px-3 py-2.5 text-[11px] sm:min-h-14 sm:px-4 sm:py-3 sm:text-xs'
               } ${
                 selected && userImage
                   ? `${group.selectedStyle} font-semibold`
                   : selected
                     ? 'border-zinc-700 bg-[#080808] font-semibold text-zinc-300'
-                  : 'border-zinc-800 bg-[#080808] text-zinc-400 hover:border-zinc-600 hover:text-zinc-200'
+                  : 'border-[#303441] bg-[#1a1c25] text-[#aeb2bf] hover:border-[#555a69] hover:text-zinc-100'
               } ${group.layout === 'cards' ? 'text-start' : 'text-center'}`}
             >
               {option[language]}
@@ -477,18 +513,18 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
   if (!isOpen) return null;
 
   return (
-    <div className="smart-style-changer fixed inset-0 z-[100] overflow-y-auto bg-[#050505] text-white" dir={isArabic ? 'rtl' : 'ltr'}>
-      <header className="sticky top-0 z-20 border-b border-zinc-800 bg-black">
+    <div className="smart-style-changer fixed inset-0 z-[100] overflow-y-auto bg-[#191b24] text-[#e6e8ee]" dir={isArabic ? 'rtl' : 'ltr'}>
+      <header className="sticky top-0 z-20 border-b border-[#303441] bg-[#191b24]">
         <div className="mx-auto flex h-14 w-full max-w-[1536px] items-center justify-between px-4 sm:px-8">
           <div className="flex items-center gap-2 text-sm font-bold">
-            <span className="flex h-7 w-7 items-center justify-center rounded-md border border-zinc-700 bg-zinc-900 text-zinc-400"><Wand2 className="h-4 w-4" /></span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-md border border-[#3b404e] bg-[#232631] text-[#aeb2bf]"><Wand2 className="h-4 w-4" /></span>
             <span>{copy.title}</span>
           </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => setLanguage(current => current === 'en' ? 'ar' : 'en')}
-              className="rounded-full border border-zinc-700 bg-zinc-900 px-3 py-1 text-[9px] text-zinc-400 hover:bg-zinc-800"
+              className="rounded-full border border-[#3b404e] bg-[#232631] px-3 py-1 text-[9px] text-[#b1b5c1] hover:bg-[#2b2f3b]"
             >
               {isArabic ? 'English' : 'العربية'}
             </button>
@@ -500,17 +536,17 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
       </header>
 
       <main className="mx-auto flex w-full max-w-[1536px] flex-col gap-6 px-4 py-6 sm:px-8">
-        <section className="rounded-2xl border border-zinc-800 bg-black p-5 transition-all duration-500 sm:p-7">
+        <section className="rounded-2xl border border-[#303441] bg-[#1d2029] p-5 transition-all duration-500 sm:p-7">
           <div className="mb-3 flex items-center justify-between text-xs font-bold sm:text-sm">
             <span className="flex items-center gap-1.5">
               <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] transition-colors ${
-                userImage ? 'bg-zinc-700 text-zinc-200' : 'bg-zinc-800 text-zinc-400'
+                userImage ? 'bg-[#414552] text-zinc-100' : 'bg-[#292d38] text-[#aeb2bf]'
               }`}>{userImage ? '✓' : '1'}</span>
               {copy.choosePhoto}
             </span>
           </div>
           {userImage ? (
-            <div className="relative mx-auto h-40 w-40 overflow-hidden rounded-xl border border-slate-600 sm:h-48 sm:w-48">
+            <div className="relative mx-auto h-40 w-40 overflow-hidden rounded-xl border border-[#454a58] sm:h-48 sm:w-48">
               <img src={userImage} alt={copy.choosePhoto} className="h-full w-full object-cover" />
               <button
                 type="button"
@@ -536,17 +572,17 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
               <button
                 type="button"
                 onClick={() => uploadInputRef.current?.click()}
-                className="flex h-32 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-zinc-700 bg-black text-sm text-zinc-400 transition hover:border-zinc-500 hover:bg-zinc-950 sm:h-40 sm:text-base"
+                className="flex h-32 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-[#454a58] bg-[#191c25] text-sm text-[#aeb2bf] transition hover:border-[#626777] hover:bg-[#20232d] sm:h-40 sm:text-base"
               >
-                <Upload className="h-7 w-7 text-zinc-400" />
+                <Upload className="h-7 w-7 text-[#9da3b2]" />
                 {copy.upload}
               </button>
               <button
                 type="button"
                 onClick={() => cameraInputRef.current?.click()}
-                className="flex h-32 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-zinc-700 bg-black text-sm text-zinc-400 transition hover:border-zinc-500 hover:bg-zinc-950 sm:h-40 sm:text-base"
+                className="flex h-32 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-[#454a58] bg-[#191c25] text-sm text-[#aeb2bf] transition hover:border-[#626777] hover:bg-[#20232d] sm:h-40 sm:text-base"
               >
-                <Camera className="h-7 w-7 text-zinc-400" />
+                <Camera className="h-7 w-7 text-[#9da3b2]" />
                 {copy.camera}
               </button>
             </div>
@@ -555,24 +591,24 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
           <input ref={cameraInputRef} type="file" accept="image/*" capture="user" onChange={handleImageUpload} className="hidden" />
         </section>
 
-        <section className="rounded-2xl border border-zinc-800 bg-black p-5 transition-all duration-500 sm:p-7">
+        <section className="rounded-2xl border border-[#303441] bg-[#1d2029] p-5 transition-all duration-500 sm:p-7">
           <div className="mb-4 flex items-center justify-between text-xs font-bold sm:text-sm">
             <span className="flex items-center gap-1.5">
               <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] transition-colors ${
-                userImage ? 'bg-yellow-600 text-white shadow-[0_0_10px_rgba(250,204,21,0.45)]' : 'bg-zinc-800 text-zinc-400'
+                userImage ? 'bg-[#414552] text-zinc-100' : 'bg-[#292d38] text-[#aeb2bf]'
               }`}>2</span>
               {copy.customize}
             </span>
-            <span className="rounded-full border border-zinc-800 px-3 py-1 text-[9px] text-zinc-500 sm:text-[10px]">✓ {copy.exactMatch}</span>
+            <span className="rounded-full border border-[#343947] px-3 py-1 text-[9px] text-[#9da3b2] sm:text-[10px]">✓ {copy.exactMatch}</span>
           </div>
 
-          <section className="mb-5 rounded-xl border border-zinc-800 bg-black p-5 transition-all duration-500 sm:p-6">
+          <section className="mb-5 rounded-xl border border-[#303441] bg-[#191c25] p-5 transition-all duration-500 sm:p-6">
             <div className="flex items-center gap-2">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-zinc-700 bg-zinc-900 text-xs font-bold text-zinc-400">✓</span>
-              <span className="flex-1 text-[11px] font-bold text-zinc-400 sm:text-xs">{copy.identity}</span>
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-[#414655] bg-[#252935] text-xs font-bold text-[#b2b7c3]"><Check className="h-3.5 w-3.5" /></span>
+              <span className="flex-1 text-[11px] font-bold text-[#b1b5c1] sm:text-xs">{copy.identity}</span>
               <span className="rounded border border-zinc-800 px-2 py-1 text-[8px] text-zinc-500 sm:text-[9px]">{copy.locked}</span>
             </div>
-            <p className="my-2 text-[9px] leading-4 text-slate-500 sm:text-[10px]">{copy.identityDescription}</p>
+            <p className="my-2 text-[9px] leading-4 text-[#9298a7] sm:text-[10px]">{copy.identityDescription}</p>
             <div className="flex items-center gap-2">
               <input
                 type="range"
@@ -581,7 +617,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
                 value={identityMatch}
                 onChange={event => setIdentityMatch(Number(event.target.value))}
                 aria-label={copy.identity}
-                className="h-1 flex-1 cursor-pointer accent-yellow-400"
+                className="h-1 flex-1 cursor-pointer accent-[#858b9a]"
               />
               <span className="w-9 text-right text-[10px] font-bold text-slate-300">{identityMatch}%</span>
             </div>
@@ -591,7 +627,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
             </div>
           </section>
 
-          <section className="mb-5 rounded-xl border border-zinc-800 bg-black p-5 transition-all duration-500 sm:p-6">
+          <section className="mb-5 rounded-xl border border-[#303441] bg-[#191c25] p-5 transition-all duration-500 sm:p-6">
             <h3 className="mb-3 text-[11px] font-bold text-zinc-400 sm:text-xs">
               {isArabic ? 'تعابير الوجه (الحواجب والفم ونظرة العين)' : 'Facial Expressions (Brows, Mouth & Eye Gaze)'}
             </h3>
@@ -600,54 +636,54 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
             </div>
           </section>
 
-          <label htmlFor="style-description" className="mb-2 block text-[10px] font-bold text-slate-300 sm:text-xs">{copy.extraDetails}</label>
-          <textarea
-            id="style-description"
-            value={prompt}
-            onChange={event => setPrompt(event.target.value)}
-            placeholder={copy.promptPlaceholder}
-            rows={3}
-            className="mb-5 w-full resize-y rounded-lg border border-zinc-800 bg-black p-4 text-xs leading-6 text-white placeholder:text-zinc-600 focus:border-yellow-400 focus:outline-none sm:text-sm"
-          />
-
-          <div className="grid grid-cols-1 items-stretch gap-5 md:grid-cols-3">
-            <div className="flex flex-col gap-4 rounded-xl border border-zinc-800 bg-black p-4 sm:p-5">
+          <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-3">
+            <div className="flex flex-col gap-4">
               {renderChoiceGroup(groups[3])}
               {renderChoiceGroup(groups[4])}
+              {renderChoiceGroup(groups[8])}
             </div>
-            <div className="rounded-xl border border-zinc-800 bg-black p-4 sm:p-5">
+            <div className="flex flex-col gap-4">
               {renderChoiceGroup(groups[5])}
+              {renderChoiceGroup(groups[10])}
+              {renderChoiceGroup(groups[7])}
+              {renderChoiceGroup(groups[11])}
+              {renderChoiceGroup(groups[12])}
             </div>
-            <div className="rounded-xl border border-zinc-800 bg-black p-4 sm:p-5">
+            <div className="flex flex-col gap-4">
               {renderChoiceGroup(groups[6])}
-            </div>
-          </div>
-          <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-3">
-            {groups.slice(7).map(group => (
-              <div key={group.id} className="rounded-xl border border-zinc-800 bg-black p-4 sm:p-5">
-                {renderChoiceGroup(group)}
+              {renderChoiceGroup(groups[9])}
+              <div className="rounded-xl border border-[#2b2f3b] bg-[#171a23] p-4">
+                <label htmlFor="style-description" className="mb-2 block text-[10px] font-bold text-[#b6bbc7] sm:text-xs">{copy.extraDetails}</label>
+                <textarea
+                  id="style-description"
+                  value={prompt}
+                  onChange={event => setPrompt(event.target.value)}
+                  placeholder={copy.promptPlaceholder}
+                  rows={3}
+                  className="w-full resize-y rounded-lg border border-[#303441] bg-[#1a1c25] p-4 text-xs leading-6 text-white placeholder:text-[#777d8c] focus:border-[#626a7a] focus:outline-none sm:text-sm"
+                />
               </div>
-            ))}
+            </div>
           </div>
         </section>
 
         {error && <p role="alert" className="rounded-md border border-red-500/30 bg-red-950/40 p-2 text-center text-[8px] text-red-300">{error}</p>}
 
         {activeImage && (
-          <section className="rounded-xl border border-zinc-800 bg-black p-4 sm:p-5">
+          <section className="rounded-xl border border-[#303441] bg-[#1d2029] p-4 sm:p-5">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-sm font-bold">{copy.result}</h2>
               <button
                 type="button"
                 onClick={handleDownload}
-                className="flex items-center justify-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2 text-xs font-bold text-zinc-300 transition hover:border-zinc-500 hover:bg-zinc-800"
+                className="flex items-center justify-center gap-2 rounded-lg border border-[#3b404e] bg-[#252935] px-4 py-2 text-xs font-bold text-[#d0d3dc] transition hover:border-[#555a69] hover:bg-[#2b2f3b]"
               >
                 <Download className="h-4 w-4" />
                 {copy.download}
               </button>
             </div>
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
-              <div className="flex min-h-56 items-center justify-center rounded-lg border border-zinc-800 bg-[#050505] p-2 sm:min-h-80">
+              <div className="flex min-h-56 items-center justify-center rounded-lg border border-[#303441] bg-[#171a23] p-2 sm:min-h-80">
                 <img src={activeImage.url} alt={copy.result} className="max-h-[38rem] rounded-lg object-contain" />
               </div>
               <aside className="flex flex-col gap-3" aria-label={copy.result}>
@@ -659,7 +695,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
                     <div
                       key={image.id}
                       className={`rounded-lg border p-2 transition ${
-                        active ? 'border-yellow-400/70 bg-zinc-950' : 'border-zinc-800 bg-[#080808]'
+                        active ? 'border-[#626a7a] bg-[#252935]' : 'border-[#303441] bg-[#1a1c25]'
                       }`}
                     >
                       <button
@@ -693,7 +729,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
           className={`mx-auto flex w-fit min-w-48 items-center justify-center gap-2 rounded-full border px-7 py-3 text-xs font-bold transition-all duration-300 ${
             isGenerating
               ? 'border-emerald-400 bg-emerald-950 text-emerald-200 shadow-[0_0_10px_rgba(52,211,153,0.8),0_0_28px_rgba(16,185,129,0.45),inset_0_0_16px_rgba(16,185,129,0.2)]'
-              : 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:border-zinc-500 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:border-zinc-800 disabled:bg-zinc-950 disabled:text-zinc-600'
+              : 'border-[#3b404e] bg-[#252935] text-[#d0d3dc] hover:border-[#555a69] hover:bg-[#2b2f3b] disabled:cursor-not-allowed disabled:border-[#303441] disabled:bg-[#1a1c25] disabled:text-[#777d8c]'
           }`}
         >
           {isGenerating

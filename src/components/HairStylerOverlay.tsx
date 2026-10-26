@@ -282,7 +282,8 @@ const text = {
     extraDetails: 'Additional Details',
     resolution: 'Output Quality',
     standardResolution: 'Standard · 1K',
-    goldResolution: 'Gold · 4K',
+    goldResolution: 'Gold · Google 4K',
+    resolutionNote: 'Google Nano Banana 2.1 supports output up to 4K.',
     standardCost: '0.5 credits',
     goldCost: '1 credit',
     generate: 'Generate New Look',
@@ -317,7 +318,8 @@ const text = {
     extraDetails: 'تفاصيل إضافية',
     resolution: 'جودة الصورة',
     standardResolution: 'عادي · 1K',
-    goldResolution: 'ذهبي · 4K',
+    goldResolution: 'ذهبي · Google 4K',
+    resolutionNote: 'نموذج Google Nano Banana 2.1 يدعم إخراج الصور بدقة تصل إلى 4K.',
     standardCost: 'نصف نقطة',
     goldCost: 'نقطة واحدة',
     generate: 'إنشاء المظهر الجديد',
@@ -668,6 +670,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
                 );
               })}
             </div>
+            <p className="mt-3 text-center text-[10px] text-[#9298a7]">{copy.resolutionNote}</p>
           </section>
 
           <section className="mb-5 rounded-xl border border-[#303441] bg-[#191c25] p-5 transition-all duration-500 sm:p-6">

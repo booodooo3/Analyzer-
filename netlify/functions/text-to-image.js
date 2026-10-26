@@ -103,7 +103,7 @@ export const createTextToImageHandler = (billingFeature) => async (req, context)
       outputFormat = "jpeg",
     } = body;
 
-    if (billingFeature === "smart-style-changer" && size !== "1K" && size !== "4K") {
+    if (billingFeature === "smart-style-changer" && size !== "2K" && size !== "4K") {
       return new Response(JSON.stringify({ error: "Unsupported Smart Style Changer resolution." }), { status: 400, headers });
     }
 

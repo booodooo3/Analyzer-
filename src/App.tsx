@@ -1069,7 +1069,7 @@ const App: React.FC = () => {
                             </div>
                             <div className="bg-black/20 p-2 rounded border border-white/5">
                                 <span className="text-pink-400 font-bold block">Smart Style Changer</span>
-                                <span>1K: 0.5 Credits · Gold 4K: 1 Credit per generation</span>
+                                <span>Google 2K: 0.5 Credits · Gold 4K: 1 Credit per generation</span>
                             </div>
                         </div>
                         <p className="text-xs text-zinc-500 mt-2">* Credits are deducted upon successful request submission.</p>
@@ -1134,7 +1134,7 @@ const App: React.FC = () => {
                         <ul className="list-disc pl-5 space-y-2">
                             <li><strong>New Features:</strong> Added <code>kwaivgi/kling-v3-omni-video</code> to Video AI, and introduced the <strong>Face & Expression</strong> modifier for Seedream models in Tex 2 Img.</li>
                             <li><strong>Seedance 2.0 Pricing Update:</strong> Adjusted credit system to provide flexible options (5s for 3 credits, 8s for 5 credits, 10s for 7 credits).</li>
-                            <li><strong>Smart Style Changer:</strong> Upload a portrait and customize its style with Google Nano Banana 2.1 at 1K (0.5 credits) or Gold 4K (1 credit) resolution.</li>
+                            <li><strong>Smart Style Changer:</strong> Upload a portrait and customize its style with Google Nano Banana 2.1 at 2K (0.5 credits) or Gold 4K (1 credit) resolution.</li>
                             <li><strong>Tex 2 Img Tweaks:</strong> We removed the double-click image description feature to streamline the interface and prevent accidental popups.</li>
                         </ul>
                     </div>

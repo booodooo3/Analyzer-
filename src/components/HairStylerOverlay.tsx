@@ -29,7 +29,7 @@ interface HairStylerOverlayProps {
 }
 
 type Language = 'en' | 'ar';
-type OutputResolution = '1K' | '4K';
+type OutputResolution = '2K' | '4K';
 type Choice = { id: string; en: string; ar: string; prompt?: string };
 type GeneratedImage = { id: string; url: string; expiresAt: number };
 type ChoiceGroup = {
@@ -281,7 +281,7 @@ const text = {
     promptPlaceholder: 'Describe your desired look...',
     extraDetails: 'Additional Details',
     resolution: 'Output Quality',
-    standardResolution: 'Standard · 1K',
+    standardResolution: 'Standard · Google 2K',
     goldResolution: 'Gold · Google 4K',
     resolutionNote: 'Google Nano Banana 2.1 supports output up to 4K.',
     standardCost: '0.5 credits',
@@ -317,7 +317,7 @@ const text = {
     promptPlaceholder: 'اكتب وصف المظهر الذي تريده...',
     extraDetails: 'تفاصيل إضافية',
     resolution: 'جودة الصورة',
-    standardResolution: 'عادي · 1K',
+    standardResolution: 'عادي · Google 2K',
     goldResolution: 'ذهبي · Google 4K',
     resolutionNote: 'نموذج Google Nano Banana 2.1 يدعم إخراج الصور بدقة تصل إلى 4K.',
     standardCost: 'نصف نقطة',
@@ -348,7 +348,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
   const [prompt, setPrompt] = useState('');
   const [selections, setSelections] = useState<Record<string, string>>(initialSelections);
   const [identityMatch, setIdentityMatch] = useState(100);
-  const [outputResolution, setOutputResolution] = useState<OutputResolution>('1K');
+  const [outputResolution, setOutputResolution] = useState<OutputResolution>('2K');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const uploadInputRef = useRef<HTMLInputElement>(null);
@@ -648,7 +648,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
             </h3>
             <div className="grid grid-cols-2 gap-3">
               {([
-                { value: '1K', label: copy.standardResolution, cost: copy.standardCost },
+                { value: '2K', label: copy.standardResolution, cost: copy.standardCost },
                 { value: '4K', label: copy.goldResolution, cost: copy.goldCost },
               ] as const).map(option => {
                 const selected = outputResolution === option.value;
@@ -783,7 +783,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
             : <><Wand2 className="h-4 w-4" />{copy.generate}</>}
         </button>
         <p className="pb-2 text-center text-[9px] text-slate-500">
-          {outputResolution === '1K' ? copy.standardCost : copy.goldCost}
+          {outputResolution === '2K' ? copy.standardCost : copy.goldCost}
         </p>
       </main>
     </div>

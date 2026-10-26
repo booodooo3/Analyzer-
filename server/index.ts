@@ -288,17 +288,10 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
 
         // 1. Start Prediction
         // Define Models
-        // Standard Mode uses Nano Banana 2.1.
-        // Plus Mode keeps the existing Nano Banana model.
+        // Both modes use Nano Banana 2.1, with different output resolutions.
         const modelOwner = "google";
-        let modelName = "nano-banana-2.1";
-
-        if (isPlusModeBool) {
-            modelName = "nano-banana";
-            console.log("➕ PLUS MODE DETECTED: Switching to google/nano-banana");
-        } else {
-            console.log("🍌 STANDARD MODE: Using google/nano-banana-2.1");
-        }
+        const modelName = "nano-banana-2.1";
+        console.log(`🍌 ${isPlusModeBool ? "PLUS" : "STANDARD"} MODE: Using google/${modelName}`);
         
         console.log(`🚀 Starting Replicate prediction (${modelOwner}/${modelName})...`);
         
@@ -345,7 +338,7 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
                 image_input: [personDataURI, clothDataURI],
                 aspect_ratio: "match_input_image",
                 output_format: "png",
-                resolution: "2K",
+                resolution: "4K",
                 safety_filter_level: "block_only_high",
                 num_inference_steps: 25
             }
@@ -353,7 +346,7 @@ app.post('/api/generate', ClerkExpressWithAuth(), async (req: any, res: any) => 
                 prompt: promptText,
                 image_input: [personDataURI, clothDataURI],
                 aspect_ratio: "match_input_image",
-                resolution: "1K",
+                resolution: "2K",
                 google_search: false,
                 image_search: false,
                 output_format: "jpg"

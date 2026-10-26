@@ -239,7 +239,7 @@ export default async (req, context) => {
 
     // Select Model
     const modelOwner = "google";
-    const modelName = effectivePlusMode ? "nano-banana-pro" : "nano-banana-2.1";
+    const modelName = "nano-banana-2.1";
     
     console.log(`🚀 Starting Replicate prediction (${modelOwner}/${modelName})... [Plus Mode: ${effectivePlusMode}]`);
 
@@ -289,7 +289,7 @@ export default async (req, context) => {
           prompt: promptText,
           image_input: [personDataURI, clothDataURI],
           aspect_ratio: "match_input_image",
-          resolution: "1K",
+          resolution: "2K",
           google_search: false,
           image_search: false,
           output_format: "jpg"

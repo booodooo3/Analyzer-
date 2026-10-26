@@ -1086,12 +1086,12 @@ const App: React.FC = () => {
                             <h4 className="text-yellow-400 font-semibold text-sm">Virtual Try-On Models</h4>
                             <div className="text-xs text-zinc-400 mt-1 space-y-2">
                                 <p>
-                                    <strong>One Mode (Standard):</strong> Uses the <code className="text-white bg-black/30 px-1 rounded">google/nano-banana-2.1</code> model at 1K resolution.
+                                    <strong>One Mode (Standard):</strong> Uses the <code className="text-white bg-black/30 px-1 rounded">google/nano-banana-2.1</code> model at 2K.
                                     <br/>Generates a single high-quality image with the input image aspect ratio.
                                     <br/><strong>Cost:</strong> 0.5 Credits.
                                 </p>
                                 <p>
-                                    <strong>Plus Mode:</strong> Uses the <code className="text-white bg-black/30 px-1 rounded">google/nano-banana-pro</code> model in 4K resolution.
+                                    <strong>Plus Mode:</strong> Uses the <code className="text-white bg-black/30 px-1 rounded">google/nano-banana-2.1</code> model at 4K.
                                     <br/>Generates three distinct angles (Front, Side, Full Body).
                                     <br/><strong>Cost:</strong> 3 Credits.
                                 </p>

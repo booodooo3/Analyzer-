@@ -384,13 +384,15 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
               onClick={() => selectOption(group.id, option.id)}
               aria-pressed={selected}
               style={selected && userImage ? { textShadow: '0 0 8px rgba(250,204,21,0.9), 0 0 18px rgba(250,204,21,0.45)' } : undefined}
-              className={`min-h-12 rounded-lg border px-3 py-2.5 leading-snug transition sm:min-h-14 sm:px-4 sm:py-3 ${
-                isArabic ? 'text-[13px] sm:text-sm' : 'text-[11px] sm:text-xs'
+              className={`rounded-lg border leading-snug transition ${
+                isArabic
+                  ? 'min-h-10 px-2 py-2 text-sm sm:min-h-11 sm:px-3 sm:py-2.5 sm:text-base'
+                  : 'min-h-12 px-3 py-2.5 text-[11px] sm:min-h-14 sm:px-4 sm:py-3 sm:text-xs'
               } ${
                 selected && userImage
                   ? `${group.selectedStyle} font-semibold`
                   : selected
-                    ? 'border-zinc-500 bg-zinc-900 font-semibold text-zinc-200'
+                    ? 'border-zinc-700 bg-[#080808] font-semibold text-zinc-300'
                   : 'border-zinc-800 bg-[#080808] text-zinc-400 hover:border-zinc-600 hover:text-zinc-200'
               } ${group.layout === 'cards' ? 'text-start' : 'text-center'}`}
             >

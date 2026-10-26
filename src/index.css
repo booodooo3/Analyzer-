@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Alarabiya Normal Font';
+  src: url('../font/Alarabiya Normal Font.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 @layer utilities {
   .glass-effect {
     @apply bg-black/40 backdrop-blur-xl border-b border-white/5;
@@ -10,6 +18,10 @@
   .glass-card {
     @apply bg-white/[0.02] backdrop-blur-lg border border-white/10;
   }
+}
+
+.smart-style-changer[dir='rtl'] {
+  font-family: 'Alarabiya Normal Font', sans-serif;
 }
 
 body {

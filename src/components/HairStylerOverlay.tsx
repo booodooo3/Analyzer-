@@ -20,12 +20,14 @@ type ChoiceGroup = {
   selectedStyle: string;
 };
 
+const selectedChoiceStyle = 'border-yellow-400 bg-[radial-gradient(ellipse_at_center,rgba(250,204,21,0.14)_0%,#050505_78%)] text-yellow-100 shadow-[0_0_5px_rgba(250,204,21,0.85),0_0_18px_rgba(250,204,21,0.4),inset_0_0_14px_rgba(250,204,21,0.1)]';
+
 const groups: ChoiceGroup[] = [
   {
     id: 'brows',
     title: { en: 'Eyebrow Expression', ar: 'تعبير الحاجبين' },
     accent: 'text-zinc-400',
-    selectedStyle: 'border-red-500 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.14)_0%,#050505_78%)] text-red-100 shadow-[0_0_5px_rgba(239,68,68,0.85),0_0_18px_rgba(239,68,68,0.4),inset_0_0_14px_rgba(239,68,68,0.1)]',
+    selectedStyle: selectedChoiceStyle,
     options: [
       { id: 'original', en: 'Original Brows', ar: 'الحاجبان الأصليان' },
       { id: 'raised', en: 'Raised', ar: 'مرفوعان', prompt: 'raised eyebrows' },
@@ -39,7 +41,7 @@ const groups: ChoiceGroup[] = [
     id: 'mouth',
     title: { en: 'Mouth & Smile Expression', ar: 'تعبير الفم والابتسامة' },
     accent: 'text-zinc-400',
-    selectedStyle: 'border-red-500 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.14)_0%,#050505_78%)] text-red-100 shadow-[0_0_5px_rgba(239,68,68,0.85),0_0_18px_rgba(239,68,68,0.4),inset_0_0_14px_rgba(239,68,68,0.1)]',
+    selectedStyle: selectedChoiceStyle,
     options: [
       { id: 'original', en: 'Original Mouth', ar: 'الفم الأصلي' },
       { id: 'smiling', en: 'Smiling', ar: 'ابتسامة', prompt: 'smiling naturally' },
@@ -53,7 +55,7 @@ const groups: ChoiceGroup[] = [
     id: 'gaze',
     title: { en: 'Eye Gaze & Look', ar: 'نظرة العينين' },
     accent: 'text-zinc-400',
-    selectedStyle: 'border-red-500 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.14)_0%,#050505_78%)] text-red-100 shadow-[0_0_5px_rgba(239,68,68,0.85),0_0_18px_rgba(239,68,68,0.4),inset_0_0_14px_rgba(239,68,68,0.1)]',
+    selectedStyle: selectedChoiceStyle,
     options: [
       { id: 'original', en: 'Original Gaze', ar: 'النظرة الأصلية' },
       { id: 'normal', en: 'Normal Look', ar: 'نظرة طبيعية' },
@@ -67,7 +69,7 @@ const groups: ChoiceGroup[] = [
     id: 'pose',
     title: { en: 'Pose', ar: 'الوضعية' },
     accent: 'text-zinc-400',
-    selectedStyle: 'border-red-500 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.14)_0%,#050505_78%)] text-red-100 shadow-[0_0_5px_rgba(239,68,68,0.85),0_0_18px_rgba(239,68,68,0.4),inset_0_0_14px_rgba(239,68,68,0.1)]',
+    selectedStyle: selectedChoiceStyle,
     options: [
       { id: 'automatic', en: 'Automatic', ar: 'تلقائي' },
       { id: 'standing', en: 'Standing', ar: 'وقوف', prompt: 'standing pose' },
@@ -79,7 +81,7 @@ const groups: ChoiceGroup[] = [
     id: 'clothing',
     title: { en: 'Clothing', ar: 'الملابس' },
     accent: 'text-zinc-400',
-    selectedStyle: 'border-red-500 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.14)_0%,#050505_78%)] text-red-100 shadow-[0_0_5px_rgba(239,68,68,0.85),0_0_18px_rgba(239,68,68,0.4),inset_0_0_14px_rgba(239,68,68,0.1)]',
+    selectedStyle: selectedChoiceStyle,
     options: [
       { id: 'modern', en: 'Modern', ar: 'عصري', prompt: 'modern clothing' },
       { id: 'original', en: 'Original Clothes', ar: 'الملابس الأصلية', prompt: 'preserve the original clothing exactly as shown in the input image' },
@@ -96,7 +98,7 @@ const groups: ChoiceGroup[] = [
     title: { en: 'Beard & Facial Hair', ar: 'اللحية وشعر الوجه' },
     layout: 'cards',
     accent: 'text-zinc-400',
-    selectedStyle: 'border-red-500 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.14)_0%,#050505_78%)] text-red-100 shadow-[0_0_5px_rgba(239,68,68,0.85),0_0_18px_rgba(239,68,68,0.4),inset_0_0_14px_rgba(239,68,68,0.1)]',
+    selectedStyle: selectedChoiceStyle,
     options: [
       { id: 'original', en: 'Original Beard (Auto)', ar: 'اللحية الأصلية (تلقائي)', prompt: 'preserve the original facial hair' },
       { id: 'goatee', en: 'Dirty Goatee', ar: 'سكسوكة خفيفة', prompt: 'a subtle goatee and chin beard' },
@@ -111,7 +113,7 @@ const groups: ChoiceGroup[] = [
     id: 'hair',
     title: { en: 'Hairstyles & Cuts', ar: 'تسريحات وقصات الشعر' },
     accent: 'text-zinc-400',
-    selectedStyle: 'border-red-500 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.14)_0%,#050505_78%)] text-red-100 shadow-[0_0_5px_rgba(239,68,68,0.85),0_0_18px_rgba(239,68,68,0.4),inset_0_0_14px_rgba(239,68,68,0.1)]',
+    selectedStyle: selectedChoiceStyle,
     options: [
       { id: 'automatic', en: 'Automatic (Original)', ar: 'تلقائي (الأصلي)' },
       { id: 'uncombed', en: 'Uncombed', ar: 'غير ممشط', prompt: 'an intentionally uncombed hairstyle' },
@@ -128,7 +130,7 @@ const groups: ChoiceGroup[] = [
     id: 'hairColor',
     title: { en: 'Hair Color', ar: 'لون الشعر' },
     accent: 'text-zinc-400',
-    selectedStyle: 'border-red-500 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.14)_0%,#050505_78%)] text-red-100 shadow-[0_0_5px_rgba(239,68,68,0.85),0_0_18px_rgba(239,68,68,0.4),inset_0_0_14px_rgba(239,68,68,0.1)]',
+    selectedStyle: selectedChoiceStyle,
     options: [
       { id: 'original', en: 'Original', ar: 'الأصلي' },
       { id: 'black', en: 'Black', ar: 'أسود', prompt: 'natural black hair' },
@@ -142,7 +144,7 @@ const groups: ChoiceGroup[] = [
     id: 'age',
     title: { en: 'Age', ar: 'العمر' },
     accent: 'text-zinc-400',
-    selectedStyle: 'border-red-500 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.14)_0%,#050505_78%)] text-red-100 shadow-[0_0_5px_rgba(239,68,68,0.85),0_0_18px_rgba(239,68,68,0.4),inset_0_0_14px_rgba(239,68,68,0.1)]',
+    selectedStyle: selectedChoiceStyle,
     options: [
       { id: 'original', en: 'Original Age', ar: 'العمر الأصلي' },
       { id: 'younger', en: 'Younger', ar: 'أصغر سناً', prompt: 'slightly younger appearance' },
@@ -153,7 +155,7 @@ const groups: ChoiceGroup[] = [
     id: 'accessories',
     title: { en: 'Accessories', ar: 'الإكسسوارات' },
     accent: 'text-zinc-400',
-    selectedStyle: 'border-red-500 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.14)_0%,#050505_78%)] text-red-100 shadow-[0_0_5px_rgba(239,68,68,0.85),0_0_18px_rgba(239,68,68,0.4),inset_0_0_14px_rgba(239,68,68,0.1)]',
+    selectedStyle: selectedChoiceStyle,
     options: [
       { id: 'none', en: 'No Accessories', ar: 'بدون إكسسوارات' },
       { id: 'glasses', en: 'Glasses', ar: 'نظارات', prompt: 'wearing stylish glasses' },
@@ -167,7 +169,7 @@ const groups: ChoiceGroup[] = [
     id: 'makeup',
     title: { en: "Women's Makeup", ar: 'مكياج النساء' },
     accent: 'text-zinc-400',
-    selectedStyle: 'border-red-500 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.14)_0%,#050505_78%)] text-red-100 shadow-[0_0_5px_rgba(239,68,68,0.85),0_0_18px_rgba(239,68,68,0.4),inset_0_0_14px_rgba(239,68,68,0.1)]',
+    selectedStyle: selectedChoiceStyle,
     options: [
       { id: 'original', en: 'Original Makeup', ar: 'المكياج الأصلي' },
       { id: 'none', en: 'No Makeup', ar: 'بدون مكياج', prompt: 'no makeup, natural bare face' },
@@ -181,7 +183,7 @@ const groups: ChoiceGroup[] = [
     id: 'skinTexture',
     title: { en: 'Skin Texture', ar: 'ملمس البشرة' },
     accent: 'text-zinc-400',
-    selectedStyle: 'border-red-500 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.14)_0%,#050505_78%)] text-red-100 shadow-[0_0_5px_rgba(239,68,68,0.85),0_0_18px_rgba(239,68,68,0.4),inset_0_0_14px_rgba(239,68,68,0.1)]',
+    selectedStyle: selectedChoiceStyle,
     options: [
       { id: 'original', en: 'Original Texture', ar: 'الملمس الأصلي' },
       { id: 'smooth', en: 'Clear & Smooth', ar: 'صافية وناعمة', prompt: 'clear, smooth natural-looking skin, gently even the complexion without changing facial features' },
@@ -195,7 +197,7 @@ const groups: ChoiceGroup[] = [
     id: 'lipColor',
     title: { en: 'Lip Color & Gloss', ar: 'لون الشفاه والقلوس' },
     accent: 'text-zinc-400',
-    selectedStyle: 'border-red-500 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.14)_0%,#050505_78%)] text-red-100 shadow-[0_0_5px_rgba(239,68,68,0.85),0_0_18px_rgba(239,68,68,0.4),inset_0_0_14px_rgba(239,68,68,0.1)]',
+    selectedStyle: selectedChoiceStyle,
     options: [
       { id: 'original', en: 'Original Lips', ar: 'لون الشفاه الأصلي' },
       { id: 'none', en: 'No Lipstick', ar: 'بدون أحمر شفاه', prompt: 'natural bare lips without lipstick' },
@@ -381,7 +383,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
               type="button"
               onClick={() => selectOption(group.id, option.id)}
               aria-pressed={selected}
-              style={selected && userImage ? { textShadow: '0 0 8px rgba(239,68,68,0.9), 0 0 18px rgba(239,68,68,0.45)' } : undefined}
+              style={selected && userImage ? { textShadow: '0 0 8px rgba(250,204,21,0.9), 0 0 18px rgba(250,204,21,0.45)' } : undefined}
               className={`min-h-12 rounded-lg border px-3 py-2.5 text-[11px] leading-snug transition sm:min-h-14 sm:px-4 sm:py-3 sm:text-xs ${
                 selected && userImage
                   ? `${group.selectedStyle} font-semibold`
@@ -471,7 +473,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] overflow-y-auto bg-[#050505] text-white" dir={isArabic ? 'rtl' : 'ltr'}>
+    <div className="smart-style-changer fixed inset-0 z-[100] overflow-y-auto bg-[#050505] text-white" dir={isArabic ? 'rtl' : 'ltr'}>
       <header className="sticky top-0 z-20 border-b border-zinc-800 bg-black">
         <div className="mx-auto flex h-14 w-full max-w-[1536px] items-center justify-between px-4 sm:px-8">
           <div className="flex items-center gap-2 text-sm font-bold">
@@ -553,7 +555,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
           <div className="mb-4 flex items-center justify-between text-xs font-bold sm:text-sm">
             <span className="flex items-center gap-1.5">
               <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] transition-colors ${
-                userImage ? 'bg-red-700 text-white shadow-[0_0_10px_rgba(239,68,68,0.45)]' : 'bg-zinc-800 text-zinc-400'
+                userImage ? 'bg-yellow-600 text-white shadow-[0_0_10px_rgba(250,204,21,0.45)]' : 'bg-zinc-800 text-zinc-400'
               }`}>2</span>
               {copy.customize}
             </span>
@@ -575,7 +577,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
                 value={identityMatch}
                 onChange={event => setIdentityMatch(Number(event.target.value))}
                 aria-label={copy.identity}
-                className="h-1 flex-1 cursor-pointer accent-red-500"
+                className="h-1 flex-1 cursor-pointer accent-yellow-400"
               />
               <span className="w-9 text-right text-[10px] font-bold text-slate-300">{identityMatch}%</span>
             </div>
@@ -601,7 +603,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
             onChange={event => setPrompt(event.target.value)}
             placeholder={copy.promptPlaceholder}
             rows={3}
-            className="mb-5 w-full resize-y rounded-lg border border-zinc-800 bg-black p-4 text-xs leading-6 text-white placeholder:text-zinc-600 focus:border-red-500 focus:outline-none sm:text-sm"
+            className="mb-5 w-full resize-y rounded-lg border border-zinc-800 bg-black p-4 text-xs leading-6 text-white placeholder:text-zinc-600 focus:border-yellow-400 focus:outline-none sm:text-sm"
           />
 
           <div className="grid grid-cols-1 items-stretch gap-5 md:grid-cols-3">
@@ -653,7 +655,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
                     <div
                       key={image.id}
                       className={`rounded-lg border p-2 transition ${
-                        active ? 'border-red-500/70 bg-zinc-950' : 'border-zinc-800 bg-[#080808]'
+                        active ? 'border-yellow-400/70 bg-zinc-950' : 'border-zinc-800 bg-[#080808]'
                       }`}
                     >
                       <button

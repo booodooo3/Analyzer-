@@ -373,7 +373,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
 
   const renderChoiceGroup = (group: ChoiceGroup) => (
     <section key={group.id} className="min-w-0 rounded-lg border border-zinc-800 bg-black p-3">
-      <h3 className={`mb-3 text-xs font-bold uppercase tracking-wide sm:text-sm ${group.accent}`}>{group.title[language]}</h3>
+      <h3 className={`mb-3 font-bold uppercase tracking-wide ${isArabic ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'} ${group.accent}`}>{group.title[language]}</h3>
       <div className={`grid ${group.layout === 'cards' ? 'grid-cols-1' : 'grid-cols-2'} gap-2`}>
         {group.options.map(option => {
           const selected = selections[group.id] === option.id;
@@ -384,7 +384,9 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
               onClick={() => selectOption(group.id, option.id)}
               aria-pressed={selected}
               style={selected && userImage ? { textShadow: '0 0 8px rgba(250,204,21,0.9), 0 0 18px rgba(250,204,21,0.45)' } : undefined}
-              className={`min-h-12 rounded-lg border px-3 py-2.5 text-[11px] leading-snug transition sm:min-h-14 sm:px-4 sm:py-3 sm:text-xs ${
+              className={`min-h-12 rounded-lg border px-3 py-2.5 leading-snug transition sm:min-h-14 sm:px-4 sm:py-3 ${
+                isArabic ? 'text-[13px] sm:text-sm' : 'text-[11px] sm:text-xs'
+              } ${
                 selected && userImage
                   ? `${group.selectedStyle} font-semibold`
                   : selected

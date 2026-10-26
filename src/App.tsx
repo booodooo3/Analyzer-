@@ -458,32 +458,38 @@ const App: React.FC = () => {
             {appState === AppState.IDLE || appState === AppState.ERROR ? (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <header className="relative mb-12 flex flex-col items-center select-none">
-              <h1 className="text-5xl md:text-7xl lg:text-8xl leading-[0.95] font-[900] tracking-tighter bg-gradient-to-b from-[#ffffff] via-[#e5e5e5] to-[#737373] bg-clip-text text-transparent z-10 mb-6 drop-shadow-2xl text-center">
-                {t.header.title}
-              </h1>
-
-              <div className="w-full max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-10 px-4">
-                <p className="text-[#8a8a8a] text-[11px] md:text-sm font-medium max-w-[260px] text-center md:text-right leading-relaxed tracking-wide">
+              <div className="relative mx-auto aspect-video w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 shadow-2xl">
+                <img
+                  src="/555.gif"
+                  alt="AI-powered fashion experience"
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              </div>
+              <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-3 px-4 pt-5 text-center">
+                <h1 className="sr-only">{t.header.title}</h1>
+                <p className="max-w-2xl text-xs font-medium leading-relaxed tracking-wide text-zinc-400 md:text-sm">
                   {t.header.description}
                 </p>
-
-                <h2 className="text-xl md:text-3xl lg:text-4xl font-[800] text-white tracking-tight text-center md:text-left drop-shadow-lg">
-                  {t.header.subtitle}
-                </h2>
               </div>
             </header>
 
-            <div className="grid md:grid-cols-2 gap-12 items-start">
+            <div className="grid items-start gap-6 lg:grid-cols-2">
               {/* Step 1 */}
-              <div className="space-y-6">
-                <div className="space-y-4">
-                  <h3 className="text-xl font-bold">{t.step1.label}</h3>
-                  <div className="flex flex-col lg:flex-row gap-4 h-[500px] lg:h-96">
+              <div className="glass-effect space-y-6 rounded-3xl border border-white/10 p-4 md:p-6">
+                <div className="space-y-5">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-amber-400/50 bg-amber-400/10 text-sm font-black text-amber-300">01</span>
+                    <div>
+                      <h3 className="text-lg font-bold md:text-xl">{t.step1.label}</h3>
+                      <p className="mt-1 text-xs text-zinc-400">{t.step1.desc}</p>
+                    </div>
+                  </div>
+                  <div className="flex h-[540px] flex-col gap-4 lg:h-96 lg:flex-row">
                     <div className="flex-1 h-full min-h-0">
                       <ImageUploader 
                         className="h-full w-full"
                         objectFit="contain"
-                        description={t.step1.desc}
+                        description=""
                         onImageSelected={setPersonImage}
                         currentImage={personImage?.base64}
                       />
@@ -554,18 +560,24 @@ const App: React.FC = () => {
               </div>
 
               {/* Step 2 */}
-              <div className="space-y-6">
-                <div className="space-y-4">
-                  <h3 className="text-xl font-bold">{t.step2.label}</h3>
+              <div className="glass-effect space-y-6 rounded-3xl border border-white/10 p-4 md:p-6">
+                <div className="space-y-5">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-amber-400/50 bg-amber-400/10 text-sm font-black text-amber-300">02</span>
+                    <div>
+                      <h3 className="text-lg font-bold md:text-xl">{t.step2.label}</h3>
+                      <p className="mt-1 text-xs text-zinc-400">{t.step2.desc}</p>
+                    </div>
+                  </div>
                   
                   {/* Upload + Closet Row */}
-                  <div className="flex gap-4 h-64">
+                  <div className="flex h-[540px] flex-col gap-4 sm:h-[420px] sm:flex-row lg:h-96">
                     {/* Upload Garment Area */}
-                    <div className="flex-1 h-full">
+                    <div className="flex-1 h-full min-h-0 min-w-0">
                       <ImageUploader 
                         className="h-full w-full"
                         objectFit="contain"
-                        description={t.step2.desc}
+                        description=""
                         currentImage={clothImage?.base64}
                         currentUrl={clothImage?.url}
                         onImageSelected={(img) => {
@@ -575,7 +587,7 @@ const App: React.FC = () => {
                     </div>
 
                     {/* One Mode preservation settings */}
-                    <div className="flex flex-col items-center gap-2 h-full">
+                    <div className="flex h-48 w-full shrink-0 flex-col items-center gap-2 sm:h-full sm:w-40">
                       <span className="text-[10px] font-bold text-white uppercase tracking-widest">
                         One Settings
                       </span>

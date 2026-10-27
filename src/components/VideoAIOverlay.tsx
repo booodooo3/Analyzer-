@@ -32,12 +32,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [duration, setDuration] = useState(10);
   const [selectedModel, setSelectedModel] = useState('bytedance/seedance-2.0');
   const [aspectRatio, setAspectRatio] = useState('Match Input Image');
-  const [fluxDuration, setFluxDuration] = useState('10');
-  const [fluxAspectRatio, setFluxAspectRatio] = useState('auto');
-  const [fluxResolution, setFluxResolution] = useState('720p');
-  const [fluxGenerateAudio, setFluxGenerateAudio] = useState(true);
-  const [fluxDraft, setFluxDraft] = useState(false);
-  const [fluxSafetyTolerance, setFluxSafetyTolerance] = useState(2);
   // دقة الفيديو
   const [resolution, setResolution] = useState('720p');
   const [seed, setSeed] = useState(99);
@@ -360,13 +354,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const isFlux = selectedModel === 'black-forest-labs/flux-3';
-      if (file.size > (isFlux ? 50 : 200) * 1024 * 1024) {
-        setError(isFlux ? "Video file is too large. Max 50MB for FLUX 3." : "Video file is too large. Max 200MB.");
-        return;
-      }
-      if (isFlux && file.type !== 'video/mp4') {
-        setError("FLUX 3 start video must be an MP4 file.");
+      if (file.size > 200 * 1024 * 1024) {
+        setError("Video file is too large. Max 200MB.");
         return;
       }
 
@@ -376,25 +365,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       }
 
       const videoUrl = URL.createObjectURL(file);
-      if (isFlux) {
-        const video = document.createElement('video');
-        video.preload = 'metadata';
-        video.onloadedmetadata = () => {
-          if (!Number.isFinite(video.duration) || video.duration > 15) {
-            URL.revokeObjectURL(videoUrl);
-            setError("FLUX 3 start video must be a readable video of 15 seconds or shorter.");
-            return;
-          }
-          setVideoInput({ base64: videoUrl, name: file.name, file });
-        };
-        video.onerror = () => {
-          URL.revokeObjectURL(videoUrl);
-          setError("Could not read the selected MP4 video.");
-        };
-        video.src = videoUrl;
-      } else {
-        setVideoInput({ base64: videoUrl, name: file.name, file });
-      }
+      setVideoInput({ base64: videoUrl, name: file.name, file });
     }
   };
 
@@ -472,7 +443,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
   const handleConvert = async () => {
     // If we're in imageToVideo mode, we MUST have at least one image or reference image or reference video
-    if (generationMode === 'imageToVideo' && selectedModel !== 'black-forest-labs/flux-3') {
+    if (generationMode === 'imageToVideo') {
       const primaryImage = images.find(img => img !== null);
       if (!primaryImage && referenceImages.length === 0 && referenceVideos.length === 0 && !videoInput) {
         setError('Please upload an image, reference image, reference video, or video to edit.');
@@ -485,20 +456,9 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         setError('Please enter a description for the video');
         return;
     }
-    if ((selectedModel === 'google/gemini-omni-1.1' || selectedModel === 'black-forest-labs/flux-3') && !description.trim()) {
+    if (selectedModel === 'google/gemini-omni-1.1' && !description.trim()) {
         setError('Please describe the video you want to generate or edit.');
         return;
-    }
-    if (selectedModel === 'black-forest-labs/flux-3') {
-      const selectedImageCount = images.filter(Boolean).length + referenceImages.length;
-      if (videoInput && selectedImageCount > 0) {
-        setError('FLUX 3 start video cannot be combined with images.');
-        return;
-      }
-      if (fluxDuration === 'auto' && selectedImageCount >= 3) {
-        setError('Choose an explicit duration when using three or more images with FLUX 3.');
-        return;
-      }
     }
     
     setIsConverting(true);
@@ -602,7 +562,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
       const uploadedRefImages: string[] = [];
       for (const img of selectedModel === 'google/gemini-omni-1.1' && videoInput ? [] : referenceImages) {
-          if ((selectedModel === 'google/gemini-omni-1.1' || selectedModel === 'black-forest-labs/flux-3') && img.file) {
+          if (selectedModel === 'google/gemini-omni-1.1' && img.file) {
               uploadedRefImages.push(await uploadToCloudinary(img.file));
           } else if (img.base64 && !img.base64.startsWith('blob:')) {
               uploadedRefImages.push(img.base64);
@@ -625,14 +585,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
             cameraEffect,
             aiFilter,
             duration: duration,
-            flux_duration: fluxDuration,
             aspectRatio,
             resolution,
-            flux_aspect_ratio: fluxAspectRatio,
-            flux_resolution: fluxResolution,
-            flux_generate_audio: fluxGenerateAudio,
-            flux_draft: fluxDraft,
-            flux_safety_tolerance: fluxSafetyTolerance,
             seed,
             model: selectedModel,
             audioFile: uploadedAudioUrl,
@@ -1230,8 +1184,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                   className={`bg-black border rounded-lg px-3 py-2 text-xs focus:outline-none transition-all duration-300 ${
                                       selectedModel === 'google/gemini-omni-1.1'
                                           ? 'text-yellow-400 border-yellow-500/50 shadow-[0_0_10px_rgba(234,179,8,0.2)] ring-1 ring-yellow-500/20'
-                                          : selectedModel === 'black-forest-labs/flux-3'
-                                          ? 'text-pink-400 border-pink-500/50 shadow-[0_0_10px_rgba(236,72,153,0.2)] ring-1 ring-pink-500/20'
                                           : selectedModel
                                           ? 'text-green-400 border-green-500/50 shadow-[0_0_10px_rgba(34,197,94,0.2)] ring-1 ring-green-500/20' 
                                           : 'text-zinc-400 border-zinc-800 focus:ring-1 focus:ring-white/20'
@@ -1241,7 +1193,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                   <option value="bytedance/seedance-2.5" className="text-red-500 font-bold">Seedance 2.5</option>
                                   <option value="kwaivgi/kling-v3-omni-video" className="text-blue-500 font-bold">Kling V3 Omni Video</option>
                                   <option value="google/gemini-omni-1.1" className="text-yellow-500 font-bold">Gemini Omni 1.1</option>
-                                  <option value="black-forest-labs/flux-3" className="text-pink-500 font-bold">FLUX 3</option>
                               </select>
                           </div>
 
@@ -1309,60 +1260,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
               {/* خيارات الدقة ونسبة العرض إلى الارتفاع */}
               <div className="grid grid-cols-1 gap-4">
-              {selectedModel === 'black-forest-labs/flux-3' ? (
-                <div className="space-y-4 rounded-xl border border-pink-500/30 bg-pink-500/5 p-4">
-                  <div className="flex flex-wrap gap-4">
-                    <div className="min-w-[140px] flex-1">
-                      <label className="text-xs font-bold uppercase tracking-wider text-pink-300">Aspect Ratio</label>
-                      <select value={fluxAspectRatio} onChange={e => setFluxAspectRatio(e.target.value)} className="w-full rounded-xl border border-pink-500/30 bg-black p-2 text-pink-300">
-                        <option value="auto">Auto</option>
-                        <option value="16:9">16:9</option>
-                        <option value="9:16">9:16</option>
-                        <option value="1:1">1:1</option>
-                      </select>
-                    </div>
-                    <div className="min-w-[140px] flex-1">
-                      <label className="text-xs font-bold uppercase tracking-wider text-pink-300">Resolution</label>
-                      <select value={fluxResolution} onChange={e => setFluxResolution(e.target.value)} className="w-full rounded-xl border border-pink-500/30 bg-black p-2 text-pink-300">
-                        <option value="720p">720p</option>
-                        <option value="1080p">1080p</option>
-                      </select>
-                    </div>
-                    <div className="min-w-[140px] flex-1">
-                      <label className="text-xs font-bold uppercase tracking-wider text-pink-300">Duration</label>
-                      <select
-                        value={fluxDuration}
-                        onChange={e => {
-                          setFluxDuration(e.target.value);
-                          setDuration(e.target.value === '5' ? 5 : 10);
-                        }}
-                        className="w-full rounded-xl border border-pink-500/30 bg-black p-2 text-pink-300"
-                      >
-                        <option value="auto">Auto (4 credits)</option>
-                        <option value="5">5 seconds (2 credits)</option>
-                        <option value="10">10 seconds (4 credits)</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-5">
-                    <label className="flex cursor-pointer items-center gap-2 text-xs text-pink-200">
-                      <input type="checkbox" checked={fluxGenerateAudio} onChange={e => setFluxGenerateAudio(e.target.checked)} className="h-4 w-4 accent-pink-500" />
-                      Generate audio
-                    </label>
-                    <label className="flex cursor-pointer items-center gap-2 text-xs text-pink-200">
-                      <input type="checkbox" checked={fluxDraft} onChange={e => setFluxDraft(e.target.checked)} className="h-4 w-4 accent-pink-500" />
-                      Draft preview
-                    </label>
-                  </div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-pink-300">
-                    <span className="flex items-center justify-between">
-                      Safety tolerance
-                      <input type="number" min="0" max="4" value={fluxSafetyTolerance} onChange={e => setFluxSafetyTolerance(Math.min(4, Math.max(0, Number(e.target.value))))} className="w-16 rounded border border-pink-500/30 bg-black px-2 py-1 text-pink-300" />
-                    </span>
-                    <input type="range" min="0" max="4" value={fluxSafetyTolerance} onChange={e => setFluxSafetyTolerance(Number(e.target.value))} className="mt-2 w-full accent-pink-500" />
-                  </label>
-                </div>
-              ) : (
               <div className="grid grid-cols-1 gap-4">
                 <div className="flex gap-4">
                   <div className="flex-1">
@@ -1415,8 +1312,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                   </div>
                 </div>
               </div>
-              )}
-                {(selectedModel.includes('seedance') || selectedModel === 'kwaivgi/kling-v3-omni-video' || selectedModel === 'google/gemini-omni-1.1' || selectedModel === 'black-forest-labs/flux-3') && (
+                {(selectedModel.includes('seedance') || selectedModel === 'kwaivgi/kling-v3-omni-video' || selectedModel === 'google/gemini-omni-1.1') && (
                   <>
                     <div className="flex gap-4">
                       {selectedModel.includes('seedance') && (
@@ -1528,14 +1424,14 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       </div>
                     </div>
 
-                      {(selectedModel === 'google/gemini-omni-1.1' || selectedModel === 'black-forest-labs/flux-3') && (
+                      {selectedModel === 'google/gemini-omni-1.1' && (
                         <div className="flex-1">
-                          <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{selectedModel === 'black-forest-labs/flux-3' ? 'Start Video (Optional)' : 'Video (Optional)'}</label>
-                          <p className="text-[10px] text-zinc-500 mb-2">{selectedModel === 'black-forest-labs/flux-3' ? 'Continue from an MP4 video (max 50MB and 15 seconds).' : 'Upload an existing video for Gemini to edit based on your prompt.'}</p>
+                          <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Video (Optional)</label>
+                          <p className="text-[10px] text-zinc-500 mb-2">Upload an existing video for Gemini to edit based on your prompt.</p>
                           <div className="relative group">
                             {videoInput ? (
-                              <div className={`flex items-center justify-between gap-3 rounded-xl border bg-zinc-950/50 px-4 py-3 text-sm ${selectedModel === 'black-forest-labs/flux-3' ? 'border-pink-500/30' : 'border-yellow-500/30'}`}>
-                              <span className={`${selectedModel === 'black-forest-labs/flux-3' ? 'text-pink-400' : 'text-yellow-400'} truncate`}>{videoInput.name}</span>
+                              <div className="flex items-center justify-between gap-3 rounded-xl border border-yellow-500/30 bg-zinc-950/50 px-4 py-3 text-sm">
+                              <span className="truncate text-yellow-400">{videoInput.name}</span>
                                 <button
                                   type="button"
                                   onClick={() => setVideoInput(null)}
@@ -1546,12 +1442,12 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                 </button>
                               </div>
                             ) : (
-                              <label className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed bg-zinc-900/50 py-2.5 transition-colors hover:bg-zinc-800 ${selectedModel === 'black-forest-labs/flux-3' ? 'border-pink-500/30 text-pink-400 hover:border-pink-500/60' : 'border-yellow-500/30 text-yellow-400 hover:border-yellow-500/60'}`}>
+                              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-yellow-500/30 bg-zinc-900/50 py-2.5 text-yellow-400 transition-colors hover:border-yellow-500/60 hover:bg-zinc-800">
                                 <Upload className="w-4 h-4" />
-                                <span className="text-xs font-medium">{selectedModel === 'black-forest-labs/flux-3' ? 'Upload Start Video' : 'Upload Video to Edit'}</span>
+                                <span className="text-xs font-medium">Upload Video to Edit</span>
                                 <input
                                   type="file"
-                                  accept={selectedModel === 'black-forest-labs/flux-3' ? 'video/mp4' : 'video/mp4,video/webm,video/quicktime'}
+                                  accept="video/mp4,video/webm,video/quicktime"
                                   onChange={handleVideoUpload}
                                   className="sr-only"
                                 />
@@ -1561,7 +1457,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                         </div>
                       )}
                       
-                      {selectedModel !== 'google/gemini-omni-1.1' && selectedModel !== 'black-forest-labs/flux-3' && (
+                      {selectedModel !== 'google/gemini-omni-1.1' && (
                         <div className="flex-1">
                         <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Reference Videos (Optional)</label>
                         <p className="text-[10px] text-zinc-500 mb-2">For motion transfer, style reference, and editing. Reference them in your prompt as [Video1], [Video2], etc.</p>
@@ -1605,7 +1501,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       </div>
                       )}
 
-                      {selectedModel !== 'google/gemini-omni-1.1' && selectedModel !== 'black-forest-labs/flux-3' && (
+                      {selectedModel !== 'google/gemini-omni-1.1' && (
                       <div className="flex-1">
                         <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Reference Audio (Optional)</label>
                         <div className="relative group mt-1">
@@ -1684,7 +1580,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
               <Button 
                   onClick={handleConvert}
-                  disabled={(generationMode === 'imageToVideo' && selectedModel !== 'black-forest-labs/flux-3' && activeImageCount === 0 && referenceImages.length === 0 && referenceVideos.length === 0 && !videoInput) || isConverting || (generationMode === 'textToVideo' && !description.trim()) || ((selectedModel === 'google/gemini-omni-1.1' || selectedModel === 'black-forest-labs/flux-3') && !description.trim())}
+                  disabled={(generationMode === 'imageToVideo' && activeImageCount === 0 && referenceImages.length === 0 && referenceVideos.length === 0 && !videoInput) || isConverting || (generationMode === 'textToVideo' && !description.trim()) || (selectedModel === 'google/gemini-omni-1.1' && !description.trim())}
                   isLoading={isConverting}
                   className={`w-full font-bold py-4 rounded-xl transition-all duration-300 ${
                     isConverting 
@@ -1698,8 +1594,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                     ? 'Generating Video...'
                     : selectedModel === 'google/gemini-omni-1.1'
                       ? `Generate Video (${duration === 5 ? 2 : duration === 8 ? 3 : 4} Credits)`
-                      : selectedModel === 'black-forest-labs/flux-3'
-                        ? `Generate Video (${fluxDuration === '5' ? 2 : 4} Credits)`
                       : generationMode === 'textToVideo'
                         ? 'Generate Video from Text (5 Credits)'
                       : selectedModel.includes('seedance')

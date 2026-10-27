@@ -24,6 +24,33 @@
   font-family: 'Alarabiya Normal Font', sans-serif;
 }
 
+.smart-style-changer {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-bottom: env(safe-area-inset-bottom);
+  overscroll-behavior-y: contain;
+}
+
+.smart-style-changer > header {
+  padding-top: env(safe-area-inset-top);
+}
+
+@media (max-width: 639px) {
+  .smart-style-changer > header > div {
+    padding-right: 0.75rem;
+    padding-left: 0.75rem;
+  }
+
+  .smart-style-changer > main {
+    gap: 1rem;
+    padding: 1rem 0.75rem calc(1.5rem + env(safe-area-inset-bottom));
+  }
+
+  .smart-style-changer > main > section {
+    padding: 1rem;
+  }
+}
+
 body {
   background-color: #050505;
   color: #ffffff;

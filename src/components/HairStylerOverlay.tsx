@@ -677,12 +677,12 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
             <h3 className="mb-3 text-[11px] font-bold text-zinc-400 sm:text-xs">
               {isArabic ? 'تعابير الوجه (الحواجب والفم ونظرة العين)' : 'Facial Expressions (Brows, Mouth & Eye Gaze)'}
             </h3>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
               {groups.slice(0, 3).map(group => renderChoiceGroup(group))}
             </div>
           </section>
 
-          <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-3">
             <div className="flex flex-col gap-4">
               {renderChoiceGroup(groups[3])}
               {renderChoiceGroup(groups[4])}
@@ -730,7 +730,7 @@ export const HairStylerOverlay: React.FC<HairStylerOverlayProps> = ({ isOpen, on
             </div>
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
               <div className="flex min-h-56 items-center justify-center rounded-lg border border-[#303441] bg-[#171a23] p-2 sm:min-h-80">
-                <img src={activeImage.url} alt={copy.result} className="max-h-[38rem] rounded-lg object-contain" />
+                <img src={activeImage.url} alt={copy.result} className="max-h-[38rem] max-w-full rounded-lg object-contain" />
               </div>
               <aside className="flex flex-col gap-3" aria-label={copy.result}>
                 {generatedImages.map((image, index) => {

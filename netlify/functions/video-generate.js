@@ -45,6 +45,9 @@ export default async (req, context) => {
                             // Calculate cost
                             let model = prediction.model;
                             let duration = prediction.input?.duration || 10;
+                            if (model === 'black-forest-labs/flux-3') {
+                                duration = Number(duration) || 10;
+                            }
                             if (model === 'google/gemini-omni-1.1') {
                                 const durationMatch = prediction.input?.prompt?.match(/Target duration: (5|8|10) seconds/i);
                                 duration = durationMatch ? Number(durationMatch[1]) : 10;
@@ -120,7 +123,24 @@ export default async (req, context) => {
             
             const currentCredits = typeof user.publicMetadata.credits === 'number' ? user.publicMetadata.credits : 3;
             
-            const { image, image2, description, duration, cameraEffect, aiFilter, model, aspectRatio, audioFile, videoInput, characterOrientation, video_path, resolution, seed, reference_images, reference_image_count, reference_videos, reference_audios, video_reference_type, keep_original_sound, generate_audio } = await req.json();
+            const { image, image2, description, duration, flux_duration, cameraEffect, aiFilter, model, aspectRatio, audioFile, videoInput, characterOrientation, video_path, resolution, seed, reference_images, reference_image_count, reference_videos, reference_audios, video_reference_type, keep_original_sound, generate_audio, flux_aspect_ratio, flux_resolution, flux_generate_audio, flux_draft, flux_safety_tolerance } = await req.json();
+
+            const fluxDurationValue = String(flux_duration || duration || 10);
+            if (model === 'black-forest-labs/flux-3') {
+                const fluxImageCount = (image ? 1 : 0) + (Array.isArray(reference_images) ? reference_images.length : 0);
+                if (!['auto', '5', '10'].includes(fluxDurationValue)) {
+                    return new Response(JSON.stringify({ error: "FLUX 3 duration must be auto, 5, or 10 seconds." }), { status: 400, headers });
+                }
+                if (videoInput && fluxImageCount > 0) {
+                    return new Response(JSON.stringify({ error: "FLUX 3 start video cannot be combined with images." }), { status: 400, headers });
+                }
+                if (fluxDurationValue === 'auto' && fluxImageCount >= 3) {
+                    return new Response(JSON.stringify({ error: "Choose an explicit duration when using three or more images with FLUX 3." }), { status: 400, headers });
+                }
+                if (flux_safety_tolerance !== undefined && (!Number.isInteger(flux_safety_tolerance) || flux_safety_tolerance < 0 || flux_safety_tolerance > 4)) {
+                    return new Response(JSON.stringify({ error: "FLUX 3 safety tolerance must be an integer from 0 to 4." }), { status: 400, headers });
+                }
+            }
 
             // Calculate cost based on duration
             let cost = 4;
@@ -146,6 +166,9 @@ export default async (req, context) => {
             }
             if (model === 'google/gemini-omni-1.1') {
                 cost = duration === 5 ? 2 : duration === 8 ? 3 : 4;
+            }
+            if (model === 'black-forest-labs/flux-3') {
+                cost = fluxDurationValue === '5' ? 2 : 4;
             }
 
 
@@ -207,6 +230,9 @@ export default async (req, context) => {
             } else if (model === 'google/gemini-omni-1.1') {
                 modelOwner = "google";
                 modelName = "gemini-omni-1.1";
+            } else if (model === 'black-forest-labs/flux-3') {
+                modelOwner = "black-forest-labs";
+                modelName = "flux-3";
             }
 
             let input = {
@@ -277,7 +303,29 @@ export default async (req, context) => {
                 }
             }
 
- if (model === 'kwaivgi/kling-lip-sync') {
+ if (model === 'black-forest-labs/flux-3') {
+                modelOwner = "black-forest-labs";
+                modelName = "flux-3";
+                input = {
+                    prompt: enhancedPrompt || "",
+                    duration: fluxDurationValue,
+                    aspect_ratio: flux_aspect_ratio || "auto",
+                    resolution: flux_resolution || "720p",
+                    generate_audio: flux_generate_audio !== undefined ? flux_generate_audio : true,
+                    draft: flux_draft !== undefined ? flux_draft : false,
+                    safety_tolerance: Number.isInteger(flux_safety_tolerance) ? flux_safety_tolerance : 2
+                };
+                const fluxImages = [
+                    ...(image ? [image] : []),
+                    ...(Array.isArray(reference_images) ? reference_images : [])
+                ];
+                if (fluxImages.length > 0) {
+                    input.images = fluxImages;
+                }
+                if (videoInput) {
+                    input.start_video = videoInput;
+                }
+            } else if (model === 'kwaivgi/kling-lip-sync') {
                 input = {
                     video_url: image, // Frontend sends video URL in the 'image' field
                     audio_file: audioFile

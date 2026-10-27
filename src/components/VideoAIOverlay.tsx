@@ -306,6 +306,17 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
     }
   };
 
+  const addReferenceVideoPrompt = () => {
+    setDescription(prev => {
+      const referencePrompt = 'In the scene shown in [Video1] :';
+      const updatedDescription = prev
+        .replace('In the scene shown in : [Video1] Video Description', referencePrompt)
+        .trim();
+      if (updatedDescription.includes(referencePrompt)) return updatedDescription;
+      return updatedDescription ? `${updatedDescription}\n${referencePrompt}` : referencePrompt;
+    });
+  };
+
   const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -316,6 +327,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
       if (selectedModel === 'google/gemini-omni-1.1') {
         setImages([null, null]);
+        addReferenceVideoPrompt();
       }
 
       setVideoInput({
@@ -376,11 +388,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         name: file.name,
         base64: URL.createObjectURL(file)
       }))]);
-      setDescription(prev => {
-        const referencePrompt = 'In the scene shown in : [Video1] Video Description';
-        if (prev.includes(referencePrompt)) return prev;
-        return prev.trim() ? `${prev.trim()}\n${referencePrompt}` : referencePrompt;
-      });
+      addReferenceVideoPrompt();
     }
   };
 

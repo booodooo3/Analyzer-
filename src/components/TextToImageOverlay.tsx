@@ -193,18 +193,18 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col bg-[#050505] text-white animate-in fade-in duration-300">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-[#050505]">
-        <div className="flex items-center gap-3">
+      <header className="flex items-center justify-between gap-2 border-b border-white/5 bg-[#050505] px-3 py-3 sm:px-6 sm:py-4">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
             <Wand2 className="w-4 h-4 text-white" />
           </div>
-          <h1 className="text-lg font-bold tracking-tight">Tex 2 Img <span className="text-zinc-500 font-normal text-sm ml-2">{model.split('/')[1]}</span></h1>
+          <h1 className="truncate text-sm font-bold tracking-tight sm:text-lg">Tex 2 Img <span className="ml-1 text-[10px] font-normal text-zinc-500 sm:ml-2 sm:text-sm">{model.split('/')[1]}</span></h1>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-4">
              <button
                 onClick={handleReset}
-                className="bg-zinc-900 border border-zinc-700 hover:border-white text-white text-xs px-3 py-1.5 rounded-lg transition-all uppercase tracking-wider font-bold flex items-center gap-2"
+                className="flex items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white transition-all hover:border-white sm:gap-2 sm:px-3 sm:text-xs"
              >
                 <RotateCcw className="w-3 h-3" />
                 Try Again
@@ -216,10 +216,10 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-y-auto lg:overflow-hidden">
         
         {/* Left Sidebar - Settings */}
-        <div className="w-full lg:w-[320px] flex-shrink-0 flex flex-col border-r border-white/5 bg-[#080808] p-6 space-y-6 overflow-y-auto custom-scrollbar">
+        <div className="w-full lg:w-[320px] flex-shrink-0 flex flex-col border-r border-white/5 bg-[#080808] p-4 sm:p-6 space-y-6 overflow-visible lg:overflow-y-auto custom-scrollbar">
             
                         {/* Model Selection */}
                         <div className="space-y-3">
@@ -249,13 +249,13 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
                                  className="w-full h-32 bg-[#111] border border-zinc-800 rounded-xl p-3 text-sm text-zinc-300 focus:outline-none focus:border-blue-500 resize-none"
                              />
                              {/* Aspect Ratio Options */}
-                             <div className="flex gap-2 mt-2">
+                             <div className="mt-2 flex flex-wrap gap-2">
                                  {['9:16', '16:9', 'Match Input Image'].map((ratio) => (
                                      <button
                                          key={ratio}
                                          type="button"
                                          onClick={() => setAspectRatio(ratio as '9:16' | '16:9' | 'Match Input Image')}
-                                         className={`px-3 py-1 rounded-lg font-bold text-xs uppercase tracking-wider border-2 transition-all duration-200 ${
+                                         className={`flex-1 whitespace-nowrap rounded-lg border-2 px-2 py-1 text-[10px] font-bold uppercase tracking-wider transition-all duration-200 sm:px-3 sm:text-xs ${
                                              aspectRatio === ratio
                                                  ? 'bg-green-600 text-white border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.3)]'
                                                  : 'bg-black text-green-500 border-green-700 hover:bg-green-900/30'
@@ -449,7 +449,7 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
         </div>
 
         {/* Center Area - Upload & Preview */}
-        <div className="flex-1 bg-[#050505] p-6 flex flex-col items-center overflow-y-auto">
+        <div className="flex-none bg-[#050505] p-4 flex flex-col items-center overflow-visible sm:p-6 lg:flex-1 lg:overflow-y-auto">
              <div className="w-full max-w-4xl flex flex-col items-center gap-6">
                 
                 {/* Header for Upload Section */}
@@ -462,7 +462,7 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
                 {userImages.length < 14 && (
                     <div 
                         onClick={() => fileInputRef.current?.click()}
-                        className={`relative w-full max-w-2xl p-8 rounded-2xl border-2 border-dashed transition-all cursor-pointer flex flex-col items-center justify-center gap-4 group border-zinc-800 hover:border-zinc-600 bg-zinc-900/20`}
+                        className={`relative w-full max-w-2xl rounded-2xl border-2 border-dashed border-zinc-800 bg-zinc-900/20 p-5 transition-all cursor-pointer flex flex-col items-center justify-center gap-4 group hover:border-zinc-600 sm:p-8`}
                     >
                         <div className="text-center">
                             <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center mx-auto mb-4 text-zinc-400 group-hover:text-white transition-colors">
@@ -516,7 +516,7 @@ export const TextToImageOverlay: React.FC<TextToImageOverlayProps> = ({ isOpen, 
         </div>
 
         {/* Right Sidebar - Generated List */}
-        <div className="w-full lg:w-[350px] bg-[#080808] border-l border-white/5 flex flex-col">
+        <div className="flex max-h-[32rem] min-h-64 w-full flex-shrink-0 flex-col border-l border-white/5 bg-[#080808] lg:max-h-none lg:w-[350px] lg:flex-shrink">
             <div className="p-4 border-b border-white/5">
                 <h3 className="font-bold text-sm flex items-center gap-2">
                     <Clock className="w-4 h-4 text-zinc-400" />

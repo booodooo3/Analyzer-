@@ -362,18 +362,26 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
       return;
     }
     
-    files.forEach(file => {
-      if (file.size > 200 * 1024 * 1024) { // 200MB limit
+    const validFiles = files.filter(file => {
+      if (file.size > 200 * 1024 * 1024) {
         setError("One of the reference videos is too large. Max 200MB per video.");
-        return;
+        return false;
       }
-      
-      setReferenceVideos(prev => [...prev, {
+      return true;
+    });
+
+    if (validFiles.length > 0) {
+      setReferenceVideos(prev => [...prev, ...validFiles.map(file => ({
         file,
         name: file.name,
         base64: URL.createObjectURL(file)
-      }]);
-    });
+      }))]);
+      setDescription(prev => {
+        const referencePrompt = 'In the scene shown in : [Video1] Video Description';
+        if (prev.includes(referencePrompt)) return prev;
+        return prev.trim() ? `${prev.trim()}\n${referencePrompt}` : referencePrompt;
+      });
+    }
   };
 
   const handleReferenceAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

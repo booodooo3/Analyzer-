@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, MapPin, Mail, Send, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { X, MapPin, Send, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -115,14 +115,6 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
                 <span>Kuwait</span>
               </div>
               
-              <div className="flex items-center mb-4 text-zinc-300">
-                <div className="w-10 h-10 bg-white/5 rounded-[10px] flex items-center justify-center mr-4 text-[#5f63f2] font-bold shrink-0">
-                  <Mail className="w-5 h-5" />
-                </div>
-                <a href="https://analyzer-a.org/contact/" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">
-                  support@analyzer-a.org
-                </a>
-              </div>
            </div>
         </div>
 

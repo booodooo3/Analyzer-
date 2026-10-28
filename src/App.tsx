@@ -914,19 +914,10 @@ const App: React.FC = () => {
       <footer className="p-12 border-t border-zinc-900 mt-auto bg-zinc-950">
         <div className="max-w-6xl mx-auto text-center space-y-2">
            <p className="text-zinc-600 text-sm">{t.footer}</p>
-          <p className="text-zinc-600 text-sm flex items-center justify-center gap-2">
-            <a 
-              href="https://analyzer-a.org/contact/"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-white transition-colors"
-            >
-              support@analyzer-a.org
-            </a>
-            <span className="text-zinc-700">|</span>
-            <a href="https://analyzer-a.org" className="text-white hover:underline underline-offset-4" target="_blank" rel="noreferrer">
-              analyzer-a.org
-            </a>
+           <p className="text-zinc-600 text-sm">
+             <a href="https://analyzer-a.org" className="text-white hover:underline underline-offset-4" target="_blank" rel="noreferrer">
+               analyzer-a.org
+             </a>
           </p>
           <div className="flex justify-center gap-6 mt-2">
             <button 

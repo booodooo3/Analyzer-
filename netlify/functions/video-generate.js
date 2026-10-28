@@ -160,7 +160,7 @@ export default async (req, context) => {
             let enhancedPrompt = description;
             
             // Append Camera Effect
-            if (cameraEffect && cameraEffect !== 'Static') {
+            if (cameraEffect && cameraEffect !== 'Static' && model !== 'google/gemini-omni-1.1') {
                 if (cameraEffect === 'The Camera Follows The Subject Moving') {
                     enhancedPrompt += `, the camera follows the subject moving`;
                 } else if (cameraEffect === 'Free Camera') {

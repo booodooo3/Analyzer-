@@ -371,6 +371,9 @@ export default async (req, context) => {
                 const editVideo = videoInput;
                 if (editVideo) {
                     input.video = editVideo;
+                    if (reference_images && reference_images.length > 0) {
+                        input.reference_images = reference_images;
+                    }
                 } else {
                     if (image) {
                         input.image = image;

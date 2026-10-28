@@ -45,15 +45,6 @@ export default async (req, context) => {
                             // Calculate cost
                             let model = prediction.model;
                             let duration = prediction.input?.duration || 10;
-                            if (model === 'google/gemini-omni-1.1') {
-                                const requestedDuration = Number(url.searchParams.get("duration"));
-                                if ([5, 8, 10].includes(requestedDuration)) {
-                                    duration = requestedDuration;
-                                } else {
-                                    const durationMatch = prediction.input?.prompt?.match(/Target duration: (5|8|10) seconds/i);
-                                    duration = durationMatch ? Number(durationMatch[1]) : 10;
-                                }
-                            }
                             let image = prediction.input?.image || prediction.input?.video_url || prediction.input?.video || prediction.input?.start_image;
                             
                             let cost = 4;
@@ -71,10 +62,6 @@ export default async (req, context) => {
                                 else if (duration === 8) cost = 5;
                                 else if (duration === 10) cost = 7;
                             }
-                            if (model === 'google/gemini-omni-1.1') {
-                                cost = duration === 5 ? 2 : duration === 8 ? 3 : 4;
-                            }
-                            
                             const currentCredits = typeof user.publicMetadata.credits === 'number' ? user.publicMetadata.credits : 3;
                             const newDeducted = [...deductedPredictions, predictionId].slice(-50);
                             
@@ -149,9 +136,6 @@ export default async (req, context) => {
                     cost = 7;
                 }
             }
-            if (model === 'google/gemini-omni-1.1') {
-                cost = duration === 5 ? 2 : duration === 8 ? 3 : 4;
-            }
             if (currentCredits < cost) {
                 return new Response(JSON.stringify({ error: `Insufficient credits! You need ${cost} credits for video generation.` }), { status: 403, headers });
             }
@@ -160,7 +144,7 @@ export default async (req, context) => {
             let enhancedPrompt = description;
             
             // Append Camera Effect
-            if (cameraEffect && cameraEffect !== 'Static' && model !== 'google/gemini-omni-1.1') {
+            if (cameraEffect && cameraEffect !== 'Static') {
                 if (cameraEffect === 'The Camera Follows The Subject Moving') {
                     enhancedPrompt += `, the camera follows the subject moving`;
                 } else if (cameraEffect === 'Free Camera') {
@@ -207,9 +191,6 @@ export default async (req, context) => {
             } else if (model === 'pixverse/lipsync') {
                 modelOwner = "pixverse";
                 modelName = "lipsync";
-            } else if (model === 'google/gemini-omni-1.1') {
-                modelOwner = "google";
-                modelName = "gemini-omni-1.1";
             }
 
             let input = {
@@ -358,29 +339,6 @@ export default async (req, context) => {
 
                 if (image2) {
                     input.end_image = image2;
-                }
-            } else if (model === 'google/gemini-omni-1.1') {
-                modelOwner = "google";
-                modelName = "gemini-omni-1.1";
-                input = {
-                    prompt: enhancedPrompt || "",
-                    aspect_ratio: aspectRatio === "9:16" ? "9:16" : "16:9",
-                    resolution: resolution === "4k" ? "4k" : (resolution || "720p")
-                };
-
-                const editVideo = videoInput;
-                if (editVideo) {
-                    input.video = editVideo;
-                } else {
-                    if (image) {
-                        input.image = image;
-                    }
-                    if (image2) {
-                        input.last_frame = image2;
-                    }
-                    if (reference_images && reference_images.length > 0) {
-                        input.reference_images = reference_images;
-                    }
                 }
             } else if (model === 'sync/lipsync-2') {
                 modelOwner = "sync";

@@ -1071,6 +1071,10 @@ const App: React.FC = () => {
                                 <span>7 Credits for Seedance 2.0/2.5</span>
                             </div>
                             <div className="bg-black/20 p-2 rounded border border-white/5">
+                                <span className="text-white font-bold block">Google Gemini Omni 1.1</span>
+                                <span>5s: 1 point · 6s: 2 · 7s: 3 · 8s: 4 · 9s: 5 · 10s: 6</span>
+                            </div>
+                            <div className="bg-black/20 p-2 rounded border border-white/5">
                                 <span className="text-blue-400 font-bold block">Tex 2 Img</span>
                                 <span>0.5 Credits per generation</span>
                             </div>
@@ -1079,7 +1083,7 @@ const App: React.FC = () => {
                                 <span>Google 2K: 0.5 Credits · Gold 4K: 1 Credit per generation</span>
                             </div>
                         </div>
-                        <p className="text-xs text-zinc-500 mt-2">* Credits are deducted upon successful request submission.</p>
+                        <p className="text-xs text-zinc-500 mt-2">* Points are deducted after a successful video generation.</p>
                     </div>
                   </div>
 
@@ -1128,6 +1132,15 @@ const App: React.FC = () => {
                             <p className="text-xs text-zinc-400 mt-1">
                                 <strong>Best for:</strong> Advanced image-to-video generation with specific reference types.
                                 <br/><strong>Features:</strong> Uses <code>kwaivgi/kling-v3-omni-video</code>. Includes <code>video_reference_type</code> (feature or base) to give you precise control over how the reference image influences the video.
+                            </p>
+                        </div>
+
+                        <div className="border-l-2 border-white pl-3">
+                            <h4 className="text-white font-semibold text-sm">Google Gemini Omni 1.1</h4>
+                            <p className="text-xs text-zinc-400 mt-1">
+                                <strong>Best for:</strong> Video generation and editing with native synchronized audio.
+                                <br/><strong>Features:</strong> Text-to-video, image animation, first/last-frame interpolation, image references, and a video reference. Supports 360p, 720p, 1080p, and 4K.
+                                <br/><strong>Cost:</strong> 1–6 points for 5–10 seconds.
                             </p>
                         </div>
 

@@ -3,6 +3,35 @@ import Replicate from "replicate";
 
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
+const geminiOmniCosts = { 5: 1, 6: 2, 7: 3, 8: 4, 9: 5, 10: 6 };
+const geminiOmniCameraInstructions = {
+    "Zoom In": "use a smooth camera zoom-in",
+    "Zoom Out": "use a smooth camera zoom-out",
+    "Pan Left": "pan the camera smoothly to the left",
+    "Pan Right": "pan the camera smoothly to the right",
+    "Pan Up": "tilt the camera upward",
+    "Pan Down": "tilt the camera downward",
+    "Slow Motion": "show the action in slow motion",
+    "Hyperlapse / Timelapse": "use a clear hyperlapse or timelapse effect",
+    "Freeze Frame": "include a brief freeze-frame effect",
+    "Reverse": "play the requested action in reverse",
+    "Roll": "roll the camera smoothly around the frame",
+    "Dolly / Tracking": "track the subject with a smooth dolly movement",
+    "Orbit / Arc": "orbit smoothly around the subject",
+    "Crane / Boom / Pedestal": "move the camera vertically with a smooth crane movement",
+    "Handheld / Shake": "use subtle handheld camera movement",
+    "Rack Focus": "shift focus smoothly between foreground and background",
+    "Dolly Zoom": "use a cinematic dolly zoom",
+    "The Camera Follows The Subject Moving": "make the camera follow the moving subject",
+    "AI Scene Relighting": "relight the scene while preserving natural shadows",
+    "Gesture-Triggered VFX": "add visual effects triggered by the subject's gestures",
+    "Narrative Autofocus": "use intentional autofocus changes to emphasize the story",
+    "Real-time Style Transfer": "apply a consistent real-time visual style transfer",
+    "Video Outpainting / Infinite Zoom": "extend the scene beyond the frame with a seamless infinite zoom",
+    "Dynamic Object Replacement": "replace the requested object while preserving the surrounding scene",
+    "Motion Trails & Echoes": "add visible motion trails and echoes to moving subjects",
+    "AI Video Stabilization": "stabilize the video while preserving natural camera motion"
+};
 
 export default async (req, context) => {
     const headers = {
@@ -40,36 +69,56 @@ export default async (req, context) => {
                         const userId = verified.sub;
                         const user = await clerkClient.users.getUser(userId);
                         
-                        const deductedPredictions = user.publicMetadata.deducted_predictions || [];
+                        const deductedPredictions = Array.isArray(user.publicMetadata.deducted_predictions)
+                            ? user.publicMetadata.deducted_predictions
+                            : [];
                         if (!deductedPredictions.includes(predictionId)) {
                             // Calculate cost
                             let model = prediction.model;
                             let duration = prediction.input?.duration || 10;
                             let image = prediction.input?.image || prediction.input?.video_url || prediction.input?.video || prediction.input?.start_image;
                             
-                            let cost = 4;
-                            if (duration === 5) {
-                                cost = 2;
-                            }
-                            if (model === 'bytedance/omni-human' || model === 'kwaivgi/kling-lip-sync' || model === 'pixverse/lipsync') {
-                                cost = 2;
-                            }
-                            if (!image && model.includes('seedance') && !prediction.input?.reference_images && !prediction.input?.reference_videos) {
-                                cost = 5;
-                            }
-                            if (model.includes('seedance')) {
-                                if (duration === 5) cost = 3;
-                                else if (duration === 8) cost = 5;
-                                else if (duration === 10) cost = 7;
+                            const pendingVideoCosts = user.privateMetadata?.video_prediction_costs || {};
+                            let cost;
+                            if (model === "google/gemini-omni-1.1") {
+                                const savedCost = pendingVideoCosts[predictionId];
+                                if (!Number.isInteger(savedCost)) {
+                                    throw new Error(`Missing saved video cost for prediction ${predictionId}`);
+                                }
+                                cost = savedCost;
+                            } else {
+                                cost = 4;
+                                if (duration === 5) {
+                                    cost = 2;
+                                }
+                                if (model === 'bytedance/omni-human' || model === 'kwaivgi/kling-lip-sync' || model === 'pixverse/lipsync') {
+                                    cost = 2;
+                                }
+                                if (!image && model.includes('seedance') && !prediction.input?.reference_images && !prediction.input?.reference_videos) {
+                                    cost = 5;
+                                }
+                                if (model.includes('seedance')) {
+                                    if (duration === 5) cost = 3;
+                                    else if (duration === 8) cost = 5;
+                                    else if (duration === 10) cost = 7;
+                                }
                             }
                             const currentCredits = typeof user.publicMetadata.credits === 'number' ? user.publicMetadata.credits : 3;
                             const newDeducted = [...deductedPredictions, predictionId].slice(-50);
+                            const { [predictionId]: completedVideoCost, ...remainingVideoCosts } = pendingVideoCosts;
                             
                             await clerkClient.users.updateUserMetadata(userId, {
                                 publicMetadata: { 
+                                    ...user.publicMetadata,
                                     credits: Math.max(0, currentCredits - cost),
                                     deducted_predictions: newDeducted
-                                }
+                                },
+                                ...(completedVideoCost !== undefined && {
+                                    privateMetadata: {
+                                        ...user.privateMetadata,
+                                        video_prediction_costs: remainingVideoCosts
+                                    }
+                                })
                             });
                         }
                     } catch (e) {
@@ -114,9 +163,18 @@ export default async (req, context) => {
             
             const { image, image2, description, duration, cameraEffect, aiFilter, model, aspectRatio, audioFile, videoInput, characterOrientation, video_path, resolution, seed, reference_images, reference_videos, reference_audios, video_reference_type, keep_original_sound, generate_audio } = await req.json();
 
+            if (model === "google/gemini-omni-1.1" && (typeof description !== "string" || !description.trim())) {
+                return new Response(JSON.stringify({ error: "Enter a prompt to generate a video." }), { status: 400, headers });
+            }
+
             // Calculate cost based on duration
             let cost = 4;
-            if (duration === 5) {
+            if (model === "google/gemini-omni-1.1") {
+                if (!Number.isInteger(duration) || geminiOmniCosts[duration] === undefined) {
+                    return new Response(JSON.stringify({ error: "Choose a video duration between 5 and 10 seconds." }), { status: 400, headers });
+                }
+                cost = geminiOmniCosts[duration];
+            } else if (duration === 5) {
                 cost = 2;
             }
             if (model === 'bytedance/omni-human' || model === 'kwaivgi/kling-lip-sync' || model === 'pixverse/lipsync') {
@@ -149,6 +207,8 @@ export default async (req, context) => {
                     enhancedPrompt += `, the camera follows the subject moving`;
                 } else if (cameraEffect === 'Free Camera') {
                     enhancedPrompt += `, dynamic free camera movement, orbiting and panning from multiple angles, professional commercial style cinematography, sweeping dynamic shots, highly cinematic and smooth`;
+                } else if (model === "google/gemini-omni-1.1" && geminiOmniCameraInstructions[cameraEffect]) {
+                    enhancedPrompt += `, ${geminiOmniCameraInstructions[cameraEffect]}`;
                 } else {
                     enhancedPrompt += `, ${cameraEffect} camera movement`;
                 }
@@ -161,6 +221,9 @@ export default async (req, context) => {
                 } else {
                     enhancedPrompt += `, ${aiFilter} style`;
                 }
+            }
+            if (model === "google/gemini-omni-1.1") {
+                enhancedPrompt = `${enhancedPrompt || ""} Generate a video that is exactly ${duration} seconds long.`.trim();
             }
 
             // Determine Model Version
@@ -191,6 +254,9 @@ export default async (req, context) => {
             } else if (model === 'pixverse/lipsync') {
                 modelOwner = "pixverse";
                 modelName = "lipsync";
+            } else if (model === "google/gemini-omni-1.1") {
+                modelOwner = "google";
+                modelName = "gemini-omni-1.1";
             }
 
             let input = {
@@ -261,7 +327,27 @@ export default async (req, context) => {
                 }
             }
 
-            if (model === 'kwaivgi/kling-lip-sync') {
+            if (model === "google/gemini-omni-1.1") {
+                input = {
+                    prompt: enhancedPrompt,
+                    resolution: ["360p", "720p", "1080p", "4k"].includes(resolution) ? resolution : "720p"
+                };
+                if (image) {
+                    input.image = image;
+                }
+                if (image2) {
+                    input.last_frame = image2;
+                }
+                if (reference_images && reference_images.length > 0) {
+                    input.reference_images = reference_images;
+                }
+                if (reference_videos && reference_videos.length > 0) {
+                    input.video = reference_videos[0];
+                }
+                if (["16:9", "9:16"].includes(aspectRatio)) {
+                    input.aspect_ratio = aspectRatio;
+                }
+            } else if (model === 'kwaivgi/kling-lip-sync') {
                 input = {
                     video_url: image, // Frontend sends video URL in the 'image' field
                     audio_file: audioFile
@@ -383,6 +469,20 @@ export default async (req, context) => {
                     version: version,
                     input: input
                 });
+
+                if (model === "google/gemini-omni-1.1") {
+                    const latestUser = await clerkClient.users.getUser(userId);
+                    const pendingVideoCosts = latestUser.privateMetadata?.video_prediction_costs || {};
+                    await clerkClient.users.updateUserMetadata(userId, {
+                        privateMetadata: {
+                            ...latestUser.privateMetadata,
+                            video_prediction_costs: {
+                                ...pendingVideoCosts,
+                                [prediction.id]: cost
+                            }
+                        }
+                    });
+                }
 
                 // Credits will be deducted when the video generation succeeds
                 return new Response(JSON.stringify({

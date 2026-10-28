@@ -19,6 +19,8 @@ interface UploadedAsset {
   base64?: string;
 }
 
+const GEMINI_OMNI_MODEL = 'google/gemini-omni-1.1';
+
 export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose, getToken }) => {
   const [images, setImages] = useState<(ImageData | null)[]>([null, null]);
   const [description, setDescription] = useState('');
@@ -135,7 +137,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
           if (modelName) {
              setSelectedModel(modelName);
           }
-          const pendingDuration = [5, 8, 10].includes(savedDuration) ? savedDuration : undefined;
+          const validDurations = modelName === GEMINI_OMNI_MODEL ? [5, 6, 7, 8, 9, 10] : [5, 8, 10];
+          const pendingDuration = validDurations.includes(savedDuration) ? savedDuration : undefined;
           if (pendingDuration !== undefined) {
             setDuration(pendingDuration);
           }
@@ -339,9 +342,10 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const handleReferenceVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const currentCount = referenceVideos.length;
+    const maxVideos = selectedModel === GEMINI_OMNI_MODEL ? 1 : 5;
     
-    if (currentCount + files.length > 5) { // Limit to 5 reference videos
-      setError("You can only upload up to 5 reference videos.");
+    if (currentCount + files.length > maxVideos) {
+      setError(`You can only upload up to ${maxVideos} reference video${maxVideos === 1 ? '' : 's'} for this model.`);
       return;
     }
     
@@ -390,7 +394,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
     }
     
     // If textToVideo mode, we MUST have a description
-    if (generationMode === 'textToVideo' && !description.trim()) {
+    if ((generationMode === 'textToVideo' || selectedModel === GEMINI_OMNI_MODEL) && !description.trim()) {
         setError('Please enter a description for the video');
         return;
     }
@@ -447,6 +451,16 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
           // We leave processedImage as null if there's no primary image.
       }
       const processedImage2 = generationMode === 'imageToVideo' && images[1] ? await processImage(images[1].base64) : null;
+      let requestedAspectRatio = aspectRatio;
+      const sourceImage = primaryImage?.base64 || primaryImage?.url;
+      if (isGeminiOmni && aspectRatio === 'Match Input Image' && sourceImage) {
+        requestedAspectRatio = await new Promise<string>((resolve, reject) => {
+          const image = new Image();
+          image.onload = () => resolve(image.naturalHeight > image.naturalWidth ? '9:16' : '16:9');
+          image.onerror = () => reject(new Error('Could not read the uploaded image aspect ratio.'));
+          image.src = sourceImage;
+        });
+      }
 
       // 1.5 Upload large files to Cloudinary
       setStatusMessage('Uploading files...');
@@ -505,7 +519,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
             cameraEffect,
             aiFilter,
             duration: duration,
-            aspectRatio,
+            aspectRatio: requestedAspectRatio,
             resolution,
             seed,
             model: selectedModel,
@@ -772,7 +786,13 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
     </div>
   ));
 
-  const supportsTwoImages = (selectedModel.includes('seedance') && !selectedModel.includes('fast')) || (selectedModel.includes('kling') && !selectedModel.includes('kling-v3'));
+  const isGeminiOmni = selectedModel === GEMINI_OMNI_MODEL;
+  const supportsTwoImages = (selectedModel.includes('seedance') && !selectedModel.includes('fast')) || (selectedModel.includes('kling') && !selectedModel.includes('kling-v3')) || isGeminiOmni;
+  const videoCost = isGeminiOmni
+    ? duration - 4
+    : selectedModel.includes('seedance')
+      ? duration === 5 ? 3 : duration === 8 ? 5 : 7
+      : duration === 5 ? 2 : 4;
 
   return (
     <>
@@ -796,7 +816,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       <span className="w-2 h-2 rounded-full bg-yellow-100 animate-pulse shadow-[0_0_8px_rgba(254,240,138,0.8)]" />
                       Analyzer Ai
                   </div>
-                  <span className="text-xs font-normal text-zinc-400 ml-4">Image To Video</span>
+                  <span className="text-xs font-normal text-zinc-400 ml-4">{generationMode === 'textToVideo' ? 'Text To Video' : 'Image To Video'}</span>
               </h2>
               <button 
               onClick={onClose}
@@ -953,8 +973,8 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {/* Generation Mode Toggle (Only for Seedance 2.0) */}
-                      {selectedModel.includes('seedance') && (
+                      {/* Generation mode is available for models that support text and image inputs. */}
+                      {(selectedModel.includes('seedance') || isGeminiOmni) && (
                         <div className="flex bg-black rounded-xl p-1 border border-zinc-800">
                           <button
                             onClick={() => setGenerationMode('imageToVideo')}
@@ -1076,26 +1096,33 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                   value={selectedModel}
                                   onChange={(e) => {
                                     const newModel = e.target.value;
-                                    setSelectedModel(newModel);
-                                    if (!newModel.includes('seedance')) {
+                                      setSelectedModel(newModel);
+                                      if (!newModel.includes('seedance') && newModel !== GEMINI_OMNI_MODEL) {
                                         setGenerationMode('imageToVideo');
                                     }
-                                    if (newModel === 'kwaivgi/kling-v3-omni-video' && duration === 8) {
+                                    if (newModel === 'kwaivgi/kling-v3-omni-video' && ![5, 10].includes(duration)) {
                                         setDuration(5);
                                     }
-                                    if (resolution === '4k') {
-                                      setResolution('1080p');
+                                    if (newModel.includes('seedance') && ![5, 8, 10].includes(duration)) {
+                                      setDuration(10);
                                     }
+                                      if (newModel === GEMINI_OMNI_MODEL && resolution === '480p') {
+                                        setResolution('720p');
+                                    }
+                                      if (newModel !== GEMINI_OMNI_MODEL && ['360p', '4k'].includes(resolution)) {
+                                        setResolution('1080p');
+                                      }
                                   }}
                                   className={`bg-black border rounded-lg px-3 py-2 text-xs focus:outline-none transition-all duration-300 ${
                                       selectedModel
-                                          ? 'text-green-400 border-green-500/50 shadow-[0_0_10px_rgba(34,197,94,0.2)] ring-1 ring-green-500/20' 
+                                          ? isGeminiOmni ? 'text-white border-white/50 shadow-[0_0_10px_rgba(255,255,255,0.15)] ring-1 ring-white/20' : 'text-green-400 border-green-500/50 shadow-[0_0_10px_rgba(34,197,94,0.2)] ring-1 ring-green-500/20'
                                           : 'text-zinc-400 border-zinc-800 focus:ring-1 focus:ring-white/20'
                                   }`}
                               >
                                   <option value="bytedance/seedance-2.0" className="text-purple-500 font-bold">Seedance 2.0</option>
                                   <option value="bytedance/seedance-2.5" className="text-red-500 font-bold">Seedance 2.5</option>
                                   <option value="kwaivgi/kling-v3-omni-video" className="text-blue-500 font-bold">Kling V3 Omni Video</option>
+                                  <option value={GEMINI_OMNI_MODEL} className="text-white font-bold">Google Gemini Omni 1.1</option>
                               </select>
                           </div>
 
@@ -1104,50 +1131,36 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
               </div>
 
                     <div className="space-y-2">
-                  {((selectedModel.includes('seedance') || selectedModel === 'kwaivgi/kling-v3-omni-video') && generationMode === 'imageToVideo') && (
-                      <div className="flex justify-end gap-3 mt-1 mb-2">
-                          <label className="flex items-center gap-1.5 cursor-pointer group">
-                              <input 
-                                  type="radio" 
-                                  name="duration" 
-                                  value={5} 
-                                  checked={duration === 5} 
-                                  onChange={() => setDuration(5)}
-                                  className="accent-green-500 w-3 h-3"
-                              />
-                              <span className="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
-                                  <span className="text-green-500 font-bold">5</span> seconds (<span className="text-green-500 font-bold">{selectedModel === 'kwaivgi/kling-v3-omni-video' ? '2' : '3'}</span> points deduction)
-                              </span>
-                          </label>
-                          {selectedModel.includes('seedance') && (
-                              <label className="flex items-center gap-1.5 cursor-pointer group">
-                                  <input 
-                                      type="radio" 
-                                      name="duration" 
-                                      value={8} 
-                                      checked={duration === 8} 
-                                      onChange={() => setDuration(8)}
-                                      className="accent-green-500 w-3 h-3"
-                                  />
-                                  <span className="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
-                                      <span className="text-green-500 font-bold">8</span> seconds (<span className="text-green-500 font-bold">5</span> points deduction)
-                                  </span>
+                  {((selectedModel.includes('seedance') || selectedModel === 'kwaivgi/kling-v3-omni-video' || isGeminiOmni) && (generationMode === 'imageToVideo' || isGeminiOmni)) && (
+                      <div className="flex flex-wrap justify-end gap-x-3 gap-y-2 mt-1 mb-2">
+                          {(isGeminiOmni ? [5, 6, 7, 8, 9, 10] : selectedModel.includes('seedance') ? [5, 8, 10] : [5, 10]).map(seconds => {
+                            const points = isGeminiOmni
+                              ? seconds - 4
+                              : selectedModel.includes('seedance')
+                                ? seconds === 5 ? 3 : seconds === 8 ? 5 : 7
+                                : seconds === 5 ? 2 : 4;
+                            return (
+                              <label key={seconds} className="flex items-center gap-1.5 cursor-pointer group">
+                                <input
+                                  type="radio"
+                                  name="duration"
+                                  value={seconds}
+                                  checked={duration === seconds}
+                                  onChange={() => setDuration(seconds)}
+                                  className={`${isGeminiOmni ? 'accent-white' : 'accent-green-500'} w-3 h-3`}
+                                />
+                                <span className="text-[10px] text-zinc-500 group-hover:text-zinc-300 transition-colors">
+                                  <span className={`${isGeminiOmni ? 'text-white' : 'text-green-500'} font-bold`}>{seconds}</span> seconds (<span className={`${isGeminiOmni ? 'text-white' : 'text-green-500'} font-bold`}>{points}</span> points deduction)
+                                </span>
                               </label>
-                          )}
-                          <label className="flex items-center gap-1.5 cursor-pointer group">
-                              <input 
-                                  type="radio" 
-                                  name="duration" 
-                                  value={10} 
-                                  checked={duration === 10} 
-                                  onChange={() => setDuration(10)}
-                                  className="accent-green-500 w-3 h-3"
-                              />
-                              <span className="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
-                                  <span className="text-green-500 font-bold">10</span> seconds (<span className="text-green-500 font-bold">{selectedModel === 'kwaivgi/kling-v3-omni-video' ? '4' : '7'}</span> points deduction)
-                              </span>
-                          </label>
+                            );
+                          })}
                       </div>
+                  )}
+                  {isGeminiOmni && (
+                    <p className="text-right text-[10px] text-zinc-500">
+                      The requested duration is included in the prompt; the final video length may vary.
+                    </p>
                   )}
 
 
@@ -1169,11 +1182,22 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                     <select
                       value={resolution}
                       onChange={e => setResolution(e.target.value)}
-                      className="w-full bg-black border border-zinc-800 rounded-xl p-2 text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 focus:shadow-[0_0_15px_rgba(34,197,94,0.15)] transition-all duration-300"
+                      className={`w-full bg-black border border-zinc-800 rounded-xl p-2 ${isGeminiOmni ? 'text-white focus:ring-white focus:border-white' : 'text-green-500 focus:ring-green-500 focus:border-green-500'} focus:outline-none focus:ring-1 transition-all duration-300`}
                     >
-                      <option value="1080p">1080p</option>
-                      <option value="720p">720p</option>
-                      <option value="480p">480p</option>
+                      {isGeminiOmni ? (
+                        <>
+                          <option value="360p">360p</option>
+                          <option value="720p">720p</option>
+                          <option value="1080p">1080p</option>
+                          <option value="4k">4K</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="1080p">1080p</option>
+                          <option value="720p">720p</option>
+                          <option value="480p">480p</option>
+                        </>
+                      )}
                     </select>
                   </div>
                   <div className="flex-1">
@@ -1181,12 +1205,16 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                     <select
                       value={aspectRatio}
                       onChange={e => setAspectRatio(e.target.value)}
-                      className="w-full bg-black border border-zinc-800 rounded-xl p-2 text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 focus:shadow-[0_0_15px_rgba(34,197,94,0.15)] transition-all duration-300"
+                      className={`w-full bg-black border border-zinc-800 rounded-xl p-2 ${isGeminiOmni ? 'text-white focus:ring-white focus:border-white' : 'text-green-500 focus:ring-green-500 focus:border-green-500'} focus:outline-none focus:ring-1 transition-all duration-300`}
                     >
-                      <option value="9:16">9:16</option>
                       <option value="16:9">16:9</option>
-                      <option value="1:1">1:1</option>
-                      <option value="4:5">4:5</option>
+                      <option value="9:16">9:16</option>
+                      {!isGeminiOmni && (
+                        <>
+                          <option value="1:1">1:1</option>
+                          <option value="4:5">4:5</option>
+                        </>
+                      )}
                       {generationMode !== 'textToVideo' && (
                         <option value="Match Input Image">Match Input Image</option>
                       )}
@@ -1194,7 +1222,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                   </div>
                 </div>
               </div>
-                {(selectedModel.includes('seedance') || selectedModel === 'kwaivgi/kling-v3-omni-video') && (
+                {(selectedModel.includes('seedance') || selectedModel === 'kwaivgi/kling-v3-omni-video' || isGeminiOmni) && (
                   <>
                     <div className="flex gap-4">
                       {selectedModel.includes('seedance') && (
@@ -1256,7 +1284,9 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       <div className="flex-1">
                         <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Reference Images (Optional)</label>
                         <p className="text-[10px] text-zinc-500 mb-2">
-                          {selectedModel === 'kwaivgi/kling-v3-omni-video' 
+                          {isGeminiOmni
+                            ? 'Reference images for subject, style, or scene guidance. Use alongside the optional start and last frame.'
+                            : selectedModel === 'kwaivgi/kling-v3-omni-video'
                             ? 'Reference images for elements, scenes, or styles. Supports .jpg/.jpeg/.png. Max 7 without video, 4 with video.'
                             : 'Reference images (up to 9) for character consistency, style guidance, and scene composition. Cannot be used together with first/last frame images. You can reference them in your prompt as [Image1], [Image2], etc.'}
                         </p>
@@ -1268,7 +1298,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                                 onChange={handleReferenceImageUpload}
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                             />
-                            <button className={`w-full flex items-center justify-center gap-2 bg-zinc-900/50 hover:bg-zinc-800 border border-dashed py-2.5 rounded-xl transition-all ${referenceImages.length > 0 && referenceAudios ? 'border-yellow-500 text-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.5)]' : referenceImages.length > 0 ? 'border-green-500 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)]' : 'border-zinc-700 hover:border-green-500/50 text-zinc-400 hover:text-green-400'}`}>
+                            <button className={`w-full flex items-center justify-center gap-2 bg-zinc-900/50 hover:bg-zinc-800 border border-dashed py-2.5 rounded-xl transition-all ${referenceImages.length > 0 && referenceAudios ? 'border-yellow-500 text-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.5)]' : referenceImages.length > 0 ? (isGeminiOmni ? 'border-white text-white shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'border-green-500 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)]') : (isGeminiOmni ? 'border-zinc-700 hover:border-white/50 text-zinc-400 hover:text-white' : 'border-zinc-700 hover:border-green-500/50 text-zinc-400 hover:text-green-400')}`}>
                                 <Upload className="w-4 h-4" />
                                 <span className="text-xs font-medium">{referenceImages.length > 0 ? `${referenceImages.length} images selected` : selectedModel === 'kwaivgi/kling-v3-omni-video' ? 'Upload Reference Images (Max 7)' : 'Upload Reference Images (Max 9)'}</span>
                             </button>
@@ -1304,18 +1334,18 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
                         <div className="flex-1">
                         <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Reference Videos (Optional)</label>
-                        <p className="text-[10px] text-zinc-500 mb-2">For motion transfer, style reference, and editing. Reference them in your prompt as [Video1], [Video2], etc.</p>
+                        <p className="text-[10px] text-zinc-500 mb-2">{isGeminiOmni ? 'Use one video as a visual reference or source for editing.' : 'For motion transfer, style reference, and editing. Reference them in your prompt as [Video1], [Video2], etc.'}</p>
                         <div className="relative group mt-1">
                             <input
                                 type="file"
-                                multiple
+                                multiple={!isGeminiOmni}
                                 accept="video/mp4,video/webm,video/quicktime"
                                 onChange={handleReferenceVideoUpload}
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                             />
-                            <button className={`w-full flex items-center justify-center gap-2 bg-zinc-900/50 hover:bg-zinc-800 border border-dashed py-2.5 rounded-xl transition-all ${referenceVideos.length > 0 ? 'border-blue-500 text-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'border-zinc-700 hover:border-blue-500/50 text-zinc-400 hover:text-blue-400'}`}>
+                            <button className={`w-full flex items-center justify-center gap-2 bg-zinc-900/50 hover:bg-zinc-800 border border-dashed py-2.5 rounded-xl transition-all ${referenceVideos.length > 0 ? (isGeminiOmni ? 'border-white text-white shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'border-blue-500 text-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]') : (isGeminiOmni ? 'border-zinc-700 hover:border-white/50 text-zinc-400 hover:text-white' : 'border-zinc-700 hover:border-blue-500/50 text-zinc-400 hover:text-blue-400')}`}>
                                 <Upload className="w-4 h-4" />
-                                <span className="text-xs font-medium">{referenceVideos.length > 0 ? `${referenceVideos.length} videos selected` : 'Upload Reference Videos'}</span>
+                                <span className="text-xs font-medium">{referenceVideos.length > 0 ? `${referenceVideos.length} ${isGeminiOmni ? 'video' : 'videos'} selected` : isGeminiOmni ? 'Upload Reference Video' : 'Upload Reference Videos'}</span>
                             </button>
                         </div>
 
@@ -1344,7 +1374,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                         )}
                       </div>
 
-                      <div className="flex-1">
+                      {!isGeminiOmni && <div className="flex-1">
                         <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Reference Audio (Optional)</label>
                         <div className="relative group mt-1">
                             <input
@@ -1376,7 +1406,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                             </button>
                           </div>
                         )}
-                      </div>
+                      </div>}
                   </>
                 )}
                   <div className="space-y-2">
@@ -1392,10 +1422,10 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       <select 
                           value={cameraEffect}
                           onChange={(e) => setCameraEffect(e.target.value)}
-                          className="w-full bg-black border border-zinc-800 rounded-xl p-3 text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 focus:shadow-[0_0_15px_rgba(34,197,94,0.15)] transition-all duration-300"
+                          className={`w-full bg-black border border-zinc-800 rounded-xl p-3 ${isGeminiOmni ? 'text-white focus:ring-white focus:border-white' : 'text-green-500 focus:ring-green-500 focus:border-green-500'} focus:outline-none focus:ring-1 transition-all duration-300`}
                       >
                           {CAMERA_EFFECTS.map(effect => (
-                              <option key={effect} value={effect} className="text-green-500 bg-zinc-900">{effect}</option>
+                              <option key={effect} value={effect} className={`${isGeminiOmni ? 'text-white' : 'text-green-500'} bg-zinc-900`}>{effect}</option>
                           ))}
                       </select>
                   </div>
@@ -1410,10 +1440,10 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                       <select 
                           value={aiFilter}
                           onChange={handleFilterChange}
-                          className="w-full bg-black border border-green-500/50 rounded-xl p-3 text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)] transition-all duration-300 font-bold"
+                          className={`w-full bg-black rounded-xl p-3 ${isGeminiOmni ? 'border-white/50 text-white focus:ring-white focus:border-white' : 'border-green-500/50 text-green-500 focus:ring-green-500 focus:border-green-500'} focus:outline-none focus:ring-1 transition-all duration-300 font-bold`}
                       >
                           {AI_FILTERS.map(filter => (
-                              <option key={filter.value} value={filter.value} className="text-green-500 bg-zinc-900 font-bold">{filter.label}</option>
+                              <option key={filter.value} value={filter.value} className={`${isGeminiOmni ? 'text-white' : 'text-green-500'} bg-zinc-900 font-bold`}>{filter.label}</option>
                           ))}
                       </select>
                   </div>
@@ -1425,16 +1455,20 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                   isLoading={isConverting}
                   className={`w-full font-bold py-4 rounded-xl transition-all duration-300 ${
                     isConverting 
-                      ? 'bg-zinc-900 border border-green-500/50 text-green-400 shadow-[0_0_30px_rgba(34,197,94,0.2)]' 
-                      : generationMode === 'textToVideo'
+                      ? isGeminiOmni ? 'bg-white/10 border border-white/50 text-white shadow-[0_0_30px_rgba(255,255,255,0.15)]' : 'bg-zinc-900 border border-green-500/50 text-green-400 shadow-[0_0_30px_rgba(34,197,94,0.2)]'
+                      : generationMode === 'textToVideo' && !isGeminiOmni
                         ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white shadow-lg shadow-red-500/20 border border-red-500/50'
+                      : isGeminiOmni
+                        ? 'bg-white hover:bg-zinc-100 text-black shadow-lg shadow-white/20'
                         : 'bg-gradient-to-r from-zinc-700 to-zinc-600 hover:from-zinc-600 hover:to-zinc-500 text-white shadow-lg shadow-white/5'
                   }`}
               >
                   {isConverting
                     ? 'Generating Video...'
-                    : generationMode === 'textToVideo'
+                    : generationMode === 'textToVideo' && !isGeminiOmni
                         ? 'Generate Video from Text (5 Credits)'
+                      : isGeminiOmni
+                        ? `Generate Video (${videoCost} Points)`
                       : selectedModel.includes('seedance')
                         ? `Generate Video (${duration === 5 ? 3 : duration === 8 ? 5 : 7} Credits)`
                         : `Generate Video (${duration === 5 ? 2 : 4} Credits)`}

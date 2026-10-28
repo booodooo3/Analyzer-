@@ -915,8 +915,8 @@ const App: React.FC = () => {
         <div className="max-w-6xl mx-auto text-center space-y-2">
            <p className="text-zinc-600 text-sm">{t.footer}</p>
            <p className="text-zinc-600 text-sm">
-             <a href="https://analyzer-a.org" className="text-white hover:underline underline-offset-4" target="_blank" rel="noreferrer">
-               analyzer-a.org
+             <a href="mailto:analyzer-ai@outlook.com" className="text-white hover:underline underline-offset-4">
+               analyzer-ai@outlook.com
              </a>
           </p>
           <div className="flex justify-center gap-6 mt-2">

@@ -920,7 +920,7 @@ const App: React.FC = () => {
                onClick={() => setIsContactOpen(true)}
                className="text-white hover:underline underline-offset-4"
              >
-               analyzer-ai@outlook.com
+               contact@analyzer-a.com
              </button>
           </p>
           <div className="flex justify-center gap-6 mt-2">

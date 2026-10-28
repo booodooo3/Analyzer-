@@ -523,7 +523,7 @@ app.post('/api/send-contact', async (req: any, res: any) => {
 
         const emailPayload = {
             from: "Analyzer Support <onboarding@resend.dev>",
-            to: ["analyzer-ai@outlook.com"],
+            to: ["contact@analyzer-a.com"],
             reply_to: email.trim(),
             subject: `New Contact: ${subject.trim()}`,
             text: `

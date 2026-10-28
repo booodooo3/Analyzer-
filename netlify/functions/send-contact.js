@@ -30,7 +30,7 @@ export default async (req, context) => {
 
     const emailPayload = {
         from: "Analyzer Support <onboarding@resend.dev>",
-        to: ["analyzer-ai@outlook.com"],
+        to: ["contact@analyzer-a.com"],
         reply_to: email.trim(),
         subject: `New Contact: ${subject.trim()}`,
         text: `

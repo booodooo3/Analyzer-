@@ -16,6 +16,6 @@ View your app in AI Studio: https://ai.studio/apps/drive/1IrPe5RoP4-YmBxX8W9zfwt
 1. Install dependencies:
    `npm install`
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. To enable the contact form, set `RESEND_API_KEY` in `.env.local` and in the Netlify environment variables. The temporary `onboarding@resend.dev` sender can only deliver to a recipient verified with Resend. Verify a domain in Resend before using a custom sender address for public contact-form delivery.
+3. To enable the contact form, set `RESEND_API_KEY` in `.env.local` and in the Netlify environment variables. The temporary `onboarding@resend.dev` sender can only deliver to a recipient verified with Resend. Verify the recipient `contact@analyzer-a.com` in Resend; verify a sending domain before using a custom sender address for public contact-form delivery.
 4. Run the app:
    `npm run dev`

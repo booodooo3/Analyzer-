@@ -1056,15 +1056,15 @@ const App: React.FC = () => {
                             </div>
                             <div className="bg-black/20 p-2 rounded border border-white/5">
                                 <span className="text-green-400 font-bold block">Standard Video (5s)</span>
-                                <span>2 Credits (3 Credits for Seedance 2.0)</span>
+                                <span>2 Credits (3 for Seedance 2.0/2.5; 2 for Gemini Omni 1.1)</span>
                             </div>
                             <div className="bg-black/20 p-2 rounded border border-white/5">
                                 <span className="text-green-400 font-bold block">Medium Video (8s)</span>
-                                <span>5 Credits (Seedance 2.0 only)</span>
+                                <span>5 for Seedance 2.0/2.5; 3 for Gemini Omni 1.1</span>
                             </div>
                             <div className="bg-black/20 p-2 rounded border border-white/5">
                                 <span className="text-green-400 font-bold block">Long Video (10s)</span>
-                                <span>4 Credits (7 Credits for Seedance 2.0)</span>
+                                <span>4 for Gemini Omni 1.1; 7 for Seedance 2.0/2.5</span>
                             </div>
                             <div className="bg-black/20 p-2 rounded border border-white/5">
                                 <span className="text-blue-400 font-bold block">Tex 2 Img</span>
@@ -1107,6 +1107,24 @@ const App: React.FC = () => {
                                 <strong>Best for:</strong> General purpose high-quality video generation.
                                 <br/><strong>Features:</strong> Excellent balance of speed and cinematic quality.
                                 <br/><strong>Seedance 2.0 Durations:</strong> 5s, 8s, and 10s options.
+                            </p>
+                        </div>
+
+                        <div className="border-l-2 border-red-500 pl-3">
+                            <h4 className="text-red-400 font-semibold text-sm">Seedance 2.5</h4>
+                            <p className="text-xs text-zinc-400 mt-1">
+                                <strong>Best for:</strong> Creating short videos from a text prompt or animating an image.
+                                <br/><strong>Features:</strong> Supports 5s, 8s, and 10s generations, with optional image and video references to guide the result.
+                                <br/><strong>Cost:</strong> 3 credits (5s), 5 credits (8s), or 7 credits (10s).
+                            </p>
+                        </div>
+
+                        <div className="border-l-2 border-yellow-500 pl-3">
+                            <h4 className="text-yellow-400 font-semibold text-sm">Gemini Omni 1.1</h4>
+                            <p className="text-xs text-zinc-400 mt-1">
+                                <strong>Best for:</strong> Prompt-led video generation or editing an uploaded video.
+                                <br/><strong>Features:</strong> Supports text-to-video, image-to-video, and prompt-based edits to an existing video. Choose 5s, 8s, or 10s and a supported resolution and aspect ratio.
+                                <br/><strong>Cost:</strong> 2 credits (5s), 3 credits (8s), or 4 credits (10s).
                             </p>
                         </div>
 

@@ -52,8 +52,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
   const [videoReferenceType, setVideoReferenceType] = useState('feature');
   const [keepOriginalSound, setKeepOriginalSound] = useState(true);
   const [generateAudio, setGenerateAudio] = useState(false);
-  const descriptionTemplatePending = useRef(false);
-  const descriptionInputRef = useRef<HTMLTextAreaElement>(null);
 
   const { userId } = useAuth();
 
@@ -308,49 +306,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
     }
   };
 
-  const addReferenceVideoPrompt = () => {
-    setDescription(prev => {
-      const referencePrompt = 'In the scene shown in [Video1] :';
-      const updatedDescription = prev
-        .replace('In the scene shown in : [Video1] Video Description', referencePrompt)
-        .trim();
-      if (updatedDescription.includes(referencePrompt)) return updatedDescription;
-      return updatedDescription ? `${updatedDescription}\n${referencePrompt}` : referencePrompt;
-    });
-  };
-
-  const addReferenceImagePrompt = () => {
-    const videoPrompt = 'In the scene shown in [Video1] :';
-    const imagePrompt = `${videoPrompt} .............................. [Image1]..............................`;
-    setDescription(prev => {
-      const updatedDescription = prev
-        .replace('In the scene shown in : [Video1] Video Description', videoPrompt)
-        .trim();
-      if (updatedDescription.includes('[Image1]')) return updatedDescription;
-      descriptionTemplatePending.current = true;
-      if (updatedDescription.includes(videoPrompt)) {
-        return updatedDescription.replace(videoPrompt, imagePrompt);
-      }
-      return updatedDescription ? `${imagePrompt}\n${updatedDescription}` : imagePrompt;
-    });
-  };
-
-  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const { value } = e.target;
-    if (descriptionTemplatePending.current) {
-      const cursorPosition = e.target.selectionStart;
-      const updatedDescription = value.replace(/\.{3,}/g, '');
-      const updatedCursorPosition = value.slice(0, cursorPosition).replace(/\.{3,}/g, '').length;
-      descriptionTemplatePending.current = false;
-      setDescription(updatedDescription);
-      requestAnimationFrame(() => {
-        descriptionInputRef.current?.setSelectionRange(updatedCursorPosition, updatedCursorPosition);
-      });
-      return;
-    }
-    setDescription(value);
-  };
-
   const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -361,7 +316,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
       if (selectedModel === 'google/gemini-omni-1.1') {
         setImages([null, null]);
-        addReferenceVideoPrompt();
       }
 
       const videoUrl = URL.createObjectURL(file);
@@ -384,7 +338,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         return;
       }
       
-      addReferenceImagePrompt();
       const reader = new FileReader();
       reader.onloadend = () => {
         setReferenceImages(prev => [...prev, {
@@ -420,7 +373,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         name: file.name,
         base64: URL.createObjectURL(file)
       }))]);
-      addReferenceVideoPrompt();
     }
   };
 
@@ -1249,10 +1201,9 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
 
 
-                  <textarea  
-                      ref={descriptionInputRef}
+                  <textarea
                       value={description}
-                      onChange={handleDescriptionChange}
+                      onChange={(e) => setDescription(e.target.value)}
                       placeholder="Describe the motion and scene (e.g. 'A futuristic city with flying cars')..."
                       className="w-full h-24 bg-zinc-900/50 border border-zinc-700/50 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20 resize-none"
                   />

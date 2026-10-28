@@ -497,47 +497,65 @@ app.get('/api/generate', async (req: any, res: any) => {
 });
 
 // Email Contact Endpoint
+const escapeHtml = (value: unknown): string => String(value ?? "").replace(/[&<>"']/g, character => {
+    const entities: Record<string, string> = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+    };
+    return entities[character];
+});
+
 app.post('/api/send-contact', async (req: any, res: any) => {
     try {
         const { name, email, subject, message } = req.body;
+        const emailUser = process.env.EMAIL_USER || "analyzer-ai@outlook.com";
+
+        if (![name, email, subject, message].every(value => typeof value === "string" && value.trim()) ||
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+            return res.status(400).json({ status: "error", message: "Please provide a valid name, email, subject, and message." });
+        }
 
         if (!process.env.EMAIL_PASSWORD) {
-            console.error("❌ ERROR: EMAIL_PASSWORD is missing in .env.local");
-            return res.status(500).json({ error: "Server configuration error (missing email password)" });
+            console.error("❌ ERROR: EMAIL_PASSWORD must contain the Outlook mailbox app password");
+            return res.status(500).json({ status: "error", message: "Contact form email is not configured." });
         }
 
         const transporter = nodemailer.createTransport({
-            host: "smtp.hostinger.com",
-            port: 465,
-            secure: true, // true for 465, false for other ports
+            host: "smtp-mail.outlook.com",
+            port: 587,
+            secure: false,
+            requireTLS: true,
             auth: {
-                user: "support@analyzer-a.org",
+                user: emailUser,
                 pass: process.env.EMAIL_PASSWORD,
             },
         });
 
         const mailOptions = {
-            from: '"Analyzer Support" <support@analyzer-a.org>',
-            to: "support@analyzer-a.org", // Send to yourself
-            replyTo: email, // Allow replying to the user
-            subject: `New Contact: ${subject || 'No Subject'}`,
+            from: `"Analyzer Support" <${emailUser}>`,
+            to: "analyzer-ai@outlook.com",
+            replyTo: email.trim(), // Allow replying to the user
+            subject: `New Contact: ${subject.trim()}`,
             text: `
-اسم المرسل: ${name}
-البريد: ${email}
-الموضوع: ${subject}
+اسم المرسل: ${name.trim()}
+البريد: ${email.trim()}
+الموضوع: ${subject.trim()}
 
 الرسالة:
-${message}
+${message.trim()}
             `,
             html: `
 <div dir="rtl" style="font-family: Arial, sans-serif;">
     <h3>رسالة جديدة من نموذج التواصل</h3>
-    <p><strong>اسم المرسل:</strong> ${name}</p>
-    <p><strong>البريد:</strong> ${email}</p>
-    <p><strong>الموضوع:</strong> ${subject}</p>
+    <p><strong>اسم المرسل:</strong> ${escapeHtml(name.trim())}</p>
+    <p><strong>البريد:</strong> ${escapeHtml(email.trim())}</p>
+    <p><strong>الموضوع:</strong> ${escapeHtml(subject.trim())}</p>
     <br>
     <p><strong>الرسالة:</strong></p>
-    <p>${message.replace(/\n/g, '<br>')}</p>
+    <p>${escapeHtml(message.trim()).replace(/\n/g, '<br>')}</p>
 </div>
             `,
         };

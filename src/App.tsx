@@ -915,9 +915,13 @@ const App: React.FC = () => {
         <div className="max-w-6xl mx-auto text-center space-y-2">
            <p className="text-zinc-600 text-sm">{t.footer}</p>
            <p className="text-zinc-600 text-sm">
-             <span className="text-white">
+             <button
+               type="button"
+               onClick={() => setIsContactOpen(true)}
+               className="text-white hover:underline underline-offset-4"
+             >
                analyzer-ai@outlook.com
-             </span>
+             </button>
           </p>
           <div className="flex justify-center gap-6 mt-2">
             <button 

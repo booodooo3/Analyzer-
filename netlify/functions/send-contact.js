@@ -19,44 +19,51 @@ export default async (req, context) => {
   try {
     const body = await req.json();
     const { name, email, subject, message } = body;
+    const emailUser = process.env.EMAIL_USER || "analyzer-ai@outlook.com";
+
+    if (![name, email, subject, message].every(value => typeof value === "string" && value.trim()) ||
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      return new Response(JSON.stringify({ status: "error", message: "Please provide a valid name, email, subject, and message." }), { status: 400, headers });
+    }
 
     if (!process.env.EMAIL_PASSWORD) {
-        console.error("❌ ERROR: EMAIL_PASSWORD is missing");
-        return new Response(JSON.stringify({ error: "Server configuration error" }), { status: 500, headers });
+        console.error("❌ ERROR: EMAIL_PASSWORD must contain the Outlook mailbox app password");
+        return new Response(JSON.stringify({ status: "error", message: "Contact form email is not configured." }), { status: 500, headers });
     }
 
     const transporter = nodemailer.createTransport({
-        host: "smtp.hostinger.com",
-        port: 465,
-        secure: true,
+        host: "smtp-mail.outlook.com",
+        port: 587,
+        secure: false,
+        requireTLS: true,
         auth: {
-            user: "support@analyzer-a.org",
+            user: emailUser,
             pass: process.env.EMAIL_PASSWORD,
         },
     });
 
     const mailOptions = {
-        from: '"Analyzer Support" <support@analyzer-a.org>',
-        to: "support@analyzer-a.org",
-        replyTo: email,
-        subject: `New Contact: ${subject || 'No Subject'}`,
+        from: `"Analyzer Support" <${emailUser}>`,
+        to: "analyzer-ai@outlook.com",
+        replyTo: email.trim(),
+        subject: `New Contact: ${subject.trim()}`,
         text: `
-Name: ${name}
-Email: ${email}
-Subject: ${subject}
+Name: ${name.trim()}
+Email: ${email.trim()}
+Subject: ${subject.trim()}
 
 Message:
-${message}
+${message.trim()}
         `,
         html: `
 <div dir="rtl" style="font-family: Arial, sans-serif;">
     <h3>رسالة جديدة من نموذج التواصل</h3>
-    <p><strong>اسم المرسل:</strong> ${name}</p>
-    <p><strong>البريد:</strong> ${email}</p>
-    <p><strong>الموضوع:</strong> ${subject}</p>
+    <p><strong>اسم المرسل:</strong> ${escapeHtml(name.trim())}</p>
+    <p><strong>البريد:</strong> ${escapeHtml(email.trim())}</p>
+    <p><strong>الموضوع:</strong> ${escapeHtml(subject.trim())}</p>
     <br>
     <p><strong>الرسالة:</strong></p>
-    <p>${message.replace(/\n/g, '<br>')}</p>
+    <p>${escapeHtml(message.trim()).replace(/\n/g, '<br>')}</p>
 </div>
         `,
     };
@@ -67,6 +74,17 @@ ${message}
 
   } catch (error) {
     console.error("🔥 Email Error:", error);
-    return new Response(JSON.stringify({ status: "error", message: error.message || "Failed to send email" }), { status: 500, headers });
+    const message = error instanceof Error ? error.message : "Failed to send email";
+    return new Response(JSON.stringify({ status: "error", message }), { status: 500, headers });
   }
 };
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, character => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  })[character]);
+}

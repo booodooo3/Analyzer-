@@ -160,7 +160,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
                 name="subject"
                 value={formData.subject}
                 onChange={handleChange}
-                placeholder="Subject" 
+                placeholder="Problem summary"
                 required
                 className="w-full p-4 bg-zinc-800/50 border border-zinc-700 rounded-[10px] text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#5f63f2] transition-colors"
               />
@@ -171,7 +171,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
-                placeholder="Your Message" 
+                placeholder="Describe your problem"
                 required
                 rows={4}
                 className="w-full p-4 bg-zinc-800/50 border border-zinc-700 rounded-[10px] text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#5f63f2] transition-colors resize-none h-[120px]"

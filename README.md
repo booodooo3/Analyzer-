@@ -16,5 +16,6 @@ View your app in AI Studio: https://ai.studio/apps/drive/1IrPe5RoP4-YmBxX8W9zfwt
 1. Install dependencies:
    `npm install`
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+3. To enable the contact form, set `EMAIL_USER=analyzer-ai@outlook.com` and `EMAIL_PASSWORD` to an Outlook app password in `.env.local` and in the Netlify environment variables.
+4. Run the app:
    `npm run dev`

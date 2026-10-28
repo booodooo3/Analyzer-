@@ -1,5 +1,3 @@
-import nodemailer from "nodemailer";
-
 export default async (req, context) => {
   // Handle CORS
   const headers = {
@@ -19,33 +17,21 @@ export default async (req, context) => {
   try {
     const body = await req.json();
     const { name, email, subject, message } = body;
-    const emailUser = process.env.EMAIL_USER || "analyzer-ai@outlook.com";
 
     if (![name, email, subject, message].every(value => typeof value === "string" && value.trim()) ||
         !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       return new Response(JSON.stringify({ status: "error", message: "Please provide a valid name, email, subject, and message." }), { status: 400, headers });
     }
 
-    if (!process.env.EMAIL_PASSWORD) {
-        console.error("❌ ERROR: EMAIL_PASSWORD must contain the Outlook mailbox app password");
+    if (!process.env.RESEND_API_KEY) {
+        console.error("❌ ERROR: RESEND_API_KEY is missing");
         return new Response(JSON.stringify({ status: "error", message: "Contact form email is not configured." }), { status: 500, headers });
     }
 
-    const transporter = nodemailer.createTransport({
-        host: "smtp-mail.outlook.com",
-        port: 587,
-        secure: false,
-        requireTLS: true,
-        auth: {
-            user: emailUser,
-            pass: process.env.EMAIL_PASSWORD,
-        },
-    });
-
-    const mailOptions = {
-        from: `"Analyzer Support" <${emailUser}>`,
-        to: "analyzer-ai@outlook.com",
-        replyTo: email.trim(),
+    const emailPayload = {
+        from: "Analyzer Support <onboarding@resend.dev>",
+        to: ["analyzer-ai@outlook.com"],
+        reply_to: email.trim(),
         subject: `New Contact: ${subject.trim()}`,
         text: `
 Name: ${name.trim()}
@@ -68,7 +54,23 @@ ${message.trim()}
         `,
     };
 
-    await transporter.sendMail(mailOptions);
+    const resendResponse = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(emailPayload),
+    });
+
+    if (!resendResponse.ok) {
+      const errorDetails = await resendResponse.text();
+      console.error(`Resend API error (${resendResponse.status}):`, errorDetails);
+      return new Response(JSON.stringify({
+        status: "error",
+        message: "Email delivery failed. Check Resend configuration and recipient verification.",
+      }), { status: 502, headers });
+    }
     
     return new Response(JSON.stringify({ status: "success", message: "تم الإرسال بنجاح!" }), { status: 200, headers });
 

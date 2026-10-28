@@ -915,9 +915,9 @@ const App: React.FC = () => {
         <div className="max-w-6xl mx-auto text-center space-y-2">
            <p className="text-zinc-600 text-sm">{t.footer}</p>
            <p className="text-zinc-600 text-sm">
-             <a href="mailto:analyzer-ai@outlook.com" className="text-white hover:underline underline-offset-4">
+             <span className="text-white">
                analyzer-ai@outlook.com
-             </a>
+             </span>
           </p>
           <div className="flex justify-center gap-6 mt-2">
             <button 

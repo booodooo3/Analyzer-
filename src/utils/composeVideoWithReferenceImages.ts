@@ -25,8 +25,6 @@ const drawContained = (
   const scale = Math.min(canvasWidth / sourceWidth, canvasHeight / sourceHeight);
   const width = sourceWidth * scale;
   const height = sourceHeight * scale;
-  context.fillStyle = '#000';
-  context.fillRect(0, 0, canvasWidth, canvasHeight);
   context.drawImage(source, (canvasWidth - width) / 2, (canvasHeight - height) / 2, width, height);
 };
 
@@ -96,11 +94,6 @@ export const composeVideoWithReferenceImages = async (videoFile: File, reference
     });
 
     recorder.start(250);
-    for (const image of images) {
-      drawContained(context, image, image.naturalWidth, image.naturalHeight, canvas.width, canvas.height);
-      await new Promise(resolve => window.setTimeout(resolve, 100));
-    }
-
     await new Promise<void>((resolve, reject) => {
       video.onended = () => resolve();
       video.onerror = () => reject(new Error('Failed while reading the video selected for editing.'));
@@ -108,6 +101,18 @@ export const composeVideoWithReferenceImages = async (videoFile: File, reference
       const drawVideoFrame = () => {
         if (video.ended || video.paused) return;
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        const referenceDuration = Math.min(0.5, 1 / images.length);
+        const referenceIndex = Math.floor(video.currentTime / referenceDuration);
+        if (referenceIndex < images.length) {
+          const image = images[referenceIndex];
+          const elapsed = video.currentTime - referenceIndex * referenceDuration;
+          context.save();
+          context.globalAlpha = 0.5 * (1 - elapsed / referenceDuration);
+          drawContained(context, image, image.naturalWidth, image.naturalHeight, canvas.width, canvas.height);
+          context.restore();
+        }
+
         animationFrame = window.requestAnimationFrame(drawVideoFrame);
       };
 

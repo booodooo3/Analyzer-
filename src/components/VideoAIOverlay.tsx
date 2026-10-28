@@ -55,10 +55,11 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
 
   const { userId } = useAuth();
 
-  const pollStatus = async (currentId: string) => {
+  const pollStatus = async (currentId: string, generationDuration?: number) => {
     try {
       const token = await getToken();
-      const statusRes = await fetch(`/api/video-generate?id=${currentId}`, {
+      const durationQuery = generationDuration ? `&duration=${generationDuration}` : '';
+      const statusRes = await fetch(`/api/video-generate?id=${encodeURIComponent(currentId)}${durationQuery}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -103,12 +104,12 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
         }
       } else {
         // Still processing, poll again
-        setTimeout(() => pollStatus(currentId), 3000);
+        setTimeout(() => pollStatus(currentId, generationDuration), 3000);
       }
     } catch (e) {
       console.error("Poll error:", e);
       // If polling fails (e.g. network), try again
-      setTimeout(() => pollStatus(currentId), 5000);
+      setTimeout(() => pollStatus(currentId, generationDuration), 5000);
     }
   };
 
@@ -125,7 +126,7 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
     try {
       const savedPending = localStorage.getItem(pendingKey);
       if (savedPending) {
-        const { id, timestamp, imageBase64, modelName } = JSON.parse(savedPending);
+        const { id, timestamp, imageBase64, modelName, duration: savedDuration } = JSON.parse(savedPending);
         // If less than 15 minutes old, resume polling
         if (Date.now() - timestamp < 15 * 60 * 1000) {
           setPendingVideoId(id);
@@ -136,9 +137,13 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
           if (modelName) {
              setSelectedModel(modelName);
           }
+          const pendingDuration = [5, 8, 10].includes(savedDuration) ? savedDuration : undefined;
+          if (pendingDuration !== undefined) {
+            setDuration(pendingDuration);
+          }
           // Calculate elapsed time
           setProcessingTime(Math.floor((Date.now() - timestamp) / 1000));
-          pollStatus(id);
+          pollStatus(id, pendingDuration);
         } else {
           localStorage.removeItem(pendingKey);
         }
@@ -545,7 +550,6 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
             videoInput: uploadedVideoUrl,
             characterOrientation,
             reference_images: uploadedRefImages,
-            reference_image_count: selectedModel === 'google/gemini-omni-1.1' && videoInput ? referenceImages.length : 0,
             reference_videos: uploadedRefVideos,
             reference_audios: uploadedRefAudios,
             video_reference_type: videoReferenceType,
@@ -581,12 +585,13 @@ export const VideoAIOverlay: React.FC<VideoAIOverlayProps> = ({ isOpen, onClose,
                 id: data.id,
                 timestamp: Date.now(),
                 imageBase64: videoUrl,
-                modelName: 'pixverse/lipsync'
+                modelName: selectedModel,
+                duration
             }));
         }
         setPendingVideoId(data.id);
 
-        pollStatus(data.id);
+        pollStatus(data.id, duration);
 
     } catch (err: any) {
       console.error(err);
